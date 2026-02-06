@@ -1,15 +1,58 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Search, MapPin, CheckCircle, AlertTriangle, XCircle, Wifi } from 'lucide-react';
+import { Search, MapPin, Clock, Globe } from 'lucide-react';
+
+// Mapa de zonas horarias por Estado (Aproximación para México)
+const obtenerZonaHoraria = (estado: string) => {
+    // Normalizamos el texto (quitar acentos, minusculas)
+    const estadoNorm = estado.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    // Zona Noroeste (UTC-8)
+    if (estadoNorm.includes('baja california') && !estadoNorm.includes('sur')) return 'America/Tijuana';
+
+    // Zona Pacífico (UTC-7)
+    if (estadoNorm.includes('baja california sur') ||
+        estadoNorm.includes('chihuahua') ||
+        estadoNorm.includes('nayarit') ||
+        estadoNorm.includes('sinaloa') ||
+        estadoNorm.includes('sonora')) return 'America/Mazatlan';
+
+    // Zona Sureste (UTC-5)
+    if (estadoNorm.includes('quintana roo')) return 'America/Cancun';
+
+    // Zona Centro (UTC-6) - Resto del país
+    return 'America/Mexico_City';
+};
 
 export default function CoberturaPage() {
     const [cp, setCp] = useState('');
     const [buscando, setBuscando] = useState(false);
     const [resultado, setResultado] = useState<any>(null);
+    const [horaLocal, setHoraLocal] = useState('');
+
+    // Actualizar el reloj cada segundo si hay resultado
+    useEffect(() => {
+        if (!resultado?.zonaHoraria) return;
+
+        const ticket = setInterval(() => {
+            const ahora = new Date();
+            // Formatear hora según la zona horaria del estado
+            const horaStr = ahora.toLocaleTimeString('es-MX', {
+                timeZone: resultado.zonaHoraria,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            setHoraLocal(horaStr);
+        }, 1000);
+
+        return () => clearInterval(ticket);
+    }, [resultado]);
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,78 +63,45 @@ export default function CoberturaPage() {
 
         setBuscando(true);
         setResultado(null);
+        setHoraLocal('');
 
         try {
-            // 1. Identificar Lugar Real con API Pública (Zippopotam.us)
             const response = await fetch(`https://api.zippopotam.us/mx/${cp}`);
 
-            let ubicacionReal = null;
             if (response.ok) {
                 const data = await response.json();
-                // Zippopotam devuelve 'places' con la información
                 const lugar = data.places[0];
-                ubicacionReal = {
-                    estado: lugar['state'],
-                    municipio: lugar['place name'], // En data de MX suele ser la colonia o ciudad
-                    pais: data['country']
-                };
-            }
+                const estado = lugar['state'];
+                const municipio = lugar['place name'];
+                const zonaHoraria = obtenerZonaHoraria(estado);
 
-            // 2. Simular Cobertura (mantenemos la lógica de simulación para disponibilidad técnica)
-            // En un caso real, aquí consultaríamos la API de TELMEX con los datos geográficos obtenidos
-            const lastDigit = parseInt(cp.slice(-1));
-            let res;
+                // Calculamos la hora inicial inmediatamente
+                const ahora = new Date();
+                const horaStr = ahora.toLocaleTimeString('es-MX', {
+                    timeZone: zonaHoraria,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+                setHoraLocal(horaStr);
 
-            if (lastDigit >= 0 && lastDigit <= 3) {
-                res = {
-                    tipo: 'fibra',
-                    titulo: '¡Felicidades! Hay Fibra Óptica',
-                    mensaje: 'Esta zona cuenta con la mejor tecnología de TELMEX.',
-                    velocidad: 'Hasta 1,000 Mbps',
-                    tecnologia: 'FTTH (Fibra hasta la casa)',
-                    paquetesDisponibles: ['Todos los paquetes Residenciales y Negocio', 'Infinitum Puro', 'Paquetes con Netflix'],
-                    color: 'text-green-600',
-                    bg: 'bg-green-50',
-                    border: 'border-green-200',
-                    icon: CheckCircle
-                };
-            } else if (lastDigit >= 4 && lastDigit <= 6) {
-                res = {
-                    tipo: 'cobre',
-                    titulo: 'Cobertura Tradicional Disponible',
-                    mensaje: 'Zona con cobertura de cobre de alta velocidad (VDSL).',
-                    velocidad: 'Hasta 50 Mbps',
-                    tecnologia: 'VDSL / Cobre',
-                    paquetesDisponibles: ['Paquetes hasta 50 Mbps', 'Línea telefónica'],
-                    color: 'text-yellow-600',
-                    bg: 'bg-yellow-50',
-                    border: 'border-yellow-200',
-                    icon: AlertTriangle
-                };
+                setResultado({
+                    cp: cp,
+                    estado: estado,
+                    municipio: municipio,
+                    pais: data['country'],
+                    zonaHoraria: zonaHoraria,
+                    lat: lugar['latitude'],
+                    lon: lugar['longitude']
+                });
             } else {
-                res = {
-                    tipo: 'sin_cobertura',
-                    titulo: 'Requiere Validación en Campo',
-                    mensaje: 'No detectamos infraestructura inmediata, se requiere visita técnica.',
-                    velocidad: 'Por definir',
-                    tecnologia: 'N/A',
-                    paquetesDisponibles: ['Sujeto a factibilidad técnica'],
-                    color: 'text-red-600',
-                    bg: 'bg-red-50',
-                    border: 'border-red-200',
-                    icon: XCircle
-                };
+                alert("No se encontró información para este Código Postal.");
             }
-
-            // Combinamos resultado técnico simulado + ubicación real
-            setResultado({
-                ...res,
-                ubicacion: ubicacionReal // Agregamos la ubicación real al objeto de resultado
-            });
 
         } catch (error) {
             console.error("Error al buscar CP", error);
-            alert("Hubo un error al consultar el código postal. Intenta de nuevo.");
+            alert("Hubo un error de conexión.");
         } finally {
             setBuscando(false);
         }
@@ -101,19 +111,19 @@ export default function CoberturaPage() {
         <div className="p-6 max-w-4xl mx-auto">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                    <MapPin className="text-telmex-blue" />
-                    Verificador de Cobertura
+                    <Globe className="text-telmex-blue" />
+                    Verificador de Ubicación y Hora
                 </h1>
                 <p className="text-gray-600 mt-2">
-                    Consulta la disponibilidad de servicios TELMEX ingresando el Código Postal del cliente.
+                    Consulta la ubicación exacta y la hora local de tus clientes por Código Postal.
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Formulario de Búsqueda */}
-                <Card className="lg:col-span-1 h-fit">
+                <Card className="h-fit">
                     <CardHeader>
-                        <CardTitle className="text-lg">Buscar por Zona</CardTitle>
+                        <CardTitle className="text-lg">Buscar CP</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSearch} className="space-y-4">
@@ -122,7 +132,6 @@ export default function CoberturaPage() {
                                 placeholder="Ej. 06500"
                                 value={cp}
                                 onChange={(e) => {
-                                    // Solo permitir números y máximo 5 dígitos
                                     const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 5);
                                     setCp(val);
                                 }}
@@ -134,15 +143,10 @@ export default function CoberturaPage() {
                                 className="w-full justify-center"
                                 disabled={buscando || cp.length < 5}
                             >
-                                {buscando ? (
-                                    <span className="flex items-center gap-2">
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                        Verificando...
-                                    </span>
-                                ) : (
+                                {buscando ? 'Verificando...' : (
                                     <span className="flex items-center gap-2">
                                         <Search size={18} />
-                                        Consultar Cobertura
+                                        Verificar
                                     </span>
                                 )}
                             </Button>
@@ -151,84 +155,58 @@ export default function CoberturaPage() {
                 </Card>
 
                 {/* Resultados */}
-                <div className="lg:col-span-2">
+                <div className="md:col-span-2">
                     {!resultado && !buscando && (
-                        <div className="h-64 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 bg-gray-50/50">
+                        <div className="h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 bg-gray-50/50">
                             <MapPin size={48} className="mb-4 opacity-50" />
-                            <p className="text-lg font-medium">Ingresa un CP para ver resultados</p>
-                            <p className="text-sm text-center max-w-xs mt-2">
-                                El sistema verificará la infraestructura disponible en la zona (Fibra o Cobre).
-                            </p>
+                            <p className="font-medium">Esperando Código Postal...</p>
                         </div>
                     )}
 
                     {buscando && (
-                        <div className="h-64 border border-gray-200 rounded-xl flex flex-col items-center justify-center bg-white shadow-sm">
-                            <div className="relative">
-                                <div className="w-16 h-16 border-4 border-blue-100 border-t-telmex-blue rounded-full animate-spin"></div>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <Wifi className="text-telmex-blue animate-pulse" size={24} />
-                                </div>
-                            </div>
-                            <p className="mt-4 text-gray-600 font-medium animate-pulse">Analizando infraestructura de la zona...</p>
+                        <div className="h-48 border border-gray-200 rounded-xl flex items-center justify-center bg-white">
+                            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     )}
 
                     {resultado && (
-                        <div className={`rounded-xl border-2 p-6 shadow-sm overflow-hidden relative ${resultado.bg} ${resultado.border}`}>
-                            <div className="flex items-start gap-4">
-                                <div className={`p-3 rounded-full bg-white shadow-sm ${resultado.color}`}>
-                                    <resultado.icon size={32} />
-                                </div>
-                                <div className="flex-1">
-                                    <h2 className={`text-2xl font-bold mb-1 ${resultado.color}`}>
-                                        {resultado.titulo}
-                                    </h2>
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
-                                        <p className="text-gray-700 font-medium">
-                                            {resultado.mensaje}
-                                        </p>
-                                        {resultado.ubicacion && (
-                                            <div className="bg-gray-100 px-3 py-1 rounded-full text-xs font-semibold text-gray-600 flex items-center gap-1 border border-gray-200">
-                                                <MapPin size={12} />
-                                                {resultado.ubicacion.municipio}, {resultado.ubicacion.estado} ({resultado.ubicacion.pais})
+                        <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-100 shadow-md">
+                            <CardContent className="p-8">
+                                <div className="flex flex-col gap-6">
+                                    {/* Ubicación */}
+                                    <div className="flex items-start gap-4">
+                                        <div className="p-3 bg-blue-100 text-telmex-blue rounded-full">
+                                            <MapPin size={32} />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Ubicación Detectada</p>
+                                            <h2 className="text-2xl font-bold text-gray-900 mt-1">
+                                                {resultado.municipio}, {resultado.estado}
+                                            </h2>
+                                            <p className="text-gray-600 font-medium">{resultado.pais}</p>
+                                            <p className="text-xs text-gray-400 mt-1">CP: {resultado.cp}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Separador */}
+                                    <hr className="border-gray-200" />
+
+                                    {/* Hora Local */}
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-emerald-100 text-emerald-600 rounded-full">
+                                            <Clock size={32} />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Hora Local</p>
+                                            <div className="text-4xl font-mono font-bold text-gray-900 mt-1 bg-white inline-block px-3 py-1 rounded shadow-sm">
+                                                {horaLocal || '--:--:--'}
                                             </div>
-                                        )}
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                                        <div className="bg-white/60 p-3 rounded-lg">
-                                            <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Velocidad Estimada</p>
-                                            <p className="text-lg font-bold text-gray-900">{resultado.velocidad}</p>
+                                            <p className="text-xs text-gray-400 mt-2">Zona: {resultado.zonaHoraria}</p>
                                         </div>
-                                        <div className="bg-white/60 p-3 rounded-lg">
-                                            <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Tecnología</p>
-                                            <p className="text-lg font-bold text-gray-900">{resultado.tecnologia}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-6">
-                                        <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                                            <CheckCircle size={16} className={resultado.color} />
-                                            Oferta Disponible:
-                                        </h3>
-                                        <ul className="space-y-1">
-                                            {resultado.paquetesDisponibles.map((pkg: string, idx: number) => (
-                                                <li key={idx} className="text-sm text-gray-700 flex items-center gap-2">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                                                    {pkg}
-                                                </li>
-                                            ))}
-                                        </ul>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Background decoration */}
-                            <div className="absolute -bottom-10 -right-10 opacity-5 pointer-events-none">
-                                <Wifi size={200} />
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
                     )}
                 </div>
             </div>
