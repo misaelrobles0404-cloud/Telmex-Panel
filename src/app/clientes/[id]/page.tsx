@@ -173,7 +173,7 @@ GASTOS DE INSTALACION
                     <Button variant="secondary" onClick={generarFormatoSIAC} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200">
                         <Copy size={16} /> Copiar Formato
                     </Button>
-                    <Button variant="secondary" onClick={() => {/* TODO: Implementar editar */ }}>
+                    <Button variant="secondary" onClick={() => router.push(`/clientes/${cliente.id}/editar`)}>
                         <Edit size={16} /> Editar
                     </Button>
                     <Button variant="danger" onClick={() => {
