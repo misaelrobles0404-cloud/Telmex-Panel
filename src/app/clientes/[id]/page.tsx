@@ -98,7 +98,7 @@ NOMBRE DE CLIENTE:
 ${cliente.nombre.toUpperCase()}
 
 —————————————————
-NUM. TITUTAL:  
+NUM. TITULAR:  
 ${cliente.noTT}
 NUM. REFERENCIA:
 ${cliente.noRef}
