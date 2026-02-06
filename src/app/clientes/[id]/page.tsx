@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Cliente, Actividad, Documento, EstadoPipeline } from '@/types';
-import { obtenerClientes, guardarCliente } from '@/lib/storage';
+import { obtenerClientes, guardarCliente, eliminarCliente } from '@/lib/storage';
 import { formatearMoneda, formatearFecha, formatearFechaHora, generarId } from '@/lib/utils';
 import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle } from 'lucide-react';
 import { Textarea } from '@/components/ui/Input';
@@ -101,8 +101,8 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                     <h1 className="text-3xl font-bold text-gray-900">{cliente.nombre}</h1>
                     <div className="flex items-center gap-3 mt-2">
                         <span className={`badge ${cliente.tipoServicio === 'linea_nueva' ? 'badge-blue' :
-                                cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
-                                    'badge-green'
+                            cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
+                                'badge-green'
                             }`}>
                             {cliente.tipoServicio === 'linea_nueva' ? 'Línea Nueva' :
                                 cliente.tipoServicio === 'portabilidad' ? 'Portabilidad' : 'Winback'}
@@ -118,11 +118,11 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                         <Edit size={16} /> Editar
                     </Button>
                     <Button variant="danger" onClick={() => {
-                        if (confirm('¿Estás seguro de eliminar este cliente?')) {
-                            // Logica de borrado
-                            // const clientes = obtenerClientes().filter(c => c.id !== cliente.id);
-                            // localStorage.setItem('clientes', JSON.stringify(clientes));
-                            router.push('/clientes');
+                        if (confirm('¿Estás seguro de eliminar este cliente? Esta acción no se puede deshacer.')) {
+                            if (cliente) {
+                                eliminarCliente(cliente.id);
+                                router.push('/clientes');
+                            }
                         }
                     }}>
                         <Trash2 size={16} /> Eliminar
@@ -144,8 +144,8 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                                         key={estado}
                                         onClick={() => actualizarEstado(estado as EstadoPipeline)}
                                         className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${cliente.estadoPipeline === estado
-                                                ? 'bg-telmex-blue text-white border-telmex-blue'
-                                                : 'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
+                                            ? 'bg-telmex-blue text-white border-telmex-blue'
+                                            : 'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
                                             }`}
                                     >
                                         {estado.replace('_', ' ').toUpperCase()}
@@ -244,8 +244,8 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                                     cliente.actividades.map((actividad) => (
                                         <div key={actividad.id} className="flex gap-3 border-b border-gray-100 pb-3 last:border-0 last:pb-0">
                                             <div className={`mt-1 p-1.5 rounded-full ${actividad.tipo === 'cambio_estado' ? 'bg-blue-100 text-blue-600' :
-                                                    actividad.tipo === 'llamada' ? 'bg-green-100 text-green-600' :
-                                                        'bg-gray-100 text-gray-600'
+                                                actividad.tipo === 'llamada' ? 'bg-green-100 text-green-600' :
+                                                    'bg-gray-100 text-gray-600'
                                                 }`}>
                                                 {actividad.tipo === 'cambio_estado' && <CheckCircle size={14} />}
                                                 {actividad.tipo === 'llamada' && <Phone size={14} />}
