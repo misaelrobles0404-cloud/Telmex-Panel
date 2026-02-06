@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Cliente, Actividad, Documento, EstadoPipeline } from '@/types';
 import { obtenerClientes, guardarCliente, eliminarCliente } from '@/lib/storage';
 import { formatearMoneda, formatearFecha, formatearFechaHora, generarId } from '@/lib/utils';
-import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle, Copy } from 'lucide-react';
 import { Textarea } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { DocumentManager } from '@/components/DocumentManager';
@@ -84,6 +84,50 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         setCliente(clienteActualizado);
     };
 
+    const generarFormatoSIAC = () => {
+        if (!cliente) return;
+
+        const formato = `NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
+—————————————————
+FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
+—————————————————
+FOLIO SIAC: PENDIENTE
+
+—————————————————
+NOMBRE DE CLIENTE: 
+${cliente.nombre.toUpperCase()}
+
+—————————————————
+NUM. TITUTAL:  
+${cliente.noTT}
+NUM. REFERENCIA:
+${cliente.noRef}
+CORREO:
+${cliente.correo}
+—————————————————
+CALLE: ${cliente.calle.toUpperCase()}
+NÚMERO: 
+ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
+ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
+COLONIA: ${cliente.colonia.toUpperCase()}
+CP: ${cliente.cp}
+CIUDAD: ${cliente.cd.toUpperCase()}
+ESTADO: ${cliente.estado.toUpperCase()}
+—————————————————
+PAQUETE: ${cliente.paquete}
+INTERNET Y TELEFONÍA 
+—————————————————
+GASTOS DE INSTALACION
+☐ $400 DE PAGO INICIAL & 12 MESES DE $100 (TOTAL) $1,600`;
+
+        navigator.clipboard.writeText(formato).then(() => {
+            alert('¡Formato copiado al portapapeles!');
+        }).catch(err => {
+            console.error('Error al copiar:', err);
+            alert('Error al copiar el formato');
+        });
+    };
+
     return (
         <div className="p-6 max-w-6xl mx-auto">
             <Button
@@ -114,6 +158,9 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                 </div>
 
                 <div className="flex gap-2">
+                    <Button variant="secondary" onClick={generarFormatoSIAC} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200">
+                        <Copy size={16} /> Copiar Formato
+                    </Button>
                     <Button variant="secondary" onClick={() => {/* TODO: Implementar editar */ }}>
                         <Edit size={16} /> Editar
                     </Button>
