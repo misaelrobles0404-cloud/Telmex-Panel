@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Input, Select, Textarea } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Cliente, TipoServicio, TipoCliente } from '@/types';
+import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types';
 import { guardarCliente } from '@/lib/storage';
 import { clasificarServicio, calcularComision, generarId } from '@/lib/utils';
-import { PAQUETES_RESIDENCIALES } from '@/data/paquetes';
-import { ArrowLeft, Save } from 'lucide-react';
+import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
+import { ArrowLeft, Save, Building2, Home as HomeIcon } from 'lucide-react';
 
 export default function NuevoClientePage() {
     const router = useRouter();
@@ -59,20 +59,25 @@ export default function NuevoClientePage() {
 
     const [tipoServicio, setTipoServicio] = useState<TipoServicio>('linea_nueva');
 
-    // Actualizar tipo de servicio cuando cambian los campos relevantes
-    React.useEffect(() => {
-        const nuevoTipo = clasificarServicio(
-            formData.tieneInternet,
-            formData.tieneTelefonoFijo,
-            formData.proveedorActual
-        );
+    // Manejar cambio manual de tipo de servicio
+    const handleTipoServicioChange = (nuevoTipo: TipoServicio) => {
         setTipoServicio(nuevoTipo);
-    }, [formData.tieneInternet, formData.tieneTelefonoFijo, formData.proveedorActual]);
+
+        // Ajustar checkboxes automáticamente según el tipo seleccionado para consistencia
+        if (nuevoTipo === 'linea_nueva') {
+            setFormData(prev => ({ ...prev, tieneInternet: false, tieneTelefonoFijo: false }));
+        } else if (nuevoTipo === 'portabilidad') {
+            setFormData(prev => ({ ...prev, tieneInternet: true, tieneTelefonoFijo: true }));
+        } else if (nuevoTipo === 'winback') {
+            setFormData(prev => ({ ...prev, tieneInternet: true, proveedorActual: 'megacable', estadoCuentaMegacable: true }));
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const paqueteSeleccionado = PAQUETES_RESIDENCIALES.find(p => p.id === formData.paqueteId);
+        const paquetesDisponibles = obtenerPaquetesPorTipo(formData.tipoCliente);
+        const paqueteSeleccionado = paquetesDisponibles.find(p => p.id === formData.paqueteId);
 
         if (!paqueteSeleccionado) {
             alert('Por favor selecciona un paquete');
@@ -121,7 +126,24 @@ export default function NuevoClientePage() {
             actualizadoEn: new Date().toISOString(),
         };
 
-        guardarCliente(cliente);
+        // Si hay notas iniciales, agregarlas al historial de actividades
+        const actividadesIniciales = [];
+        if (formData.notas.trim()) {
+            actividadesIniciales.push({
+                id: generarId(),
+                clienteId: cliente.id,
+                tipo: 'nota',
+                descripcion: `Nota inicial: ${formData.notas}`,
+                fecha: new Date().toISOString(),
+            });
+        }
+
+        const clienteFinal: Cliente = {
+            ...cliente,
+            actividades: actividadesIniciales as any[],
+        };
+
+        guardarCliente(clienteFinal);
         router.push('/clientes');
     };
 
@@ -143,21 +165,113 @@ export default function NuevoClientePage() {
                 <p className="text-gray-600 mt-1">Formulario de captura TELMEX</p>
             </div>
 
-            {/* Tipo de Servicio y Comisión */}
-            <Card className="mb-6 bg-gradient-to-r from-telmex-blue to-telmex-lightblue text-white">
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+            {/* Selector Tipo Cliente (Residencial / Negocio) */}
+            <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm flex mb-6 w-fit">
+                <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, tipoCliente: 'residencial', paqueteId: '' }))}
+                    className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${formData.tipoCliente === 'residencial'
+                        ? 'bg-telmex-blue text-white shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                >
+                    <HomeIcon size={16} />
+                    Residencial
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, tipoCliente: 'pyme', paqueteId: '' }))}
+                    className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${formData.tipoCliente === 'pyme'
+                        ? 'bg-telmex-blue text-white shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                >
+                    <Building2 size={16} />
+                    Negocio
+                </button>
+            </div>
+
+            {/* Selector de Tipo de Servicio */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div
+                    onClick={() => handleTipoServicioChange('linea_nueva')}
+                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'linea_nueva'
+                        ? 'border-telmex-blue bg-blue-50/50 shadow-md'
+                        : 'border-gray-200 hover:border-blue-300 bg-white'
+                        }`}
+                >
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="font-bold text-gray-900">Línea Nueva</span>
+                        <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'linea_nueva' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
+                            }`} />
+                    </div>
+                    <p className="text-sm text-gray-500">
+                        Cliente sin servicio actual o instalación nueva.
+                    </p>
+                    <p className="text-telmex-blue font-bold mt-2 text-lg">$250 MXN</p>
+                </div>
+
+                <div
+                    onClick={() => handleTipoServicioChange('portabilidad')}
+                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'portabilidad'
+                        ? 'border-telmex-blue bg-blue-50/50 shadow-md'
+                        : 'border-gray-200 hover:border-blue-300 bg-white'
+                        }`}
+                >
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="font-bold text-gray-900">Portabilidad</span>
+                        <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'portabilidad' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
+                            }`} />
+                    </div>
+                    <p className="text-sm text-gray-500">
+                        Cambio de compañía (Izzi, Totalplay) conservando número.
+                    </p>
+                    <p className="text-telmex-blue font-bold mt-2 text-lg">$300 MXN</p>
+                </div>
+
+                <div
+                    onClick={() => handleTipoServicioChange('winback')}
+                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'winback'
+                        ? 'border-telmex-blue bg-blue-50/50 shadow-md'
+                        : 'border-gray-200 hover:border-blue-300 bg-white'
+                        }`}
+                >
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="font-bold text-gray-900">Winback</span>
+                        <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'winback' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
+                            }`} />
+                    </div>
+                    <p className="text-sm text-gray-500">
+                        Recuperación de clientes específicos (Megacable).
+                    </p>
+                    <p className="text-telmex-blue font-bold mt-2 text-lg">$300 MXN</p>
+                </div>
+            </div>
+
+            {/* Requisitos del Trámite */}
+            <Card className="mb-6 bg-blue-50 border-blue-200">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2 text-telmex-blue">
+                        <span role="img" aria-label="info">ℹ️</span> Requisitos para {REQUISITOS_SERVICIO[tipoServicio].tipoServicio.replace('_', ' ').toUpperCase()}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h3 className="text-lg font-semibold">Tipo de Servicio</h3>
-                            <p className="text-2xl font-bold mt-1">
-                                {tipoServicio === 'linea_nueva' && 'Línea Nueva'}
-                                {tipoServicio === 'portabilidad' && 'Portabilidad'}
-                                {tipoServicio === 'winback' && 'Winback (Megacable)'}
-                            </p>
+                            <h4 className="font-semibold text-sm mb-2 text-gray-700">Documentos Necesarios:</h4>
+                            <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                {REQUISITOS_SERVICIO[tipoServicio].documentos.map((req, idx) => (
+                                    <li key={idx}>{req}</li>
+                                ))}
+                            </ul>
                         </div>
-                        <div className="text-right">
-                            <h3 className="text-lg font-semibold">Comisión</h3>
-                            <p className="text-3xl font-bold mt-1">${comision}</p>
+                        <div>
+                            <h4 className="font-semibold text-sm mb-2 text-gray-700">Datos a Capturar:</h4>
+                            <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                {REQUISITOS_SERVICIO[tipoServicio].campos.map((campo, idx) => (
+                                    <li key={idx}>{campo}</li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
                 </CardContent>
@@ -346,16 +460,16 @@ export default function NuevoClientePage() {
                 {/* Paquete */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Paquete TELMEX</CardTitle>
+                        <CardTitle>Paquete {formData.tipoCliente === 'residencial' ? 'TELMEX' : 'NEGOCIO'}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Select
                             label="Seleccionar Paquete"
                             value={formData.paqueteId}
                             onChange={(e) => setFormData({ ...formData, paqueteId: e.target.value })}
-                            options={PAQUETES_RESIDENCIALES.map(p => ({
+                            options={obtenerPaquetesPorTipo(formData.tipoCliente).map(p => ({
                                 value: p.id,
-                                label: `${p.velocidad} Mbps - $${p.precioPromo}/mes ${p.netflix ? '(Netflix incluido)' : ''}`
+                                label: `${p.velocidad} Mbps - $${p.precioPromo}/mes ${p.netflix ? '(Netflix)' : ''} ${!p.llamadasIlimitadas ? '(Solo Internet)' : ''}`
                             }))}
                             required
                         />

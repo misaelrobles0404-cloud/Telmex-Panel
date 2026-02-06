@@ -147,12 +147,13 @@ Para proceder con tu contratación necesito los siguientes documentos:
 
 Para tu línea nueva de TELMEX necesito:
 
-📄 CURP
-🏠 Comprobante de domicilio
-📞 Número de teléfono para registro
-📞 Número de referencia
+📄 Identificación Oficial (INE, CURP, Pasaporte)
+🏠 Comprobante de domicilio (Luz, Agua, Gas o Teléfono)
+📧 Correo electrónico
+📞 Número de celular
+👤 2 Números de referencia (adicionales)
 
-¿Los tienes a la mano?`,
+¿Me ayudas con estos datos?`,
         variables: ['nombre']
     },
     {
@@ -164,13 +165,13 @@ Para tu línea nueva de TELMEX necesito:
 
 Para tu portabilidad de {proveedor} a TELMEX necesito:
 
-📄 CURP
+📄 Identificación Oficial (INE, CURP, Pasaporte)
 🏠 Comprobante de domicilio
-📞 Número a portar
+📞 Número a portar (fijo de la competencia)
 🔑 NIP de portabilidad (marca 051 desde tu teléfono)
-📅 Fecha de vigencia
-📋 Formato de portabilidad
-📝 Carta de baja (si no has cancelado con {proveedor})
+📅 Fecha de vigencia del NIP
+📋 Formato de portabilidad (llenado por el promotor)
+📝 Carta de baja (opcional)
 
 ¿Cuándo podemos agendar la instalación?`,
         variables: ['nombre', 'proveedor']

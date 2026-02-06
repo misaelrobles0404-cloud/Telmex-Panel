@@ -230,27 +230,25 @@ export interface Requisitos {
 export const REQUISITOS_SERVICIO: Record<TipoServicio, Requisitos> = {
     linea_nueva: {
         tipoServicio: 'linea_nueva',
-        documentos: ['CURP', 'Comprobante de domicilio'],
-        campos: ['Número de teléfono para registro', 'Número de teléfono de referencia']
+        documentos: ['Identificación Oficial (INE, CURP, Pasaporte)', 'Comprobante de Domicilio', 'Correo Electrónico', 'Número de Celular'],
+        campos: ['Nombre Completo', 'Celular de contacto', 'Correo Electrónico', '2 Números de Referencia (Adicionales)']
     },
     portabilidad: {
         tipoServicio: 'portabilidad',
-        documentos: ['CURP', 'Comprobante de domicilio', 'Formato de portabilidad', 'Carta de baja (opcional)'],
+        documentos: ['Identificación Oficial', 'Comprobante de Domicilio', 'Formato de Portabilidad', 'Carta de baja (opcional)'],
         campos: [
-            'Número de teléfono para registro',
-            'Número de teléfono de referencia',
-            'Número a portar',
-            'NIP-Portabilidad (marcar 051)',
-            'Fecha de vigencia'
+            'Número de Teléfono a Portar',
+            'NIP de Portabilidad (Marcar 051)',
+            'Fecha de vigencia del NIP',
+            'Formato de Portabilidad firmado'
         ]
     },
     winback: {
         tipoServicio: 'winback',
-        documentos: ['CURP', 'Comprobante de domicilio', 'Estado de cuenta Megacable'],
+        documentos: ['Identificación Oficial', 'Comprobante de Domicilio', 'Estado de cuenta Megacable'],
         campos: [
-            'Número de teléfono para registro',
-            'Número de teléfono de referencia',
-            'Número a portar'
+            'Número de teléfono a recuperar (Opcional)',
+            'Estado de Cuenta Megacable (Evidencia)'
         ]
     }
 };
