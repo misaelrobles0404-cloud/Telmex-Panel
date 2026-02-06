@@ -203,6 +203,22 @@ Si tienes cualquier duda o necesitas ayuda, no dudes en contactarme.
 
 Estoy aquí para ayudarte en lo que necesites.`,
         variables: ['nombre']
+    },
+    {
+        id: 'post-referidos',
+        nombre: 'Postventa - Solicitar Referidos',
+        categoria: 'postventa',
+        contenido: `¡Hola {nombre}! 🌟
+
+Espero que estés disfrutando tu nuevo internet TELMEX.
+
+Quería pedirte un pequeño favor:
+¿Conoces a algún amigo, vecino o familiar que esté batallando con su internet? 🤔
+
+Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo depende de recomendaciones de clientes felices como tú. 🙏
+
+¡Gracias por tu apoyo!`,
+        variables: ['nombre']
     }
 ];
 

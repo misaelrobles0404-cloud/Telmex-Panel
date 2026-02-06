@@ -164,6 +164,28 @@ GASTOS DE INSTALACION
         });
     };
 
+    const solicitarReferidos = () => {
+        if (!cliente) return;
+
+        const mensaje = `¡Hola ${cliente.nombre.split(' ')[0]}! 🌟
+
+Espero que estés disfrutando tu nuevo internet TELMEX.
+
+Quería pedirte un pequeño favor:
+¿Conoces a algún amigo, vecino o familiar que esté batallando con su internet? 🤔
+
+Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo depende de recomendaciones de clientes felices como tú. 🙏
+
+¡Gracias por tu apoyo!`;
+
+        navigator.clipboard.writeText(mensaje).then(() => {
+            alert('¡Mensaje de referidos copiado! Listo para enviar por WhatsApp.');
+        }).catch(err => {
+            console.error('Error al copiar:', err);
+            alert('Error al copiar el mensaje');
+        });
+    };
+
     return (
         <div className="p-6 max-w-6xl mx-auto">
             <Button
@@ -194,6 +216,16 @@ GASTOS DE INSTALACION
                 </div>
 
                 <div className="flex gap-2">
+                    {cliente.estadoPipeline === 'vendido' && (
+                        <Button
+                            variant="secondary"
+                            onClick={solicitarReferidos}
+                            className="bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-yellow-200"
+                            title="Pedir referidos a cliente feliz"
+                        >
+                            <span className="mr-1">🎁</span> Pedir Referidos
+                        </Button>
+                    )}
                     <Button variant="secondary" onClick={generarFormatoSIAC} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200">
                         <Copy size={16} /> Copiar Formato
                     </Button>
