@@ -124,7 +124,47 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const generarFormatoSIAC = () => {
         if (!cliente) return;
 
-        const formato = `NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
+        let formato = '';
+
+        if (cliente.tipoServicio === 'portabilidad') {
+            formato = `PLANTILLA PARA PORTABILIDAD
+NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
+—————————————————
+FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
+—————————————————
+FOLIO SIAC: ${cliente.folioSiac || 'PENDIENTE'}
+—————————————————
+**PORTABILIDAD**
+NIP: ${cliente.nipPortabilidad || ''}
+GENERICO: 
+NUMERO A SER PORTADO: ${cliente.numeroAPortar || ''}
+((COMPETIDOR)): ${cliente.proveedorActual ? cliente.proveedorActual.toUpperCase() : ''}
+—————————————————
+NOMBRE DE CLIENTE: 
+${cliente.nombre.toUpperCase()}
+—————————————————
+■ NUM. TITULAR:  ${cliente.noTT}
+■ NUM. REFERENCIA 1: ${cliente.noRef}
+■ NUM. REFERENCIA 2: 
+■ CORREO: ${cliente.correo}
+—————————————————
+CALLE: ${cliente.calle.toUpperCase()}
+NÚMERO: 
+MANZ:    LOT:    EDF:    DPTO:
+ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
+ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
+COLONIA: ${cliente.colonia.toUpperCase()}
+CP: ${cliente.cp}
+CIUDAD: ${cliente.cd.toUpperCase()}
+ESTADO: ${cliente.estado.toUpperCase()}
+—————————————————
+PAQUETE: ${cliente.paquete}
+—————————————————
+GASTOS DE INSTALACION
+***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
+        } else {
+            // Formato para Línea Nueva (y Winback por ahora)
+            formato = `NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
@@ -156,6 +196,7 @@ INTERNET Y TELEFONÍA
 —————————————————
 GASTOS DE INSTALACION
 ☐ $400 DE PAGO INICIAL & 12 MESES DE $100 (TOTAL) $1,600`;
+        }
 
         navigator.clipboard.writeText(formato).then(() => {
             alert('¡Formato copiado al portapapeles!');
