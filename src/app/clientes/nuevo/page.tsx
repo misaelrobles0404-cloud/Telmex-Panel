@@ -9,7 +9,7 @@ import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types
 import { guardarCliente } from '@/lib/storage';
 import { clasificarServicio, calcularComision, generarId } from '@/lib/utils';
 import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
-import { ArrowLeft, Save, Building2, Home as HomeIcon } from 'lucide-react';
+import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus } from 'lucide-react';
 
 export default function NuevoClientePage() {
     const router = useRouter();
@@ -71,6 +71,69 @@ export default function NuevoClientePage() {
         } else if (nuevoTipo === 'winback') {
             setFormData(prev => ({ ...prev, tieneInternet: true, proveedorActual: 'megacable', estadoCuentaMegacable: true }));
         }
+    };
+
+    const handleGuardarProspecto = () => {
+        if (!formData.nombre || !formData.noTT) {
+            alert('Para prospecto se requiere al menos Nombre y Teléfono');
+            return;
+        }
+
+        const cliente: Cliente = {
+            id: generarId(),
+            nombre: formData.nombre,
+            noTT: formData.noTT,
+            noRef: formData.noRef || 'PENDIENTE',
+            correo: formData.correo || 'pendiente@correo.com',
+            calle: 'PENDIENTE',
+            colonia: 'PENDIENTE',
+            cp: '00000',
+            cd: formData.cd || 'PENDIENTE',
+            estado: formData.estado || 'PENDIENTE',
+            entreCalle1: '',
+            entreCalle2: '',
+            ine: '',
+            curp: 'PENDIENTE',
+            usuario: '',
+            tipoServicio,
+            tipoCliente: formData.tipoCliente,
+            paquete: 'POR DEFINIR',
+            clavePaquete: 'pendiente',
+            velocidad: 0,
+            precioMensual: 0,
+            tieneInternet: false,
+            tieneTelefonoFijo: false,
+            proveedorActual: undefined,
+            numeroAPortar: '',
+            nipPortabilidad: '',
+            fechaVigencia: '',
+            formatoPortabilidad: false,
+            cartaBaja: false,
+            estadoCuentaMegacable: false,
+            estadoPipeline: 'interesado', // Estado inicial para prospectos
+            fechaContacto: new Date().toISOString(),
+            fechaUltimaActividad: new Date().toISOString(),
+            comision: 0,
+            notas: formData.notas,
+            documentos: [],
+            actividades: [],
+            creadoEn: new Date().toISOString(),
+            actualizadoEn: new Date().toISOString(),
+        };
+
+        // Si hay notas iniciales
+        if (formData.notas.trim()) {
+            cliente.actividades.push({
+                id: generarId(),
+                clienteId: cliente.id,
+                tipo: 'nota',
+                descripcion: `Prospecto rápido: ${formData.notas}`,
+                fecha: new Date().toISOString(),
+            });
+        }
+
+        guardarCliente(cliente);
+        router.push('/clientes');
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -578,15 +641,25 @@ export default function NuevoClientePage() {
                 <div className="flex gap-4 justify-end">
                     <Button
                         type="button"
-                        variant="secondary"
+                        variant="ghost"
                         onClick={() => router.back()}
+                        className="text-gray-500 hover:text-gray-700"
                     >
                         Cancelar
                     </Button>
 
+                    <Button
+                        type="button"
+                        onClick={handleGuardarProspecto}
+                        className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
+                    >
+                        <UserPlus size={20} className="mr-2" />
+                        Guardar como Prospecto
+                    </Button>
+
                     <Button type="submit" variant="primary">
-                        <Save size={20} />
-                        Guardar Cliente
+                        <Save size={20} className="mr-2" />
+                        Guardar Cliente Completo
                     </Button>
                 </div>
             </form>
