@@ -12,6 +12,7 @@ import {
     Calculator,
     BarChart3,
     Settings,
+    MapPin,
 } from 'lucide-react';
 
 const navigation = [
@@ -21,6 +22,7 @@ const navigation = [
     { name: 'Plantillas WhatsApp', href: '/plantillas', icon: MessageSquare },
     { name: 'Publicaciones', href: '/publicaciones', icon: Megaphone },
     { name: 'Calculadora', href: '/calculadora', icon: Calculator },
+    { name: 'Cobertura', href: '/cobertura', icon: MapPin },
     { name: 'Reportes', href: '/reportes', icon: BarChart3 },
 ];
 
