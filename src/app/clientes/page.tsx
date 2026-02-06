@@ -1,0 +1,156 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Cliente } from '@/types';
+import { obtenerClientes } from '@/lib/storage';
+import { formatearMoneda, formatearFecha } from '@/lib/utils';
+import { Plus, Search, Filter } from 'lucide-react';
+
+export default function ClientesPage() {
+    const router = useRouter();
+    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [busqueda, setBusqueda] = useState('');
+    const [filtroEstado, setFiltroEstado] = useState<string>('todos');
+
+    useEffect(() => {
+        setClientes(obtenerClientes());
+    }, []);
+
+    const clientesFiltrados = clientes.filter(cliente => {
+        const matchBusqueda = cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+            cliente.noTT.includes(busqueda) ||
+            cliente.correo.toLowerCase().includes(busqueda.toLowerCase());
+
+        const matchEstado = filtroEstado === 'todos' || cliente.estadoPipeline === filtroEstado;
+
+        return matchBusqueda && matchEstado;
+    });
+
+    return (
+        <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Clientes</h1>
+                    <p className="text-gray-600 mt-1">
+                        {clientes.length} cliente{clientes.length !== 1 ? 's' : ''} registrado{clientes.length !== 1 ? 's' : ''}
+                    </p>
+                </div>
+
+                <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() => router.push('/clientes/nuevo')}
+                >
+                    <Plus size={20} />
+                    Nuevo Cliente
+                </Button>
+            </div>
+
+            {/* Filtros */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                        type="text"
+                        placeholder="Buscar por nombre, teléfono o correo..."
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
+                        className="input pl-10"
+                    />
+                </div>
+
+                <select
+                    value={filtroEstado}
+                    onChange={(e) => setFiltroEstado(e.target.value)}
+                    className="input"
+                >
+                    <option value="todos">Todos los estados</option>
+                    <option value="contactado">Contactado</option>
+                    <option value="interesado">Interesado</option>
+                    <option value="cotizacion">Cotización</option>
+                    <option value="cierre_programado">Cierre Programado</option>
+                    <option value="vendido">Vendido</option>
+                    <option value="perdido">Perdido</option>
+                </select>
+            </div>
+
+            {/* Lista de Clientes */}
+            <div className="grid grid-cols-1 gap-4">
+                {clientesFiltrados.map((cliente) => (
+                    <Card
+                        key={cliente.id}
+                        className="cursor-pointer hover:shadow-lg transition-shadow"
+                        onClick={() => router.push(`/clientes/${cliente.id}`)}
+                    >
+                        <CardContent className="p-6">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <h3 className="text-lg font-semibold text-gray-900">{cliente.nombre}</h3>
+                                        <span className={`badge ${cliente.estadoPipeline === 'vendido' ? 'badge-green' :
+                                                cliente.estadoPipeline === 'cierre_programado' ? 'badge-purple' :
+                                                    cliente.estadoPipeline === 'cotizacion' ? 'badge-yellow' :
+                                                        cliente.estadoPipeline === 'interesado' ? 'badge-blue' :
+                                                            cliente.estadoPipeline === 'perdido' ? 'badge-red' :
+                                                                'bg-gray-100 text-gray-800'
+                                            }`}>
+                                            {cliente.estadoPipeline === 'vendido' && 'Vendido'}
+                                            {cliente.estadoPipeline === 'cierre_programado' && 'Cierre Programado'}
+                                            {cliente.estadoPipeline === 'cotizacion' && 'Cotización'}
+                                            {cliente.estadoPipeline === 'interesado' && 'Interesado'}
+                                            {cliente.estadoPipeline === 'contactado' && 'Contactado'}
+                                            {cliente.estadoPipeline === 'perdido' && 'Perdido'}
+                                        </span>
+                                        <span className={`badge ${cliente.tipoServicio === 'linea_nueva' ? 'badge-blue' :
+                                                cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
+                                                    'badge-green'
+                                            }`}>
+                                            {cliente.tipoServicio === 'linea_nueva' && 'Línea Nueva'}
+                                            {cliente.tipoServicio === 'portabilidad' && 'Portabilidad'}
+                                            {cliente.tipoServicio === 'winback' && 'Winback'}
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                        <div>
+                                            <p className="text-gray-500">Teléfono</p>
+                                            <p className="font-medium text-gray-900">{cliente.noTT}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-500">Correo</p>
+                                            <p className="font-medium text-gray-900">{cliente.correo}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-500">Paquete</p>
+                                            <p className="font-medium text-gray-900">{cliente.paquete}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-500">Comisión</p>
+                                            <p className="font-medium text-telmex-blue">{formatearMoneda(cliente.comision)}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-3 text-xs text-gray-500">
+                                        Contactado: {formatearFecha(cliente.fechaContacto)}
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+
+                {clientesFiltrados.length === 0 && (
+                    <Card>
+                        <CardContent className="p-12 text-center">
+                            <p className="text-gray-500">No se encontraron clientes</p>
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
+        </div>
+    );
+}
