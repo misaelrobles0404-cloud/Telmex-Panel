@@ -162,8 +162,41 @@ PAQUETE: ${cliente.paquete}
 —————————————————
 GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
+        } else if (cliente.tipoServicio === 'winback') {
+            formato = `PLANTILLA PARA WIN-BACK (ALTA INTERNET RECUPERADO)
+NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
+—————————————————
+FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
+—————————————————
+FOLIO SIAC: ${cliente.folioSiac || 'PENDIENTE'}
+—————————————————
+**ALTAN INTERNET RECUPERADO: WIN-BACK**
+((COMPETIDOR)): ${cliente.proveedorActual ? cliente.proveedorActual.toUpperCase() : ''}
+—————————————————
+NOMBRE DE CLIENTE: 
+${cliente.nombre.toUpperCase()}
+—————————————————
+■ NUM. TITULAR:  ${cliente.noTT}
+■ NUM. REFERENCIA 1: ${cliente.noRef}
+■ NUM. REFERENCIA 2: 
+■ CORREO: ${cliente.correo}
+—————————————————
+CALLE: ${cliente.calle.toUpperCase()}
+NÚMERO: 
+MANZ:    LOT:    EDF:    DPTO:
+ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
+ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
+COLONIA: ${cliente.colonia.toUpperCase()}
+CP: ${cliente.cp}
+CIUDAD: ${cliente.cd.toUpperCase()}
+ESTADO: ${cliente.estado.toUpperCase()}
+—————————————————
+PAQUETE: ${cliente.paquete}
+—————————————————
+GASTOS DE INSTALACION
+***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
         } else {
-            // Formato para Línea Nueva (y Winback por ahora)
+            // Formato para Línea Nueva
             formato = `NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
