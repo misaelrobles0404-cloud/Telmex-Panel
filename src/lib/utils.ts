@@ -114,7 +114,8 @@ export function calcularMetricas(): Metricas {
     // Pipeline
     const contactados = clientes.filter(c => c.estadoPipeline === 'contactado').length;
     const interesados = clientes.filter(c => c.estadoPipeline === 'interesado').length;
-    const cotizaciones = clientes.filter(c => c.estadoPipeline === 'cotizacion').length;
+    // const cotizaciones = clientes.filter(c => c.estadoPipeline === 'cotizacion').length; // Removed
+    const cotizaciones = 0; // Placeholder to avoid breaking interface
     const cierresProgramados = clientes.filter(c => c.estadoPipeline === 'cierre_programado').length;
     const vendidos = clientes.filter(c => c.estadoPipeline === 'vendido').length;
     const perdidos = clientes.filter(c => c.estadoPipeline === 'perdido').length;

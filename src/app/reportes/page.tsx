@@ -41,7 +41,7 @@ export default function ReportesPage() {
     const dataPipeline = [
         { name: 'Contactado', value: metricas.contactados },
         { name: 'Interesado', value: metricas.interesados },
-        { name: 'Cotización', value: metricas.cotizaciones },
+        // { name: 'Cotización', value: metricas.cotizaciones },
         { name: 'Cierre', value: metricas.cierresProgramados },
         { name: 'Vendido', value: metricas.vendidos },
     ];

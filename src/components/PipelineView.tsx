@@ -13,8 +13,8 @@ interface PipelineViewProps {
 const ESTADOS: { estado: EstadoPipeline; label: string; color: string }[] = [
     { estado: 'contactado', label: 'Contactado', color: 'bg-gray-100 border-gray-300' },
     { estado: 'interesado', label: 'Interesado', color: 'bg-blue-100 border-blue-300' },
-    { estado: 'cotizacion', label: 'Cotización', color: 'bg-yellow-100 border-yellow-300' },
-    { estado: 'cierre_programado', label: 'Cierre Programado', color: 'bg-purple-100 border-purple-300' },
+    // { estado: 'cotizacion', label: 'Cotización', color: 'bg-yellow-100 border-yellow-300' }, // REMOVED
+    { estado: 'cierre_programado', label: 'Cierre Programado (Folio SIAC)', color: 'bg-purple-100 border-purple-300' },
     { estado: 'vendido', label: 'Vendido', color: 'bg-green-100 border-green-300' },
 ];
 
@@ -51,8 +51,8 @@ export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
                                     </p>
                                     <div className="mt-2">
                                         <span className={`badge ${cliente.tipoServicio === 'linea_nueva' ? 'badge-blue' :
-                                                cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
-                                                    'badge-green'
+                                            cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
+                                                'badge-green'
                                             }`}>
                                             {cliente.tipoServicio === 'linea_nueva' ? 'Línea Nueva' :
                                                 cliente.tipoServicio === 'portabilidad' ? 'Portabilidad' :

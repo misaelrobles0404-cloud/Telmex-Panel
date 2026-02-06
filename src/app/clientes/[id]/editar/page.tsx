@@ -173,7 +173,11 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             formatoPortabilidad: formData.formatoPortabilidad,
             cartaBaja: formData.cartaBaja,
             estadoCuentaMegacable: formData.estadoCuentaMegacable,
-            estadoPipeline: estadoPipeline as any, // Mantiene el estado original
+
+            // Si tiene Folio SIAC y no está vendido, mover a cierre_programado logic
+            estadoPipeline: (formData.folioSiac && formData.folioSiac.trim() !== '' && estadoPipeline !== 'vendido')
+                ? 'cierre_programado'
+                : estadoPipeline as any,
             fechaContacto: fechaCreacion, // Mantiene fecha original
             fechaUltimaActividad: new Date().toISOString(), // Actualiza última actividad
             comision: calcularComision(tipoServicio),

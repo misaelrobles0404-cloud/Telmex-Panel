@@ -90,10 +90,34 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
 
     const guardarFolioSiac = () => {
         if (!cliente) return;
-        const clienteActualizado = { ...cliente, folioSiac: folioSiacInput };
+
+        // Al guardar Folio SIAC, movemos a Cierre Programado automáticamente
+        const nuevoEstado: EstadoPipeline = 'cierre_programado';
+
+        const clienteActualizado: Cliente = {
+            ...cliente,
+            folioSiac: folioSiacInput,
+            estadoPipeline: cliente.estadoPipeline === 'vendido' ? 'vendido' : nuevoEstado, // No regresar si ya está vendido
+            actualizadoEn: new Date().toISOString()
+        };
+
+        // Registrar actividad
+        if (cliente.estadoPipeline !== nuevoEstado && cliente.estadoPipeline !== 'vendido') {
+            clienteActualizado.actividades = [
+                {
+                    id: generarId(),
+                    clienteId: cliente.id,
+                    tipo: 'cambio_estado',
+                    descripcion: `Folio SIAC asignado: ${folioSiacInput}. Estado actualizado a Cierre Programado.`,
+                    fecha: new Date().toISOString()
+                },
+                ...cliente.actividades
+            ];
+        }
+
         guardarCliente(clienteActualizado);
         setCliente(clienteActualizado);
-        alert('Folio SIAC guardado correctamente');
+        alert('Folio SIAC guardado. Cliente movido a Cierre Programado.');
     };
 
     const generarFormatoSIAC = () => {
