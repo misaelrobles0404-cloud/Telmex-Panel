@@ -320,34 +320,36 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     </CardContent>
                 </Card>
 
-                {/* Clasificación de Servicio */}
-                <Card>
-                    <CardHeader><CardTitle>Clasificación de Servicio</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" checked={formData.tieneInternet} onChange={(e) => setFormData({ ...formData, tieneInternet: e.target.checked })} className="w-4 h-4" />
-                                <span className="text-sm font-medium text-gray-700">¿Tiene internet actualmente?</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" checked={formData.tieneTelefonoFijo} onChange={(e) => setFormData({ ...formData, tieneTelefonoFijo: e.target.checked })} className="w-4 h-4" />
-                                <span className="text-sm font-medium text-gray-700">¿Tiene teléfono fijo?</span>
-                            </label>
-                        </div>
-                        {formData.tieneInternet && (
-                            <Select label="Proveedor Actual" value={formData.proveedorActual} onChange={(e) => setFormData({ ...formData, proveedorActual: e.target.value })}
-                                options={[
-                                    { value: 'totalplay', label: 'Totalplay' },
-                                    { value: 'izzi', label: 'Izzi' },
-                                    { value: 'megacable', label: 'Megacable' },
-                                    { value: 'axtel', label: 'Axtel' },
-                                    { value: 'dish', label: 'Dish' },
-                                    { value: 'otro', label: 'Otro' },
-                                ]}
-                            />
-                        )}
-                    </CardContent>
-                </Card>
+                {/* Clasificación de Servicio - Solo si NO es Línea Nueva */}
+                {tipoServicio !== 'linea_nueva' && (
+                    <Card>
+                        <CardHeader><CardTitle>Clasificación de Servicio</CardTitle></CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked={formData.tieneInternet} onChange={(e) => setFormData({ ...formData, tieneInternet: e.target.checked })} className="w-4 h-4" />
+                                    <span className="text-sm font-medium text-gray-700">¿Tiene internet actualmente?</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked={formData.tieneTelefonoFijo} onChange={(e) => setFormData({ ...formData, tieneTelefonoFijo: e.target.checked })} className="w-4 h-4" />
+                                    <span className="text-sm font-medium text-gray-700">¿Tiene teléfono fijo?</span>
+                                </label>
+                            </div>
+                            {formData.tieneInternet && (
+                                <Select label="Proveedor Actual" value={formData.proveedorActual} onChange={(e) => setFormData({ ...formData, proveedorActual: e.target.value })}
+                                    options={[
+                                        { value: 'totalplay', label: 'Totalplay' },
+                                        { value: 'izzi', label: 'Izzi' },
+                                        { value: 'megacable', label: 'Megacable' },
+                                        { value: 'axtel', label: 'Axtel' },
+                                        { value: 'dish', label: 'Dish' },
+                                        { value: 'otro', label: 'Otro' },
+                                    ]}
+                                />
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Paquete */}
                 <Card>
