@@ -59,6 +59,9 @@ export interface Cliente {
     // Datos específicos de Winback (Megacable)
     estadoCuentaMegacable?: boolean;
 
+    // SIAC
+    folioSiac?: string;
+
     // Pipeline y seguimiento
     estadoPipeline: EstadoPipeline;
     fechaContacto: string;

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Cliente, Actividad, Documento, EstadoPipeline } from '@/types';
 import { obtenerClientes, guardarCliente, eliminarCliente } from '@/lib/storage';
 import { formatearMoneda, formatearFecha, formatearFechaHora, generarId } from '@/lib/utils';
-import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle, Copy } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle, Copy, Save } from 'lucide-react';
 import { Textarea } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { DocumentManager } from '@/components/DocumentManager';
@@ -18,11 +18,15 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const [loading, setLoading] = useState(true);
     const [nuevaNota, setNuevaNota] = useState('');
     const [modalDocumentosOpen, setModalDocumentosOpen] = useState(false);
+    const [folioSiacInput, setFolioSiacInput] = useState('');
 
     useEffect(() => {
         const clientes = obtenerClientes();
         const clienteEncontrado = clientes.find(c => c.id === params.id);
         setCliente(clienteEncontrado || null);
+        if (clienteEncontrado) {
+            setFolioSiacInput(clienteEncontrado.folioSiac || '');
+        }
         setLoading(false);
     }, [params.id]);
 
@@ -84,6 +88,14 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         setCliente(clienteActualizado);
     };
 
+    const guardarFolioSiac = () => {
+        if (!cliente) return;
+        const clienteActualizado = { ...cliente, folioSiac: folioSiacInput };
+        guardarCliente(clienteActualizado);
+        setCliente(clienteActualizado);
+        alert('Folio SIAC guardado correctamente');
+    };
+
     const generarFormatoSIAC = () => {
         if (!cliente) return;
 
@@ -91,7 +103,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
-FOLIO SIAC: PENDIENTE
+FOLIO SIAC: ${cliente.folioSiac || 'PENDIENTE'}
 
 —————————————————
 NOMBRE DE CLIENTE: 
@@ -370,9 +382,25 @@ GASTOS DE INSTALACION
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm">
                             <div>
-                                <p className="text-gray-500">No. Referencia</p>
                                 <p className="font-medium text-gray-900">{cliente.noRef}</p>
                             </div>
+
+                            <div className="pt-4 border-t border-gray-100">
+                                <label className="text-gray-500 mb-1 block">Folio SIAC</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={folioSiacInput}
+                                        onChange={(e) => setFolioSiacInput(e.target.value)}
+                                        placeholder="Ingresa Folio SIAC"
+                                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
+                                    />
+                                    <Button variant="primary" size="sm" onClick={guardarFolioSiac} disabled={folioSiacInput === (cliente.folioSiac || '')}>
+                                        <Save size={14} />
+                                    </Button>
+                                </div>
+                            </div>
+
 
                             {cliente.usuario && (
                                 <div>
