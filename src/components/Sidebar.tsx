@@ -3,23 +3,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-    LayoutDashboard,
-    Users,
-    Calendar,
-    MessageSquare,
-    Megaphone,
-    Calculator,
-    BarChart3,
-    Settings,
-    MapPin,
-} from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, MessageSquare, BarChart3, Calculator, Settings, Menu, X, ImageIcon, CheckCircle, MapPin, Megaphone } from 'lucide-react';
 
 const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Clientes', href: '/clientes', icon: Users },
     { name: 'Agenda', href: '/agenda', icon: Calendar },
     { name: 'Plantillas WhatsApp', href: '/plantillas', icon: MessageSquare },
+    { name: 'Verificar Comisiones', href: '/comisiones', icon: CheckCircle }, // Nuevo módulo
     { name: 'Publicaciones', href: '/publicaciones', icon: Megaphone },
     { name: 'Calculadora', href: '/calculadora', icon: Calculator },
     { name: 'Cobertura', href: '/cobertura', icon: MapPin },
