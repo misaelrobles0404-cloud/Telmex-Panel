@@ -11,7 +11,7 @@ export default function CoberturaPage() {
     const [buscando, setBuscando] = useState(false);
     const [resultado, setResultado] = useState<any>(null);
 
-    const handleSearch = (e: React.FormEvent) => {
+    const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (cp.length !== 5) {
             alert('Por favor ingresa un código postal válido de 5 dígitos.');
@@ -21,14 +21,28 @@ export default function CoberturaPage() {
         setBuscando(true);
         setResultado(null);
 
-        // Simulamos una petición a la API
-        setTimeout(() => {
+        try {
+            // 1. Identificar Lugar Real con API Pública (Zippopotam.us)
+            const response = await fetch(`https://api.zippopotam.us/mx/${cp}`);
+
+            let ubicacionReal = null;
+            if (response.ok) {
+                const data = await response.json();
+                // Zippopotam devuelve 'places' con la información
+                const lugar = data.places[0];
+                ubicacionReal = {
+                    estado: lugar['state'],
+                    municipio: lugar['place name'], // En data de MX suele ser la colonia o ciudad
+                    pais: data['country']
+                };
+            }
+
+            // 2. Simular Cobertura (mantenemos la lógica de simulación para disponibilidad técnica)
+            // En un caso real, aquí consultaríamos la API de TELMEX con los datos geográficos obtenidos
             const lastDigit = parseInt(cp.slice(-1));
             let res;
 
-            // Lógica simulada de cobertura basada en el último dígito
             if (lastDigit >= 0 && lastDigit <= 3) {
-                // FIBRA ÓPTICA (0-3)
                 res = {
                     tipo: 'fibra',
                     titulo: '¡Felicidades! Hay Fibra Óptica',
@@ -42,10 +56,9 @@ export default function CoberturaPage() {
                     icon: CheckCircle
                 };
             } else if (lastDigit >= 4 && lastDigit <= 6) {
-                // COBRE / VDSL (4-6)
                 res = {
                     tipo: 'cobre',
-                    titulo: 'Cobertura Tradicional Dispoible',
+                    titulo: 'Cobertura Tradicional Disponible',
                     mensaje: 'Zona con cobertura de cobre de alta velocidad (VDSL).',
                     velocidad: 'Hasta 50 Mbps',
                     tecnologia: 'VDSL / Cobre',
@@ -56,7 +69,6 @@ export default function CoberturaPage() {
                     icon: AlertTriangle
                 };
             } else {
-                // SIN COBERTURA / REVISIÓN (7-9)
                 res = {
                     tipo: 'sin_cobertura',
                     titulo: 'Requiere Validación en Campo',
@@ -71,9 +83,18 @@ export default function CoberturaPage() {
                 };
             }
 
-            setResultado(res);
+            // Combinamos resultado técnico simulado + ubicación real
+            setResultado({
+                ...res,
+                ubicacion: ubicacionReal // Agregamos la ubicación real al objeto de resultado
+            });
+
+        } catch (error) {
+            console.error("Error al buscar CP", error);
+            alert("Hubo un error al consultar el código postal. Intenta de nuevo.");
+        } finally {
             setBuscando(false);
-        }, 1500); // 1.5 segundos de "búsqueda"
+        }
     };
 
     return (
@@ -163,9 +184,17 @@ export default function CoberturaPage() {
                                     <h2 className={`text-2xl font-bold mb-1 ${resultado.color}`}>
                                         {resultado.titulo}
                                     </h2>
-                                    <p className="text-gray-700 font-medium mb-4">
-                                        {resultado.mensaje}
-                                    </p>
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
+                                        <p className="text-gray-700 font-medium">
+                                            {resultado.mensaje}
+                                        </p>
+                                        {resultado.ubicacion && (
+                                            <div className="bg-gray-100 px-3 py-1 rounded-full text-xs font-semibold text-gray-600 flex items-center gap-1 border border-gray-200">
+                                                <MapPin size={12} />
+                                                {resultado.ubicacion.municipio}, {resultado.ubicacion.estado} ({resultado.ubicacion.pais})
+                                            </div>
+                                        )}
+                                    </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                                         <div className="bg-white/60 p-3 rounded-lg">
