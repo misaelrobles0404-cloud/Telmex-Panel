@@ -18,6 +18,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const [loading, setLoading] = useState(true);
     const [nuevaNota, setNuevaNota] = useState('');
     const [modalDocumentosOpen, setModalDocumentosOpen] = useState(false);
+    const [modalReferidosOpen, setModalReferidosOpen] = useState(false);
     const [folioSiacInput, setFolioSiacInput] = useState('');
 
     useEffect(() => {
@@ -164,7 +165,14 @@ GASTOS DE INSTALACION
         });
     };
 
-    const solicitarReferidos = () => {
+    const copiarTelefono = () => {
+        if (!cliente) return;
+        navigator.clipboard.writeText(cliente.noTT).then(() => {
+            alert('Teléfono copiado. Búscalo en WhatsApp.');
+        });
+    };
+
+    const copiarMensajeReferidos = () => {
         if (!cliente) return;
 
         const mensaje = `¡Hola ${cliente.nombre.split(' ')[0]}! 🌟
@@ -179,11 +187,14 @@ Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo d
 ¡Gracias por tu apoyo!`;
 
         navigator.clipboard.writeText(mensaje).then(() => {
-            alert('¡Mensaje de referidos copiado! Listo para enviar por WhatsApp.');
-        }).catch(err => {
-            console.error('Error al copiar:', err);
-            alert('Error al copiar el mensaje');
+            alert('Mensaje copiado. Pégalo en el chat.');
+            setModalReferidosOpen(false);
         });
+    };
+
+    const solicitarReferidos = () => {
+        if (!cliente) return;
+        setModalReferidosOpen(true);
     };
 
     return (
@@ -219,7 +230,7 @@ Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo d
                     {cliente.estadoPipeline === 'vendido' && (
                         <Button
                             variant="secondary"
-                            onClick={solicitarReferidos}
+                            onClick={() => setModalReferidosOpen(true)}
                             className="bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-yellow-200"
                             title="Pedir referidos a cliente feliz"
                         >
@@ -504,6 +515,44 @@ Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo d
                         documentos={cliente.documentos}
                         onDocumentosChange={handleDocumentosChange}
                     />
+                )}
+            </Modal>
+
+            {/* Modal de Referidos */}
+            <Modal
+                isOpen={modalReferidosOpen}
+                onClose={() => setModalReferidosOpen(false)}
+                title="🎁 Solicitar Referidos"
+                size="md"
+            >
+                {cliente && (
+                    <div className="space-y-6 p-4">
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <h3 className="font-semibold text-blue-900 mb-2">Paso 1: Busca el contacto en WhatsApp</h3>
+                            <p className="text-sm text-blue-700 mb-3">Copia el número del cliente para buscarlo en tu lista de chats.</p>
+
+                            <div className="flex items-center gap-2 bg-white p-2 rounded border border-blue-200">
+                                <Phone size={18} className="text-blue-500" />
+                                <span className="font-mono text-lg font-medium flex-1">{cliente.noTT}</span>
+                                <Button size="sm" onClick={copiarTelefono}>
+                                    <Copy size={14} className="mr-1" /> Copiar Teléfono
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                            <h3 className="font-semibold text-green-900 mb-2">Paso 2: Copia el mensaje</h3>
+                            <p className="text-sm text-green-700 mb-3">Una vez en el chat, pega este mensaje para pedir referidos.</p>
+
+                            <div className="bg-white p-3 rounded border border-green-200 text-sm text-gray-600 italic mb-3">
+                                "¡Hola {cliente.nombre.split(' ')[0]}! 🌟 Espero que estés disfrutando tu nuevo internet TELMEX..."
+                            </div>
+
+                            <Button className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={copiarMensajeReferidos}>
+                                <Copy size={16} className="mr-2" /> Copiar Mensaje
+                            </Button>
+                        </div>
+                    </div>
                 )}
             </Modal>
         </div>
