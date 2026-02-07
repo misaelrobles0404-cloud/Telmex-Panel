@@ -52,6 +52,12 @@ export function eliminarRecordatorio(id: string): void {
 
 export async function guardarCliente(cliente: Cliente): Promise<void> {
     const { actividades, documentos, ...datosParaGuardar } = cliente;
+
+    // Sanitización de UUIDs: Si campana_id es una cadena vacía, debe ser null
+    if (datosParaGuardar.campana_id === '') {
+        datosParaGuardar.campana_id = undefined;
+    }
+
     const { error } = await supabase
         .from('clientes')
         .upsert(datosParaGuardar);

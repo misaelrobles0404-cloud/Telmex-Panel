@@ -147,7 +147,7 @@ export default function NuevoClientePage() {
             fecha_ultima_actividad: new Date().toISOString(),
             comision: 0,
             notas: formData.notas,
-            campana_id: formData.campanaId,
+            campana_id: formData.campanaId || undefined,
             creado_en: new Date().toISOString(),
             actualizado_en: new Date().toISOString(),
         };
@@ -227,7 +227,7 @@ export default function NuevoClientePage() {
             fecha_ultima_actividad: new Date().toISOString(),
             comision: calcularComision(tipoServicio),
             notas: formData.notas,
-            campana_id: formData.campanaId,
+            campana_id: formData.campanaId || undefined,
             creado_en: new Date().toISOString(),
             actualizado_en: new Date().toISOString(),
         };
