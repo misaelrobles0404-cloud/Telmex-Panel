@@ -22,6 +22,7 @@ export interface Cliente {
 
     // Dirección
     calle: string;
+    numeroExterior?: string;
     colonia: string;
     cp: string;
     cd: string; // Ciudad

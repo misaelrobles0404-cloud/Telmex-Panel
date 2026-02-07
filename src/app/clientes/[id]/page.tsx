@@ -144,7 +144,7 @@ ${cliente.nombre.toUpperCase()}
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: 
+NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} 
 MANZ:    LOT:    EDF:    DPTO:
 ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
@@ -180,7 +180,7 @@ ${cliente.nombre.toUpperCase()}
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: 
+NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} 
 MANZ:    LOT:    EDF:    DPTO:
 ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
@@ -213,7 +213,7 @@ ${cliente.nombre.toUpperCase()}
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: 
+NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} 
 MANZ:    LOT:    EDF:    DPTO:
 ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
@@ -247,7 +247,7 @@ CORREO:
 ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: 
+NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} 
 ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
@@ -297,32 +297,7 @@ Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo d
         });
     };
 
-    const copiarMensajeSeguimiento = () => {
-        if (!cliente) return;
 
-        const nombre = cliente.nombre.includes('Prospecto') ? '' : ` ${cliente.nombre.split(' ')[0]}`;
-        const direccion = cliente.calle !== 'PENDIENTE' ? cliente.calle : 'tu domicilio';
-        const paquete = cliente.paquete !== 'POR DEFINIR' ? cliente.paquete : 'el paquete que cotizamos';
-
-        const mensaje = `¡Hola${nombre}! 👋
-
-Te escribo para dar seguimiento a tu trámite de internet TELMEX. 🚀
-
-Tenemos estos datos registrados:
-📦 Paquete: ${paquete}
-💰 Precio: $${cliente.precioMensual}/mes
-📍 Dirección: ${direccion}
-
-¿Te gustaría que procedamos con la instalación/validación? 🤔
-Solo necesito que me confirmes para agendar.
-
-¡Quedo atento!`;
-
-        navigator.clipboard.writeText(mensaje).then(() => {
-            alert('Mensaje de seguimiento copiado.');
-            setModalSeguimientoOpen(false);
-        });
-    };
 
     const copiarMensajeSeguimiento = () => {
         if (!cliente) return;
@@ -380,7 +355,7 @@ Solo necesito que me confirmes para agendar.
                                 cliente.tipoServicio === 'portabilidad' ? 'Portabilidad' : 'Winback'}
                         </span>
                         <span className="text-gray-500 text-sm">
-                            Creado: {formatearFecha(cliente.creadoEn)}
+                            Creado: {formatearFechaHora(cliente.creadoEn)}
                         </span>
                     </div>
                 </div>
@@ -500,7 +475,7 @@ Solo necesito que me confirmes para agendar.
                                 <div>
                                     <p className="text-sm text-gray-500">Dirección</p>
                                     <p className="font-medium">
-                                        {cliente.calle} {cliente.colonia}, {cliente.cp}<br />
+                                        {cliente.calle} {cliente.numeroExterior ? `No. ${cliente.numeroExterior}` : ''}, {cliente.colonia}, {cliente.cp}<br />
                                         {cliente.cd}, {cliente.estado}
                                     </p>
                                     {(cliente.entreCalle1 || cliente.entreCalle2) && (

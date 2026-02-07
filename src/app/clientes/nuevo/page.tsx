@@ -22,6 +22,7 @@ export default function NuevoClientePage() {
 
         // Dirección
         calle: '',
+        numeroExterior: '',
         colonia: '',
         cp: '',
         cd: '',
@@ -88,6 +89,7 @@ export default function NuevoClientePage() {
             noRef: formData.noRef || 'PENDIENTE',
             correo: formData.correo || 'pendiente@correo.com',
             calle: 'PENDIENTE',
+            numeroExterior: '',
             colonia: 'PENDIENTE',
             cp: '00000',
             cd: formData.cd || 'PENDIENTE',
@@ -161,6 +163,7 @@ export default function NuevoClientePage() {
             noRef: formData.noRef,
             correo: formData.correo,
             calle: formData.calle,
+            numeroExterior: formData.numeroExterior,
             colonia: formData.colonia,
             cp: formData.cp,
             cd: formData.cd,
@@ -398,6 +401,14 @@ export default function NuevoClientePage() {
                                 label="Calle"
                                 value={formData.calle}
                                 onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
+                                required
+                            />
+
+                            <Input
+                                label="Número Exterior"
+                                value={formData.numeroExterior}
+                                onChange={(e) => setFormData({ ...formData, numeroExterior: e.target.value })}
+                                placeholder="Ej. 123, 12-A"
                                 required
                             />
 
