@@ -7,8 +7,8 @@ import { Input, Select } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { Plus, Facebook, Instagram, Calendar as CalendarIcon, DollarSign, Users, BarChart2, Zap, Pause, Play, Trash2 } from 'lucide-react';
 import { Publicacion } from '@/types';
-import { obtenerPublicaciones, guardarPublicacion } from '@/lib/storage';
-import { formatearMoneda, formatearFecha, generarId } from '@/lib/utils';
+import { obtenerPublicaciones, obtenerClientes, guardarPublicacion } from '@/lib/storage';
+import { formatearMoneda, formatearFecha, generarId, calcularEstadisticasCampana } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -25,7 +25,9 @@ export default function CampanasPage() {
     const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));
 
     useEffect(() => {
-        setPublicaciones(obtenerPublicaciones());
+        const pubs = obtenerPublicaciones();
+        const clients = obtenerClientes();
+        setPublicaciones(calcularEstadisticasCampana(pubs, clients));
         setLoading(false);
     }, []);
 

@@ -148,6 +148,35 @@ export function calcularMetricas(): Metricas {
 }
 
 // ============================================
+// ESTADÍSTICAS DE CAMPAÑAS
+// ============================================
+
+export function calcularEstadisticasCampana(campanas: any[], clientes: Cliente[]) {
+    return campanas.map(campana => {
+        // Leads reales vinculados
+        const leads = clientes.filter(c => c.campanaId === campana.id).length;
+
+        // Simulación de Alcance y Clicks basada en el presupuesto diario y días activa
+        // Asumimos un rendimiento promedio de mercado para anuncios inmobiliarios/servicios locales
+        // Alcance: ~1200 personas por cada $35 diarios
+        // Clicks: ~40 clicks (3.3% CTR) por cada $35 diarios
+
+        const factorRendimiento = campana.presupuesto / 35;
+        const diasActiva = campana.activa ? 1 : 0.5; // Simplificación para demo
+
+        const alcanceSimulado = Math.floor(1200 * factorRendimiento * (leads > 0 ? leads : 1) * (Math.random() * 0.5 + 0.8));
+        const clicksSimulados = Math.floor(40 * factorRendimiento * (leads > 0 ? leads : 1) * (Math.random() * 0.4 + 0.7));
+
+        return {
+            ...campana,
+            alcance: alcanceSimulado,
+            interacciones: clicksSimulados,
+            leadsGenerados: leads
+        };
+    });
+}
+
+// ============================================
 // VALIDACIÓN DE REQUISITOS
 // ============================================
 

@@ -6,10 +6,11 @@ import { Input, Select, Textarea } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types';
-import { guardarCliente } from '@/lib/storage';
+import { guardarCliente, obtenerPublicaciones } from '@/lib/storage';
 import { clasificarServicio, calcularComision, generarId } from '@/lib/utils';
 import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
 import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus } from 'lucide-react';
+import { Publicacion } from '@/types';
 
 export default function NuevoClientePage() {
     const router = useRouter();
@@ -57,6 +58,9 @@ export default function NuevoClientePage() {
 
         // Notas
         notas: '',
+
+        // Campaña
+        campanaId: '',
     });
 
     const [tipoServicio, setTipoServicio] = useState<TipoServicio>('linea_nueva');
@@ -121,6 +125,7 @@ export default function NuevoClientePage() {
             fechaUltimaActividad: new Date().toISOString(),
             comision: 0,
             notas: formData.notas,
+            campanaId: formData.campanaId,
             documentos: [],
             actividades: [],
             creadoEn: new Date().toISOString(),
@@ -196,6 +201,7 @@ export default function NuevoClientePage() {
             fechaUltimaActividad: new Date().toISOString(),
             comision: calcularComision(tipoServicio),
             notas: formData.notas,
+            campanaId: formData.campanaId,
             documentos: [],
             actividades: [],
             creadoEn: new Date().toISOString(),
@@ -651,12 +657,24 @@ export default function NuevoClientePage() {
                     </Card>
                 )}
 
-                {/* Notas */}
+                {/* Notas y Campaña */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Notas</CardTitle>
+                        <CardTitle>Origen y Notas</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-4">
+                        <Select
+                            label="Campaña de Origen"
+                            value={formData.campanaId}
+                            onChange={(e) => setFormData({ ...formData, campanaId: e.target.value })}
+                            options={[
+                                { value: '', label: 'Sin campaña (Directo)' },
+                                ...obtenerPublicaciones().map((p: Publicacion) => ({
+                                    value: p.id,
+                                    label: p.titulo
+                                }))
+                            ]}
+                        />
                         <Textarea
                             label="Notas adicionales"
                             value={formData.notas}

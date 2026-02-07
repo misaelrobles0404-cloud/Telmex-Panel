@@ -64,6 +64,9 @@ export interface Cliente {
     // SIAC
     folioSiac?: string;
 
+    // Campaña de origen
+    campanaId?: string;
+
     // Pipeline y seguimiento
     estadoPipeline: EstadoPipeline;
     fechaContacto: string;
