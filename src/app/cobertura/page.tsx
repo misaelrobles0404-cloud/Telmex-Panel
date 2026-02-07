@@ -28,6 +28,58 @@ const obtenerZonaHoraria = (estado: string) => {
     return 'America/Mexico_City';
 };
 
+// Mapa de claves LADA principales de México
+const MAPA_LADAS: Record<string, string> = {
+    '55': 'Ciudad de México y Área Metropolitana',
+    '33': 'Guadalajara, Jalisco',
+    '81': 'Monterrey, Nuevo León',
+    '222': 'Puebla, Puebla',
+    '442': 'Querétaro, Querétaro',
+    '998': 'Cancún, Quintana Roo',
+    '664': 'Tijuana, Baja California',
+    '477': 'León, Guanajuato',
+    '722': 'Toluca, Estado de México',
+    '444': 'San Luis Potosí, SLP',
+    '999': 'Mérida, Yucatán',
+    '614': 'Chihuahua, Chihuahua',
+    '844': 'Saltillo, Coahuila',
+    '311': 'Tepic, Nayarit',
+    '951': 'Oaxaca, Oaxaca',
+    '229': 'Veracruz, Veracruz',
+    '833': 'Tampico, Tamaulipas',
+    '322': 'Puerto Vallarta, Jalisco',
+    '612': 'La Paz, Baja California Sur',
+    '686': 'Mexicali, Baja California',
+    '449': 'Aguascalientes, Ags.',
+    '443': 'Morelia, Michoacán',
+    '777': 'Cuernavaca, Morelos',
+    '744': 'Acapulco, Guerrero',
+    '271': 'Córdoba, Veracruz',
+    '272': 'Orizaba, Veracruz',
+    '618': 'Durango, Durango',
+    '667': 'Culiacán, Sinaloa',
+    '662': 'Hermosillo, Sonora',
+    '867': 'Nuevo Laredo, Tamaulipas',
+    '868': 'Matamoros, Tamaulipas',
+    '899': 'Reynosa, Tamaulipas',
+    '921': 'Coatzacoalcos, Veracruz',
+    '981': 'Campeche, Campeche',
+    '961': 'Tuxtla Gutiérrez, Chiapas',
+    '461': 'Celaya, Guanajuato',
+    '462': 'Irapuato, Guanajuato',
+    '473': 'Guanajuato, Gto.',
+    '228': 'Xalapa, Veracruz',
+    '771': 'Pachuca, Hidalgo',
+    '427': 'San Juan del Río, Qro.',
+    '656': 'Ciudad Juárez, Chihuahua',
+    '753': 'Lázaro Cárdenas, Michoacán',
+    '492': 'Zacatecas, Zac.',
+    '312': 'Colima, Colima',
+    '938': 'Ciudad del Carmen, Camp.',
+    '747': 'Chilpancingo, Guerrero',
+    '967': 'San Cristóbal de las Casas, Chis.',
+};
+
 export default function CoberturaPage() {
     const [cp, setCp] = useState('');
     const [calle, setCalle] = useState('');
@@ -35,6 +87,32 @@ export default function CoberturaPage() {
     const [buscando, setBuscando] = useState(false);
     const [resultado, setResultado] = useState<any>(null);
     const [horaLocal, setHoraLocal] = useState('');
+
+    // Estados para el buscador de LADA
+    const [lada, setLada] = useState('');
+    const [resultadoLada, setResultadoLada] = useState('');
+
+    // Lógica de búsqueda de LADA automática
+    useEffect(() => {
+        if (lada.length >= 2) {
+            // Primero checamos las de 2 dígitos (CDMX, GDL, MTY)
+            const lada2 = lada.slice(0, 2);
+            if (['55', '33', '81'].includes(lada2)) {
+                setResultadoLada(MAPA_LADAS[lada2]);
+                return;
+            }
+
+            // Si no, checamos las de 3 dígitos
+            if (lada.length === 3) {
+                const region = MAPA_LADAS[lada];
+                setResultadoLada(region || 'LADA no reconocida o poco común');
+            } else {
+                setResultadoLada('');
+            }
+        } else {
+            setResultadoLada('');
+        }
+    }, [lada]);
 
     // Actualizar el reloj cada segundo si hay resultado
     useEffect(() => {
@@ -209,6 +287,40 @@ export default function CoberturaPage() {
                                 )}
                             </Button>
                         </form>
+                    </CardContent>
+                </Card>
+
+                {/* Buscador de LADA Independiente */}
+                <Card className="h-fit border-telmex-blue/30 bg-telmex-blue/5">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <span className="text-xl">📞</span> Identificador de LADA
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <p className="text-xs text-gray-500">Averigua de dónde es el número del cliente (2 o 3 dígitos).</p>
+                        <Input
+                            placeholder="Ej. 55 o 998"
+                            value={lada}
+                            onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 3);
+                                setLada(val);
+                            }}
+                            className="text-lg font-bold text-center tracking-widest"
+                        />
+
+                        {resultadoLada && (
+                            <div className="p-3 bg-white rounded-lg border border-telmex-blue/20 shadow-sm animate-in fade-in slide-in-from-top-1">
+                                <p className="text-[10px] text-telmex-blue font-bold uppercase tracking-tighter">Procedencia:</p>
+                                <p className="text-sm font-semibold text-gray-800 leading-tight">
+                                    {resultadoLada}
+                                </p>
+                            </div>
+                        )}
+
+                        {lada.length > 0 && !resultadoLada && lada.length < 2 && (
+                            <p className="text-[10px] text-gray-400 text-center italic">Escribe al menos 2 dígitos...</p>
+                        )}
                     </CardContent>
                 </Card>
 
