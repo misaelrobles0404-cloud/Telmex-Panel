@@ -30,6 +30,8 @@ const obtenerZonaHoraria = (estado: string) => {
 
 export default function CoberturaPage() {
     const [cp, setCp] = useState('');
+    const [calle, setCalle] = useState('');
+    const [numero, setNumero] = useState('');
     const [buscando, setBuscando] = useState(false);
     const [resultado, setResultado] = useState<any>(null);
     const [horaLocal, setHoraLocal] = useState('');
@@ -89,6 +91,8 @@ export default function CoberturaPage() {
                 setResultado({
                     cp: cp,
                     estado: estado,
+                    calle: calle,
+                    numero: numero,
                     municipio: municipio,
                     pais: data['country'],
                     zonaHoraria: zonaHoraria,
@@ -154,6 +158,20 @@ export default function CoberturaPage() {
                                 }}
                                 required
                             />
+                            <div className="grid grid-cols-2 gap-3">
+                                <Input
+                                    label="Calle (Opcional)"
+                                    placeholder="Ej. Av. Reforma"
+                                    value={calle}
+                                    onChange={(e) => setCalle(e.target.value)}
+                                />
+                                <Input
+                                    label="Número (Opcional)"
+                                    placeholder="Ej. 123"
+                                    value={numero}
+                                    onChange={(e) => setNumero(e.target.value)}
+                                />
+                            </div>
                             <Button
                                 type="submit"
                                 variant="primary"
@@ -200,7 +218,11 @@ export default function CoberturaPage() {
                                             <h2 className="text-2xl font-bold text-gray-900 mt-1">
                                                 {resultado.municipio}, {resultado.estado}
                                             </h2>
-                                            <p className="text-gray-600 font-medium">{resultado.pais}</p>
+                                            <p className="text-gray-600 font-medium">
+                                                {resultado.calle && `${resultado.calle} ${resultado.numero}`}
+                                                {resultado.calle ? <br /> : null}
+                                                {resultado.pais}
+                                            </p>
                                             <p className="text-xs text-gray-400 mt-1">CP: {resultado.cp}</p>
                                         </div>
                                     </div>
