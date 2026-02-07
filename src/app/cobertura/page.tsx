@@ -93,6 +93,8 @@ export default function CoberturaPage() {
                     estado: estado,
                     calle: calle,
                     numero: numero,
+                    colonia: municipio, // Zippopotam a veces pone la colonia o el municipio aquí
+                    ciudad: municipio,
                     municipio: municipio,
                     pais: data['country'],
                     zonaHoraria: zonaHoraria,
@@ -116,10 +118,10 @@ export default function CoberturaPage() {
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                     <Globe className="text-telmex-blue" />
-                    Verificador de Ubicación y Hora
+                    Verificador de Cobertura y Ubicación
                 </h1>
                 <p className="text-gray-600 mt-2">
-                    Consulta la ubicación exacta y la hora local de tus clientes por Código Postal.
+                    Consulta la ubicación exacta (Colonia, Ciudad, Estado) y la hora local de tus clientes.
                 </p>
             </div>
 
@@ -127,7 +129,7 @@ export default function CoberturaPage() {
                 {/* Formulario de Búsqueda */}
                 <Card className="h-fit">
                     <CardHeader>
-                        <CardTitle className="text-lg">Buscar CP</CardTitle>
+                        <CardTitle className="text-lg">Datos del Domicilio</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {/* Botón de mensaje rápido */}
@@ -158,20 +160,23 @@ export default function CoberturaPage() {
                                 }}
                                 required
                             />
-                            <div className="grid grid-cols-2 gap-3">
-                                <Input
-                                    label="Calle (Opcional)"
-                                    placeholder="Ej. Av. Reforma"
-                                    value={calle}
-                                    onChange={(e) => setCalle(e.target.value)}
-                                />
-                                <Input
-                                    label="Número (Opcional)"
-                                    placeholder="Ej. 123"
-                                    value={numero}
-                                    onChange={(e) => setNumero(e.target.value)}
-                                />
-                            </div>
+
+                            <Input
+                                label="Calle"
+                                placeholder="Ej. Av. Reforma"
+                                value={calle}
+                                onChange={(e) => setCalle(e.target.value)}
+                                required
+                            />
+
+                            <Input
+                                label="Número"
+                                placeholder="Ej. 123"
+                                value={numero}
+                                onChange={(e) => setNumero(e.target.value)}
+                                required
+                            />
+
                             <Button
                                 type="submit"
                                 variant="primary"
@@ -181,7 +186,7 @@ export default function CoberturaPage() {
                                 {buscando ? 'Verificando...' : (
                                     <span className="flex items-center gap-2">
                                         <Search size={18} />
-                                        Verificar
+                                        Verificar Cobertura
                                     </span>
                                 )}
                             </Button>
@@ -194,7 +199,7 @@ export default function CoberturaPage() {
                     {!resultado && !buscando && (
                         <div className="h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 bg-gray-50/50">
                             <MapPin size={48} className="mb-4 opacity-50" />
-                            <p className="font-medium">Esperando Código Postal...</p>
+                            <p className="font-medium">Ingresa los datos para verificar...</p>
                         </div>
                     )}
 
@@ -205,47 +210,70 @@ export default function CoberturaPage() {
                     )}
 
                     {resultado && (
-                        <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-100 shadow-md">
-                            <CardContent className="p-8">
-                                <div className="flex flex-col gap-6">
-                                    {/* Ubicación */}
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-3 bg-blue-100 text-telmex-blue rounded-full">
-                                            <MapPin size={32} />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Ubicación Detectada</p>
-                                            <h2 className="text-2xl font-bold text-gray-900 mt-1">
-                                                {resultado.municipio}, {resultado.estado}
-                                            </h2>
-                                            <p className="text-gray-600 font-medium">
-                                                {resultado.calle && `${resultado.calle} ${resultado.numero}`}
-                                                {resultado.calle ? <br /> : null}
-                                                {resultado.pais}
-                                            </p>
-                                            <p className="text-xs text-gray-400 mt-1">CP: {resultado.cp}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Separador */}
-                                    <hr className="border-gray-200" />
-
-                                    {/* Hora Local */}
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-emerald-100 text-emerald-600 rounded-full">
-                                            <Clock size={32} />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Hora Local</p>
-                                            <div className="text-4xl font-mono font-bold text-gray-900 mt-1 bg-white inline-block px-3 py-1 rounded shadow-sm">
-                                                {horaLocal || '--:--:--'}
+                        <div className="space-y-4">
+                            <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-100 shadow-md">
+                                <CardContent className="p-8">
+                                    <div className="flex flex-col gap-6">
+                                        {/* Ubicación */}
+                                        <div className="flex items-start gap-4">
+                                            <div className="p-3 bg-blue-100 text-telmex-blue rounded-full">
+                                                <MapPin size={32} />
                                             </div>
-                                            <p className="text-xs text-gray-400 mt-2">Zona: {resultado.zonaHoraria}</p>
+                                            <div className="flex-1">
+                                                <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Dirección Completa</p>
+
+                                                <div className="mt-2 space-y-1">
+                                                    <h2 className="text-2xl font-bold text-gray-900 leading-tight">
+                                                        {resultado.calle} #{resultado.numero}
+                                                    </h2>
+                                                    <p className="text-xl text-telmex-blue font-semibold">
+                                                        Col. {resultado.colonia}
+                                                    </p>
+                                                    <p className="text-lg text-gray-700">
+                                                        {resultado.municipio}, {resultado.estado}
+                                                    </p>
+                                                    <div className="flex items-center gap-4 mt-2">
+                                                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm font-mono tracking-wider">
+                                                            CP: {resultado.cp}
+                                                        </span>
+                                                        <span className="text-gray-400 text-sm italic">{resultado.pais}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Separador */}
+                                        <hr className="border-gray-200" />
+
+                                        {/* Hora Local */}
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 bg-emerald-100 text-emerald-600 rounded-full">
+                                                <Clock size={32} />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Hora Local en {resultado.estado}</p>
+                                                <div className="text-4xl font-mono font-bold text-gray-900 mt-1 bg-white inline-block px-3 py-1 rounded shadow-sm">
+                                                    {horaLocal || '--:--:--'}
+                                                </div>
+                                                <p className="text-xs text-gray-400 mt-2">Zona Horaria: {resultado.zonaHoraria}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+
+                            <Button
+                                variant="outline"
+                                className="w-full py-6 text-lg border-2"
+                                onClick={() => {
+                                    const texto = `📍 UBICACIÓN VERIFICADA:\nCalle: ${resultado.calle}\nNúmero: ${resultado.numero}\nColonia: ${resultado.colonia}\nCiudad/Mun: ${resultado.municipio}\nEstado: ${resultado.estado}\nCP: ${resultado.cp}\n\n⏰ Hora Local: ${horaLocal}`;
+                                    navigator.clipboard.writeText(texto);
+                                    alert('Dirección completa copiada.');
+                                }}
+                            >
+                                📋 Copiar Dirección Completa
+                            </Button>
+                        </div>
                     )}
                 </div>
             </div>
