@@ -83,6 +83,8 @@ export interface Cliente {
     // Metadata
     creado_en: string;
     actualizado_en: string;
+    actividades?: Actividad[];
+    documentos?: Documento[];
 }
 
 // ============================================

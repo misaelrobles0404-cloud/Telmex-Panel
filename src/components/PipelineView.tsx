@@ -20,7 +20,7 @@ const ESTADOS: { estado: EstadoPipeline; label: string; color: string }[] = [
 
 export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
     const clientesPorEstado = (estado: EstadoPipeline) =>
-        clientes.filter((c) => c.estadoPipeline === estado);
+        clientes.filter((c) => c.estado_pipeline === estado);
 
     return (
         <div className="flex flex-nowrap lg:grid lg:grid-cols-5 gap-4 overflow-x-auto pb-4 lg:pb-0 lg:overflow-x-visible">
@@ -50,12 +50,12 @@ export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
                                         {cliente.paquete} • {formatearMoneda(cliente.comision)}
                                     </p>
                                     <div className="mt-2">
-                                        <span className={`badge ${cliente.tipoServicio === 'linea_nueva' ? 'badge-blue' :
-                                            cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
+                                        <span className={`badge ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
+                                            cliente.tipo_servicio === 'portabilidad' ? 'badge-purple' :
                                                 'badge-green'
                                             }`}>
-                                            {cliente.tipoServicio === 'linea_nueva' ? 'Línea Nueva' :
-                                                cliente.tipoServicio === 'portabilidad' ? 'Portabilidad' :
+                                            {cliente.tipo_servicio === 'linea_nueva' ? 'Línea Nueva' :
+                                                cliente.tipo_servicio === 'portabilidad' ? 'Portabilidad' :
                                                     'Winback'}
                                         </span>
                                     </div>

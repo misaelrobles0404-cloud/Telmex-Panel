@@ -1,5 +1,4 @@
 import { Cliente, TipoServicio, Metricas } from '@/types';
-import { obtenerClientes } from './storage';
 import { format, startOfDay, startOfWeek, startOfMonth, isAfter } from 'date-fns';
 
 // ============================================

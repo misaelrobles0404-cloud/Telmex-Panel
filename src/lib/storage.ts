@@ -51,9 +51,10 @@ export function eliminarRecordatorio(id: string): void {
 // ============================================
 
 export async function guardarCliente(cliente: Cliente): Promise<void> {
+    const { actividades, documentos, ...datosParaGuardar } = cliente;
     const { error } = await supabase
         .from('clientes')
-        .upsert(cliente);
+        .upsert(datosParaGuardar);
 
     if (error) {
         console.error('Error al guardar cliente en Supabase:', error);

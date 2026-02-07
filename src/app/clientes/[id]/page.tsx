@@ -28,7 +28,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                 const data = await obtenerCliente(params.id);
                 if (data) {
                     setCliente(data);
-                    setFolioSiacInput(data.folioSiac || '');
+                    setFolioSiacInput(data.folio_siac || '');
                 }
             } catch (error) {
                 console.error("Error al cargar cliente:", error);
@@ -49,15 +49,14 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
             id: generarId(),
             clienteId: cliente.id,
             tipo: 'cambio_estado',
-            descripcion: `Estado actualizado de ${cliente.estadoPipeline} a ${nuevoEstado}`,
+            descripcion: `Estado actualizado de ${cliente.estado_pipeline} a ${nuevoEstado}`,
             fecha: new Date().toISOString(),
         };
 
         const clienteActualizado = {
             ...cliente,
-            estadoPipeline: nuevoEstado,
-            actividades: [actividad, ...cliente.actividades],
-            actualizadoEn: new Date().toISOString()
+            estado_pipeline: nuevoEstado,
+            actualizado_en: new Date().toISOString()
         };
 
         try {
@@ -82,8 +81,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
 
         const clienteActualizado = {
             ...cliente,
-            actividades: [actividad, ...cliente.actividades],
-            actualizadoEn: new Date().toISOString()
+            actualizado_en: new Date().toISOString()
         };
 
         try {
@@ -113,12 +111,12 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
 
         const clienteActualizado: Cliente = {
             ...cliente,
-            folioSiac: folioSiacInput,
-            estadoPipeline: cliente.estadoPipeline === 'vendido' ? 'vendido' : nuevoEstado,
-            actualizadoEn: new Date().toISOString()
+            folio_siac: folioSiacInput,
+            estado_pipeline: cliente.estado_pipeline === 'vendido' ? 'vendido' : nuevoEstado,
+            actualizado_en: new Date().toISOString()
         };
 
-        if (cliente.estadoPipeline !== nuevoEstado && cliente.estadoPipeline !== 'vendido') {
+        if (cliente.estado_pipeline !== nuevoEstado && cliente.estado_pipeline !== 'vendido') {
             clienteActualizado.actividades = [
                 {
                     id: generarId(),
@@ -127,7 +125,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                     descripcion: `Folio SIAC asignado: ${folioSiacInput}. Estado actualizado a Cierre Programado.`,
                     fecha: new Date().toISOString()
                 },
-                ...cliente.actividades
+                ...cliente.actividades || []
             ];
         }
 
@@ -145,63 +143,63 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
 
         let formato = '';
 
-        if (cliente.tipoCliente === 'pyme') {
+        if (cliente.tipo_cliente === 'pyme') {
             formato = `PLANTILLA PARA CLIENTE PYME
 NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
-FOLIO SIAC: ${cliente.folioSiac || 'PENDIENTE'}
+FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
 —————————————————
 NOMBRE DE CLIENTE: 
 ${cliente.nombre.toUpperCase()}
 —————————————————
-■ NUM. TITULAR:  ${cliente.noTT}
-■ NUM. REFERENCIA 1: ${cliente.noRef}
+■ NUM. TITULAR:  ${cliente.no_tt}
+■ NUM. REFERENCIA 1: ${cliente.no_ref}
 ■ NUM. REFERENCIA 2: 
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} ${cliente.numeroInterior ? `INT ${cliente.numeroInterior}` : ''} 
+NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
 MANZ:    LOT:    EDF:    DPTO:
-ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
-ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
+ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
+ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
 CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
 ESTADO: ${cliente.estado.toUpperCase()}
 —————————————————
-PAQUETE COMERCIAL: ${cliente.paquete} ($${cliente.precioMensual + 100})
+PAQUETE COMERCIAL: ${cliente.paquete} ($${cliente.precio_mensual + 100})
 —————————————————
 GASTOS DE INSTALACION
 ☐ $400 DE PAGO INICIAL & 12 MESES DE $100 (TOTAL) $1,600`;
-        } else if (cliente.tipoServicio === 'portabilidad') {
+        } else if (cliente.tipo_servicio === 'portabilidad') {
             formato = `PLANTILLA PARA PORTABILIDAD
 NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
-FOLIO SIAC: ${cliente.folioSiac || 'PENDIENTE'}
+FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
 —————————————————
 **PORTABILIDAD**
-NIP: ${cliente.nipPortabilidad || ''}
+NIP: ${cliente.nip_portabilidad || ''}
 GENERICO: 
-NUMERO A SER PORTADO: ${cliente.numeroAPortar || ''}
-((COMPETIDOR)): ${cliente.proveedorActual ? cliente.proveedorActual.toUpperCase() : ''}
+NUMERO A SER PORTADO: ${cliente.numero_a_portar || ''}
+((COMPETIDOR)): ${cliente.proveedor_actual ? cliente.proveedor_actual.toUpperCase() : ''}
 —————————————————
 NOMBRE DE CLIENTE: 
 ${cliente.nombre.toUpperCase()}
 —————————————————
-■ NUM. TITULAR:  ${cliente.noTT}
-■ NUM. REFERENCIA 1: ${cliente.noRef}
+■ NUM. TITULAR:  ${cliente.no_tt}
+■ NUM. REFERENCIA 1: ${cliente.no_ref}
 ■ NUM. REFERENCIA 2: 
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} ${cliente.numeroInterior ? `INT ${cliente.numeroInterior}` : ''} 
+NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
 MANZ:    LOT:    EDF:    DPTO:
-ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
-ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
+ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
+ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
 CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
@@ -211,30 +209,30 @@ PAQUETE: ${cliente.paquete}
 —————————————————
 GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
-        } else if (cliente.tipoServicio === 'winback') {
+        } else if (cliente.tipo_servicio === 'winback') {
             formato = `PLANTILLA PARA WIN-BACK (ALTA INTERNET RECUPERADO)
 NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
-FOLIO SIAC: ${cliente.folioSiac || 'PENDIENTE'}
+FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
 —————————————————
 **ALTAN INTERNET RECUPERADO: WIN-BACK**
-((COMPETIDOR)): ${cliente.proveedorActual ? cliente.proveedorActual.toUpperCase() : ''}
+((COMPETIDOR)): ${cliente.proveedor_actual ? cliente.proveedor_actual.toUpperCase() : ''}
 —————————————————
 NOMBRE DE CLIENTE: 
 ${cliente.nombre.toUpperCase()}
 —————————————————
-■ NUM. TITULAR:  ${cliente.noTT}
-■ NUM. REFERENCIA 1: ${cliente.noRef}
+■ NUM. TITULAR:  ${cliente.no_tt}
+■ NUM. REFERENCIA 1: ${cliente.no_ref}
 ■ NUM. REFERENCIA 2: 
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} ${cliente.numeroInterior ? `INT ${cliente.numeroInterior}` : ''} 
+NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
 MANZ:    LOT:    EDF:    DPTO:
-ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
-ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
+ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
+ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
 CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
@@ -250,7 +248,7 @@ GASTOS DE INSTALACION
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
-FOLIO SIAC: ${cliente.folioSiac || 'PENDIENTE'}
+FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
 
 —————————————————
 NOMBRE DE CLIENTE: 
@@ -258,22 +256,22 @@ ${cliente.nombre.toUpperCase()}
 
 —————————————————
 NUM. TITULAR:  
-${cliente.noTT}
+${cliente.no_tt}
 NUM. REFERENCIA:
-${cliente.noRef}
+${cliente.no_ref}
 CORREO:
 ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} 
-ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
-ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
+NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} 
+ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
+ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
 CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
 ESTADO: ${cliente.estado.toUpperCase()}
 —————————————————
-PAQUETE: ${cliente.paquete} ($${cliente.precioMensual + 100})
+PAQUETE: ${cliente.paquete} ($${cliente.precio_mensual + 100})
 INTERNET Y TELEFONÍA 
 —————————————————
 GASTOS DE INSTALACION
@@ -290,7 +288,7 @@ GASTOS DE INSTALACION
 
     const copiarTelefono = () => {
         if (!cliente) return;
-        navigator.clipboard.writeText(cliente.noTT).then(() => {
+        navigator.clipboard.writeText(cliente.no_tt).then(() => {
             alert('Teléfono copiado. Búscalo en WhatsApp.');
         });
     };
@@ -330,7 +328,7 @@ Te escribo para dar seguimiento a tu trámite de internet TELMEX. 🚀
 
 Tenemos estos datos registrados:
 📦 Paquete: ${paquete}
-💰 Precio: $${cliente.precioMensual}/mes
+💰 Precio: $${cliente.precio_mensual}/mes
 📍 Dirección: ${direccion}
 
 ¿Te gustaría que procedamos con la instalación/validación? 🤔
@@ -365,21 +363,21 @@ Solo necesito que me confirmes para agendar.
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">{cliente.nombre}</h1>
                     <div className="flex items-center gap-3 mt-2">
-                        <span className={`badge ${cliente.tipoServicio === 'linea_nueva' ? 'badge-blue' :
-                            cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
+                        <span className={`badge ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
+                            cliente.tipo_servicio === 'portabilidad' ? 'badge-purple' :
                                 'badge-green'
                             }`}>
-                            {cliente.tipoServicio === 'linea_nueva' ? 'Línea Nueva' :
-                                cliente.tipoServicio === 'portabilidad' ? 'Portabilidad' : 'Winback'}
+                            {cliente.tipo_servicio === 'linea_nueva' ? 'Línea Nueva' :
+                                cliente.tipo_servicio === 'portabilidad' ? 'Portabilidad' : 'Winback'}
                         </span>
                         <span className="text-gray-500 text-sm">
-                            Creado: {formatearFechaHora(cliente.creadoEn)}
+                            Creado: {formatearFechaHora(cliente.creado_en)}
                         </span>
                     </div>
                 </div>
 
                 <div className="flex gap-2">
-                    {cliente.estadoPipeline !== 'vendido' && cliente.estadoPipeline !== 'perdido' && (
+                    {cliente.estado_pipeline !== 'vendido' && cliente.estado_pipeline !== 'perdido' && (
                         <Button
                             variant="secondary"
                             onClick={() => setModalSeguimientoOpen(true)}
@@ -390,7 +388,7 @@ Solo necesito que me confirmes para agendar.
                         </Button>
                     )}
 
-                    {cliente.estadoPipeline === 'vendido' && (
+                    {cliente.estado_pipeline === 'vendido' && (
                         <Button
                             variant="secondary"
                             onClick={() => setModalReferidosOpen(true)}
@@ -436,7 +434,7 @@ Solo necesito que me confirmes para agendar.
                                     <button
                                         key={estado}
                                         onClick={() => actualizarEstado(estado as EstadoPipeline)}
-                                        className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${cliente.estadoPipeline === estado
+                                        className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${cliente.estado_pipeline === estado
                                             ? 'bg-telmex-blue text-white border-telmex-blue'
                                             : 'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
                                             }`}
@@ -460,7 +458,7 @@ Solo necesito que me confirmes para agendar.
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500">Precio Mensual</p>
-                                <p className="font-medium text-telmex-blue">{formatearMoneda(cliente.precioMensual)}</p>
+                                <p className="font-medium text-telmex-blue">{formatearMoneda(cliente.precio_mensual)}</p>
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500">Velocidad</p>
@@ -482,7 +480,7 @@ Solo necesito que me confirmes para agendar.
                                 <Phone className="text-gray-400" size={18} />
                                 <div>
                                     <p className="text-sm text-gray-500">Teléfono (TT)</p>
-                                    <p className="font-medium">{cliente.noTT}</p>
+                                    <p className="font-medium">{cliente.no_tt}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
@@ -497,12 +495,12 @@ Solo necesito que me confirmes para agendar.
                                 <div>
                                     <p className="text-sm text-gray-500">Dirección</p>
                                     <p className="font-medium">
-                                        {cliente.calle} {cliente.numeroExterior ? `No. ${cliente.numeroExterior}` : ''} {cliente.numeroInterior ? `Int. ${cliente.numeroInterior}` : ''}, {cliente.colonia}, {cliente.cp}<br />
+                                        {cliente.calle} {cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''} {cliente.numero_interior ? `Int. ${cliente.numero_interior}` : ''}, {cliente.colonia}, {cliente.cp}<br />
                                         {cliente.cd}, {cliente.estado}
                                     </p>
-                                    {(cliente.entreCalle1 || cliente.entreCalle2) && (
+                                    {(cliente.entre_calle_1 || cliente.entre_calle_2) && (
                                         <p className="text-sm text-gray-500 mt-1">
-                                            Entre: {cliente.entreCalle1} y {cliente.entreCalle2}
+                                            Entre: {cliente.entre_calle_1} y {cliente.entre_calle_2}
                                         </p>
                                     )}
                                 </div>
@@ -531,7 +529,7 @@ Solo necesito que me confirmes para agendar.
                             </form>
 
                             <div className="space-y-4">
-                                {cliente.actividades.length === 0 ? (
+                                {(!cliente.actividades || cliente.actividades.length === 0) ? (
                                     <p className="text-gray-500 text-center py-4">No hay actividad registrada.</p>
                                 ) : (
                                     cliente.actividades.map((actividad) => (
@@ -586,10 +584,10 @@ Solo necesito que me confirmes para agendar.
                                 )}
                             </div>
 
-                            {(cliente.tipoServicio === 'portabilidad' || cliente.tipoServicio === 'winback') && (
+                            {(cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback') && (
                                 <div className="flex items-center justify-between p-2 rounded bg-gray-50">
                                     <span className="text-sm font-medium">NIP Portabilidad</span>
-                                    {cliente.nipPortabilidad ? (
+                                    {cliente.nip_portabilidad ? (
                                         <span className="text-success text-xs flex items-center gap-1"><CheckCircle size={12} /> OK</span>
                                     ) : (
                                         <span className="text-error text-xs">Pendiente</span>
@@ -616,7 +614,7 @@ Solo necesito que me confirmes para agendar.
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm">
                             <div>
-                                <p className="font-medium text-gray-900">{cliente.noRef}</p>
+                                <p className="font-medium text-gray-900">{cliente.no_ref}</p>
                             </div>
 
                             <div className="pt-4 border-t border-gray-100">
@@ -629,7 +627,7 @@ Solo necesito que me confirmes para agendar.
                                         placeholder="Ingresa Folio SIAC"
                                         className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
                                     />
-                                    <Button variant="primary" size="sm" onClick={guardarFolioSiac} disabled={folioSiacInput === (cliente.folioSiac || '')}>
+                                    <Button variant="primary" size="sm" onClick={guardarFolioSiac} disabled={folioSiacInput === (cliente.folio_siac || '')}>
                                         <Save size={14} />
                                     </Button>
                                 </div>
@@ -643,23 +641,23 @@ Solo necesito que me confirmes para agendar.
                                 </div>
                             )}
 
-                            {(cliente.tipoServicio === 'portabilidad' || cliente.tipoServicio === 'winback') && (
+                            {(cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback') && (
                                 <>
                                     <div className="pt-2 border-t border-gray-100">
                                         <p className="font-semibold text-gray-900 mb-2">Datos de Portabilidad</p>
                                     </div>
                                     <div>
                                         <p className="text-gray-500">Proveedor Anterior</p>
-                                        <p className="font-medium text-gray-900 capitalize">{cliente.proveedorActual}</p>
+                                        <p className="font-medium text-gray-900 capitalize">{cliente.proveedor_actual}</p>
                                     </div>
                                     <div>
                                         <p className="text-gray-500">Número a Portar</p>
-                                        <p className="font-medium text-gray-900">{cliente.numeroAPortar}</p>
+                                        <p className="font-medium text-gray-900">{cliente.numero_a_portar}</p>
                                     </div>
-                                    {cliente.fechaVigencia && (
+                                    {cliente.fecha_vigencia && (
                                         <div>
                                             <p className="text-gray-500">Vigencia NIP</p>
-                                            <p className="font-medium text-gray-900">{cliente.fechaVigencia}</p>
+                                            <p className="font-medium text-gray-900">{cliente.fecha_vigencia}</p>
                                         </div>
                                     )}
                                 </>
@@ -679,7 +677,7 @@ Solo necesito que me confirmes para agendar.
                 {cliente && (
                     <DocumentManager
                         clienteId={cliente.id}
-                        documentos={cliente.documentos}
+                        documentos={cliente.documentos || []}
                         onDocumentosChange={handleDocumentosChange}
                     />
                 )}
@@ -700,7 +698,7 @@ Solo necesito que me confirmes para agendar.
 
                             <div className="flex items-center gap-2 bg-white p-2 rounded border border-blue-200">
                                 <Phone size={18} className="text-blue-500" />
-                                <span className="font-mono text-lg font-medium flex-1">{cliente.noTT}</span>
+                                <span className="font-mono text-lg font-medium flex-1">{cliente.no_tt}</span>
                                 <Button size="sm" onClick={copiarTelefono}>
                                     <Copy size={14} className="mr-1" /> Copiar Teléfono
                                 </Button>
@@ -738,7 +736,7 @@ Solo necesito que me confirmes para agendar.
 
                             <div className="flex items-center gap-2 bg-white p-2 rounded border border-blue-200">
                                 <Phone size={18} className="text-blue-500" />
-                                <span className="font-mono text-lg font-medium flex-1">{cliente.noTT}</span>
+                                <span className="font-mono text-lg font-medium flex-1">{cliente.no_tt}</span>
                                 <Button size="sm" onClick={copiarTelefono}>
                                     <Copy size={14} className="mr-1" /> Copiar Teléfono
                                 </Button>

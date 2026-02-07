@@ -41,10 +41,10 @@ export default function ClientesPage() {
 
     const clientesFiltrados = clientes.filter(cliente => {
         const matchBusqueda = cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-            cliente.noTT.includes(busqueda) ||
+            cliente.no_tt.includes(busqueda) ||
             cliente.correo.toLowerCase().includes(busqueda.toLowerCase());
 
-        const matchEstado = filtroEstado === 'todos' || cliente.estadoPipeline === filtroEstado;
+        const matchEstado = filtroEstado === 'todos' || cliente.estado_pipeline === filtroEstado;
 
         return matchBusqueda && matchEstado;
     });
@@ -110,34 +110,34 @@ export default function ClientesPage() {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <h3 className="text-lg font-semibold text-gray-900">{cliente.nombre}</h3>
-                                        <span className={`badge ${cliente.estadoPipeline === 'vendido' ? 'badge-green' :
-                                            cliente.estadoPipeline === 'cierre_programado' ? 'badge-purple' :
-                                                cliente.estadoPipeline === 'cotizacion' ? 'badge-yellow' :
-                                                    cliente.estadoPipeline === 'interesado' ? 'badge-blue' :
-                                                        cliente.estadoPipeline === 'perdido' ? 'badge-red' :
+                                        <span className={`badge ${cliente.estado_pipeline === 'vendido' ? 'badge-green' :
+                                            cliente.estado_pipeline === 'cierre_programado' ? 'badge-purple' :
+                                                cliente.estado_pipeline === 'cotizacion' ? 'badge-yellow' :
+                                                    cliente.estado_pipeline === 'interesado' ? 'badge-blue' :
+                                                        cliente.estado_pipeline === 'perdido' ? 'badge-red' :
                                                             'bg-gray-100 text-gray-800'
                                             }`}>
-                                            {cliente.estadoPipeline === 'vendido' && 'Vendido'}
-                                            {cliente.estadoPipeline === 'cierre_programado' && 'Cierre Programado'}
-                                            {cliente.estadoPipeline === 'cotizacion' && 'Cotización'}
-                                            {cliente.estadoPipeline === 'interesado' && 'Interesado'}
-                                            {cliente.estadoPipeline === 'contactado' && 'Contactado'}
-                                            {cliente.estadoPipeline === 'perdido' && 'Perdido'}
+                                            {cliente.estado_pipeline === 'vendido' && 'Vendido'}
+                                            {cliente.estado_pipeline === 'cierre_programado' && 'Cierre Programado'}
+                                            {cliente.estado_pipeline === 'cotizacion' && 'Cotización'}
+                                            {cliente.estado_pipeline === 'interesado' && 'Interesado'}
+                                            {cliente.estado_pipeline === 'contactado' && 'Contactado'}
+                                            {cliente.estado_pipeline === 'perdido' && 'Perdido'}
                                         </span>
-                                        <span className={`badge ${cliente.tipoServicio === 'linea_nueva' ? 'badge-blue' :
-                                            cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
+                                        <span className={`badge ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
+                                            cliente.tipo_servicio === 'portabilidad' ? 'badge-purple' :
                                                 'badge-green'
                                             }`}>
-                                            {cliente.tipoServicio === 'linea_nueva' && 'Línea Nueva'}
-                                            {cliente.tipoServicio === 'portabilidad' && 'Portabilidad'}
-                                            {cliente.tipoServicio === 'winback' && 'Winback'}
+                                            {cliente.tipo_servicio === 'linea_nueva' && 'Línea Nueva'}
+                                            {cliente.tipo_servicio === 'portabilidad' && 'Portabilidad'}
+                                            {cliente.tipo_servicio === 'winback' && 'Winback'}
                                         </span>
                                     </div>
 
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                         <div>
                                             <p className="text-gray-500">Teléfono</p>
-                                            <p className="font-medium text-gray-900">{cliente.noTT}</p>
+                                            <p className="font-medium text-gray-900">{cliente.no_tt}</p>
                                         </div>
                                         <div>
                                             <p className="text-gray-500">Correo</p>
@@ -154,7 +154,7 @@ export default function ClientesPage() {
                                     </div>
 
                                     <div className="mt-3 text-xs text-gray-500">
-                                        Contactado: {formatearFecha(cliente.fechaContacto)}
+                                        Contactado: {formatearFecha(cliente.fecha_contacto)}
                                     </div>
                                 </div>
                             </div>

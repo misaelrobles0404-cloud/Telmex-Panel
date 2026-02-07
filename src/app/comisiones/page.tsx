@@ -22,10 +22,10 @@ export default function ComisionesPage() {
         try {
             const todos = await obtenerClientes();
             const filtrados = todos.filter(c =>
-                c.folioSiac &&
-                c.folioSiac.trim() !== '' &&
-                c.estadoPipeline !== 'vendido' &&
-                c.estadoPipeline !== 'perdido'
+                c.folio_siac &&
+                c.folio_siac.trim() !== '' &&
+                c.estado_pipeline !== 'vendido' &&
+                c.estado_pipeline !== 'perdido'
             );
             setClientes(filtrados);
         } catch (error) {
@@ -36,13 +36,13 @@ export default function ComisionesPage() {
     };
 
     const confirmarInstalacion = async (cliente: Cliente) => {
-        if (!confirm(`¿Confirmar instalación del folio ${cliente.folioSiac}?\n\nEsto marcará al cliente como VENDIDO y sumará la comisión a tus reportes.`)) return;
+        if (!confirm(`¿Confirmar instalación del folio ${cliente.folio_siac}?\n\nEsto marcará al cliente como VENDIDO y sumará la comisión a tus reportes.`)) return;
 
         setLoading(true);
         const clienteActualizado: Cliente = {
             ...cliente,
-            estadoPipeline: 'vendido',
-            actualizadoEn: new Date().toISOString(),
+            estado_pipeline: 'vendido',
+            actualizado_en: new Date().toISOString(),
             actividades: [
                 {
                     id: generarId(),
@@ -51,7 +51,7 @@ export default function ComisionesPage() {
                     descripcion: 'Instalación confirmada. Comisión activada.',
                     fecha: new Date().toISOString()
                 },
-                ...cliente.actividades
+                ...cliente.actividades || []
             ]
         };
 
@@ -71,8 +71,8 @@ export default function ComisionesPage() {
         setLoading(true);
         const clienteActualizado: Cliente = {
             ...cliente,
-            estadoPipeline: 'perdido',
-            actualizadoEn: new Date().toISOString(),
+            estado_pipeline: 'perdido',
+            actualizado_en: new Date().toISOString(),
             actividades: [
                 {
                     id: generarId(),
@@ -81,7 +81,7 @@ export default function ComisionesPage() {
                     descripcion: `Instalación rechazada/cancelada. Motivo: ${motivo}`,
                     fecha: new Date().toISOString()
                 },
-                ...cliente.actividades
+                ...cliente.actividades || []
             ]
         };
 
@@ -96,7 +96,7 @@ export default function ComisionesPage() {
 
     const clientesFiltrados = clientes.filter(c =>
         c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.folioSiac?.toLowerCase().includes(searchTerm.toLowerCase())
+        c.folio_siac?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const getDiasTranscurridos = (fecha: string) => {
@@ -154,7 +154,7 @@ export default function ComisionesPage() {
                                 </thead>
                                 <tbody>
                                     {clientesFiltrados.map((cliente) => {
-                                        const dias = getDiasTranscurridos(cliente.creadoEn);
+                                        const dias = getDiasTranscurridos(cliente.creado_en);
                                         const esUrgente = dias >= 2;
 
                                         return (
@@ -162,7 +162,7 @@ export default function ComisionesPage() {
                                                 <td className="py-3 px-4">
                                                     <div className="flex items-center gap-2">
                                                         <Calendar size={14} className="text-gray-400" />
-                                                        {formatearFecha(cliente.creadoEn)}
+                                                        {formatearFecha(cliente.creado_en)}
                                                         {esUrgente && (
                                                             <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-bold">
                                                                 {dias} días
@@ -171,11 +171,11 @@ export default function ComisionesPage() {
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4 font-mono font-medium text-gray-700">
-                                                    {cliente.folioSiac}
+                                                    {cliente.folio_siac}
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     <div className="font-medium text-gray-900">{cliente.nombre}</div>
-                                                    <div className="text-gray-500 text-xs">{cliente.tipoServicio.replace('_', ' ').toUpperCase()}</div>
+                                                    <div className="text-gray-500 text-xs">{cliente.tipo_servicio.replace('_', ' ').toUpperCase()}</div>
                                                 </td>
                                                 <td className="py-3 px-4 text-gray-600">{cliente.paquete}</td>
                                                 <td className="py-3 px-4 font-medium text-green-600">
