@@ -22,14 +22,32 @@ import { useRouter } from 'next/navigation';
 export default function DashboardPage() {
     const router = useRouter();
     const [clientes, setClientes] = useState<Cliente[]>([]);
-    const [metricas, setMetricas] = useState(calcularMetricas());
+    const [metricas, setMetricas] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
     const bloqueActual = obtenerBloqueActual();
 
     useEffect(() => {
-        const clientesData = obtenerClientes();
-        setClientes(clientesData);
-        setMetricas(calcularMetricas());
+        const cargarDatos = async () => {
+            try {
+                const clientesData = await obtenerClientes();
+                setClientes(clientesData);
+                setMetricas(calcularMetricas(clientesData));
+            } catch (error) {
+                console.error("Error al cargar dashboard:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        cargarDatos();
     }, []);
+
+    if (loading || !metricas) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="w-12 h-12 border-4 border-telmex-blue border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-6 space-y-6">

@@ -78,8 +78,8 @@ export function generarId(): string {
 // CÁLCULO DE MÉTRICAS
 // ============================================
 
-export function calcularMetricas(): Metricas {
-    const clientes = obtenerClientes();
+export function calcularMetricas(clientesInput?: Cliente[]): Metricas {
+    const clientes = clientesInput || [];
     const hoy = startOfDay(new Date());
     const inicioSemana = startOfWeek(new Date(), { weekStartsOn: 1 });
     const inicioMes = startOfMonth(new Date());

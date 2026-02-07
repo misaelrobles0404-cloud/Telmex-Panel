@@ -25,10 +25,20 @@ export default function CampanasPage() {
     const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));
 
     useEffect(() => {
-        const pubs = obtenerPublicaciones();
-        const clients = obtenerClientes();
-        setPublicaciones(calcularEstadisticasCampana(pubs, clients));
-        setLoading(false);
+        const cargarDatos = async () => {
+            try {
+                const [pubs, clients] = await Promise.all([
+                    obtenerPublicaciones(),
+                    obtenerClientes()
+                ]);
+                setPublicaciones(calcularEstadisticasCampana(pubs, clients));
+            } catch (error) {
+                console.error("Error al cargar campañas:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        cargarDatos();
     }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
