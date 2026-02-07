@@ -19,6 +19,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const [nuevaNota, setNuevaNota] = useState('');
     const [modalDocumentosOpen, setModalDocumentosOpen] = useState(false);
     const [modalReferidosOpen, setModalReferidosOpen] = useState(false);
+    const [modalSeguimientoOpen, setModalSeguimientoOpen] = useState(false);
     const [folioSiacInput, setFolioSiacInput] = useState('');
 
     useEffect(() => {
@@ -296,6 +297,60 @@ Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo d
         });
     };
 
+    const copiarMensajeSeguimiento = () => {
+        if (!cliente) return;
+
+        const nombre = cliente.nombre.includes('Prospecto') ? '' : ` ${cliente.nombre.split(' ')[0]}`;
+        const direccion = cliente.calle !== 'PENDIENTE' ? cliente.calle : 'tu domicilio';
+        const paquete = cliente.paquete !== 'POR DEFINIR' ? cliente.paquete : 'el paquete que cotizamos';
+
+        const mensaje = `¡Hola${nombre}! 👋
+
+Te escribo para dar seguimiento a tu trámite de internet TELMEX. 🚀
+
+Tenemos estos datos registrados:
+📦 Paquete: ${paquete}
+💰 Precio: $${cliente.precioMensual}/mes
+📍 Dirección: ${direccion}
+
+¿Te gustaría que procedamos con la instalación/validación? 🤔
+Solo necesito que me confirmes para agendar.
+
+¡Quedo atento!`;
+
+        navigator.clipboard.writeText(mensaje).then(() => {
+            alert('Mensaje de seguimiento copiado.');
+            setModalSeguimientoOpen(false);
+        });
+    };
+
+    const copiarMensajeSeguimiento = () => {
+        if (!cliente) return;
+
+        const nombre = cliente.nombre.includes('Prospecto') ? '' : ` ${cliente.nombre.split(' ')[0]}`;
+        const direccion = cliente.calle !== 'PENDIENTE' ? cliente.calle : 'tu domicilio';
+        const paquete = cliente.paquete !== 'POR DEFINIR' ? cliente.paquete : 'el paquete que cotizamos';
+
+        const mensaje = `¡Hola${nombre}! 👋
+
+Te escribo para dar seguimiento a tu trámite de internet TELMEX. 🚀
+
+Tenemos estos datos registrados:
+📦 Paquete: ${paquete}
+💰 Precio: $${cliente.precioMensual}/mes
+📍 Dirección: ${direccion}
+
+¿Te gustaría que procedamos con la instalación/validación? 🤔
+Solo necesito que me confirmes para agendar.
+
+¡Quedo atento!`;
+
+        navigator.clipboard.writeText(mensaje).then(() => {
+            alert('Mensaje de seguimiento copiado.');
+            setModalSeguimientoOpen(false);
+        });
+    };
+
     const solicitarReferidos = () => {
         if (!cliente) return;
         setModalReferidosOpen(true);
@@ -331,6 +386,17 @@ Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo d
                 </div>
 
                 <div className="flex gap-2">
+                    {cliente.estadoPipeline !== 'vendido' && cliente.estadoPipeline !== 'perdido' && (
+                        <Button
+                            variant="secondary"
+                            onClick={() => setModalSeguimientoOpen(true)}
+                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
+                            title="Dar seguimiento a prospecto"
+                        >
+                            <span className="mr-1">📨</span> Dar Seguimiento
+                        </Button>
+                    )}
+
                     {cliente.estadoPipeline === 'vendido' && (
                         <Button
                             variant="secondary"
@@ -653,6 +719,46 @@ Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo d
                             </div>
 
                             <Button className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={copiarMensajeReferidos}>
+                                <Copy size={16} className="mr-2" /> Copiar Mensaje
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </Modal>
+
+            {/* Modal de Seguimiento */}
+            <Modal
+                isOpen={modalSeguimientoOpen}
+                onClose={() => setModalSeguimientoOpen(false)}
+                title="📨 Dar Seguimiento"
+                size="md"
+            >
+                {cliente && (
+                    <div className="space-y-6 p-4">
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <h3 className="font-semibold text-blue-900 mb-2">Paso 1: Busca el contacto en WhatsApp</h3>
+                            <p className="text-sm text-blue-700 mb-3">Copia el número del cliente para buscarlo en tu lista de chats.</p>
+
+                            <div className="flex items-center gap-2 bg-white p-2 rounded border border-blue-200">
+                                <Phone size={18} className="text-blue-500" />
+                                <span className="font-mono text-lg font-medium flex-1">{cliente.noTT}</span>
+                                <Button size="sm" onClick={copiarTelefono}>
+                                    <Copy size={14} className="mr-1" /> Copiar Teléfono
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                            <h3 className="font-semibold text-indigo-900 mb-2">Paso 2: Copia el mensaje de seguimiento</h3>
+                            <p className="text-sm text-indigo-700 mb-3">Este mensaje incluye los datos registrados (Paquete, Precio, Dirección) para recordar al cliente.</p>
+
+                            <div className="bg-white p-3 rounded border border-indigo-200 text-sm text-gray-600 italic mb-3 whitespace-pre-wrap">
+                                {`¡Hola${cliente.nombre.includes('Prospecto') ? '' : ` ${cliente.nombre.split(' ')[0]}`}! 👋
+Te escribo para dar seguimiento a tu trámite de internet TELMEX. 🚀
+...`}
+                            </div>
+
+                            <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onClick={copiarMensajeSeguimiento}>
                                 <Copy size={16} className="mr-2" /> Copiar Mensaje
                             </Button>
                         </div>
