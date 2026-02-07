@@ -20,17 +20,39 @@ export default function LoginPage() {
         setLoading(true);
         setError(null);
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-
-        if (error) {
-            setError(error.message);
+        // Diagnóstico: Verificar si las llaves están cargadas
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+            setError("Error de configuración: Las llaves de conexión no están detectadas. Verifica las variables de entorno en Vercel.");
             setLoading(false);
-        } else {
-            router.push('/');
-            router.refresh();
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (error) {
+                // Manejo de errores específicos
+                if (error.message.includes("Email not confirmed")) {
+                    setError("El correo no ha sido confirmado. Revisa tu bandeja de entrada o deshabilita 'Confirm Email' en Supabase.");
+                } else if (error.message.includes("Invalid login credentials")) {
+                    setError("Usuario o contraseña incorrectos. Verifica tus datos en el panel de Supabase.");
+                } else {
+                    setError(error.message);
+                }
+                setLoading(false);
+            } else if (data.user) {
+                // Éxito: Forzar refresco para que el middleware detecte la cookie
+                router.push('/');
+                setTimeout(() => {
+                    router.refresh();
+                }, 500);
+            }
+        } catch (err: any) {
+            setError("Ocurrió un error inesperado al intentar iniciar sesión.");
+            setLoading(false);
         }
     };
 
