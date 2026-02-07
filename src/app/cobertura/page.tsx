@@ -125,7 +125,24 @@ export default function CoberturaPage() {
                     <CardHeader>
                         <CardTitle className="text-lg">Buscar CP</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-4">
+                        {/* Botón de mensaje rápido */}
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 mb-4">
+                            <p className="text-xs text-blue-700 font-medium mb-2 uppercase tracking-wide">Mensaje para el Cliente</p>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                className="w-full text-xs bg-white hover:bg-white/80 border-blue-200 text-blue-700 shadow-sm"
+                                onClick={() => {
+                                    const mensaje = `¡Hola! 👋 Gracias por contactar a TELMEX. Para decirte exactamente qué promociones y qué velocidad de Fibra Óptica llegan a tu casa, ¿me podrías proporcionar estos dos datos?\n\n📍 **Código Postal:**\n🏠 **Calle y Número:**\n\nEn cuanto me los pases, verifico tu cobertura en el sistema y te doy respuesta inmediata. 😊`;
+                                    navigator.clipboard.writeText(mensaje);
+                                    alert('¡Mensaje copiado! Pégalo en el WhatsApp del cliente.');
+                                }}
+                            >
+                                <span className="mr-2">💬</span> Copiar solicitud de datos
+                            </Button>
+                        </div>
+
                         <form onSubmit={handleSearch} className="space-y-4">
                             <Input
                                 label="Código Postal"

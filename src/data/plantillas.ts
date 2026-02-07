@@ -7,6 +7,20 @@ import { PlantillaWhatsApp } from '@/types';
 export const PLANTILLAS_WHATSAPP: PlantillaWhatsApp[] = [
     // PROSPECCIÓN
     {
+        id: 'bienvenida-cobertura',
+        nombre: 'Bienvenida y Solicitud de Cobertura',
+        categoria: 'prospeccion',
+        contenido: `¡Hola! 👋 Gracias por contactar a TELMEX.
+
+Para poder decirte exactamente qué promociones y qué velocidad de Fibra Óptica llegan a tu casa, ¿me podrías proporcionar estos dos datos?
+
+📍 **Código Postal:** 
+🏠 **Calle y Número:**
+
+En cuanto me los pases, verifico tu cobertura en el sistema y te doy respuesta inmediata. 😊`,
+        variables: []
+    },
+    {
         id: 'prosp-inicial',
         nombre: 'Mensaje Inicial de Prospección',
         categoria: 'prospeccion',
