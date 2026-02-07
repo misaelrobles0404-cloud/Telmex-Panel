@@ -31,7 +31,7 @@ export default function ReportesPage() {
     }, []);
 
     const calcularRoiPorPlataforma = (pubs: any[]) => {
-        const stats = {
+        const stats: Record<string, { gasto: number; leads: number }> = {
             facebook: { gasto: 0, leads: 0 },
             instagram: { gasto: 0, leads: 0 },
             marketplace: { gasto: 0, leads: 0 }
