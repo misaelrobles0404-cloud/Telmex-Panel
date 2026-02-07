@@ -40,7 +40,7 @@ export default function LoginPage() {
                 } else if (error.message.includes("Invalid login credentials")) {
                     setError("Usuario o contraseña incorrectos. Verifica tus datos en el panel de Supabase.");
                 } else {
-                    setError(error.message);
+                    setError(`Error de Supabase: ${error.message}`);
                 }
                 setLoading(false);
             } else if (data.user) {
@@ -51,7 +51,8 @@ export default function LoginPage() {
                 }, 500);
             }
         } catch (err: any) {
-            setError("Ocurrió un error inesperado al intentar iniciar sesión.");
+            console.error("Login detail error:", err);
+            setError(`Error de conexión (Network Error): ${err.message || 'Error desconocido'}. Esto suele pasar por bloqueadores de anuncios o URLs mal configuradas.`);
             setLoading(false);
         }
     };
