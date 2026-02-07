@@ -277,17 +277,15 @@ export default function CalculadoraPage() {
                                     <span>🎁</span> Beneficios Exclusivos
                                 </h3>
                                 <div id="benefits-grid" className="grid grid-cols-2 gap-6">
-                                    {paquete.netflix && (
-                                        <div className="flex items-start gap-3">
-                                            <div>
-                                                <span className="text-2xl">📺</span>
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-lg">Netflix Incluido</p>
-                                                <p className="text-sm text-white/90">Gratis por 6 meses</p>
-                                            </div>
+                                    <div className="flex items-start gap-3">
+                                        <div>
+                                            <span className="text-2xl">📺</span>
                                         </div>
-                                    )}
+                                        <div>
+                                            <p className="font-bold text-lg">Netflix Incluido</p>
+                                            <p className="text-sm text-white/90">Gratis por 6 meses</p>
+                                        </div>
+                                    </div>
                                     <div className="flex items-start gap-3">
                                         <div>
                                             <span className="text-2xl">🚀</span>
