@@ -144,7 +144,7 @@ ${cliente.nombre.toUpperCase()}
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} 
+NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} ${cliente.numeroInterior ? `INT ${cliente.numeroInterior}` : ''} 
 MANZ:    LOT:    EDF:    DPTO:
 ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
@@ -180,7 +180,7 @@ ${cliente.nombre.toUpperCase()}
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} 
+NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} ${cliente.numeroInterior ? `INT ${cliente.numeroInterior}` : ''} 
 MANZ:    LOT:    EDF:    DPTO:
 ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
@@ -213,7 +213,7 @@ ${cliente.nombre.toUpperCase()}
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
-NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} 
+NÚMERO: ${cliente.numeroExterior ? cliente.numeroExterior : ''} ${cliente.numeroInterior ? `INT ${cliente.numeroInterior}` : ''} 
 MANZ:    LOT:    EDF:    DPTO:
 ENTRE 1: ${cliente.entreCalle1 ? cliente.entreCalle1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entreCalle2 ? cliente.entreCalle2.toUpperCase() : ''}
@@ -475,7 +475,7 @@ Solo necesito que me confirmes para agendar.
                                 <div>
                                     <p className="text-sm text-gray-500">Dirección</p>
                                     <p className="font-medium">
-                                        {cliente.calle} {cliente.numeroExterior ? `No. ${cliente.numeroExterior}` : ''}, {cliente.colonia}, {cliente.cp}<br />
+                                        {cliente.calle} {cliente.numeroExterior ? `No. ${cliente.numeroExterior}` : ''} {cliente.numeroInterior ? `Int. ${cliente.numeroInterior}` : ''}, {cliente.colonia}, {cliente.cp}<br />
                                         {cliente.cd}, {cliente.estado}
                                     </p>
                                     {(cliente.entreCalle1 || cliente.entreCalle2) && (
