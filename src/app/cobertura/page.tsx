@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Search, MapPin, Clock, Globe } from 'lucide-react';
+import { MAPA_LADAS } from '@/data/ladas';
 
 // Mapa de zonas horarias por Estado (Aproximación para México)
 const obtenerZonaHoraria = (estado: string) => {
@@ -26,58 +27,6 @@ const obtenerZonaHoraria = (estado: string) => {
 
     // Zona Centro (UTC-6) - Resto del país
     return 'America/Mexico_City';
-};
-
-// Mapa de claves LADA principales de México
-const MAPA_LADAS: Record<string, string> = {
-    '55': 'Ciudad de México y Área Metropolitana',
-    '33': 'Guadalajara, Jalisco',
-    '81': 'Monterrey, Nuevo León',
-    '222': 'Puebla, Puebla',
-    '442': 'Querétaro, Querétaro',
-    '998': 'Cancún, Quintana Roo',
-    '664': 'Tijuana, Baja California',
-    '477': 'León, Guanajuato',
-    '722': 'Toluca, Estado de México',
-    '444': 'San Luis Potosí, SLP',
-    '999': 'Mérida, Yucatán',
-    '614': 'Chihuahua, Chihuahua',
-    '844': 'Saltillo, Coahuila',
-    '311': 'Tepic, Nayarit',
-    '951': 'Oaxaca, Oaxaca',
-    '229': 'Veracruz, Veracruz',
-    '833': 'Tampico, Tamaulipas',
-    '322': 'Puerto Vallarta, Jalisco',
-    '612': 'La Paz, Baja California Sur',
-    '686': 'Mexicali, Baja California',
-    '449': 'Aguascalientes, Ags.',
-    '443': 'Morelia, Michoacán',
-    '777': 'Cuernavaca, Morelos',
-    '744': 'Acapulco, Guerrero',
-    '271': 'Córdoba, Veracruz',
-    '272': 'Orizaba, Veracruz',
-    '618': 'Durango, Durango',
-    '667': 'Culiacán, Sinaloa',
-    '662': 'Hermosillo, Sonora',
-    '867': 'Nuevo Laredo, Tamaulipas',
-    '868': 'Matamoros, Tamaulipas',
-    '899': 'Reynosa, Tamaulipas',
-    '921': 'Coatzacoalcos, Veracruz',
-    '981': 'Campeche, Campeche',
-    '961': 'Tuxtla Gutiérrez, Chiapas',
-    '461': 'Celaya, Guanajuato',
-    '462': 'Irapuato, Guanajuato',
-    '473': 'Guanajuato, Gto.',
-    '228': 'Xalapa, Veracruz',
-    '771': 'Pachuca, Hidalgo',
-    '427': 'San Juan del Río, Qro.',
-    '656': 'Ciudad Juárez, Chihuahua',
-    '753': 'Lázaro Cárdenas, Michoacán',
-    '492': 'Zacatecas, Zac.',
-    '312': 'Colima, Colima',
-    '938': 'Ciudad del Carmen, Camp.',
-    '747': 'Chilpancingo, Guerrero',
-    '967': 'San Cristóbal de las Casas, Chis.',
 };
 
 export default function CoberturaPage() {
