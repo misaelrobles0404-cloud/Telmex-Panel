@@ -80,10 +80,12 @@ export default function NuevoClientePage() {
         }
     };
 
-    const [campanas, setCampanas] = useState<Publicacion[]>([]);
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
         const cargarDatos = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
             const pubs = await obtenerPublicaciones();
             setCampanas(pubs);
         };
@@ -96,11 +98,17 @@ export default function NuevoClientePage() {
             return;
         }
 
+        if (!user) {
+            alert('Error de sesión');
+            return;
+        }
+
         setLoading(true);
         const nombreFinal = formData.nombre.trim() || `Prospecto ${formData.noTT}`;
 
         const cliente: Cliente = {
             id: generarId(),
+            user_id: user.id,
             nombre: nombreFinal,
             noTT: formData.noTT,
             noRef: formData.noRef || 'PENDIENTE',
@@ -166,6 +174,12 @@ export default function NuevoClientePage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!user) {
+            alert('Error de sesión. Re-inicia sesión.');
+            return;
+        }
+
         setLoading(true);
 
         if (!formData.nombre.trim()) {
@@ -185,6 +199,7 @@ export default function NuevoClientePage() {
 
         const cliente: Cliente = {
             id: generarId(),
+            user_id: user.id,
             nombre: formData.nombre,
             noTT: formData.noTT,
             noRef: formData.noRef,

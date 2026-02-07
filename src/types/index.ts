@@ -13,6 +13,7 @@ export type Proveedor = 'totalplay' | 'izzi' | 'megacable' | 'axtel' | 'dish' | 
 
 export interface Cliente {
     id: string;
+    user_id?: string;
 
     // Información básica
     nombre: string;
@@ -153,6 +154,7 @@ export interface PlantillaWhatsApp {
 
 export interface Publicacion {
     id: string;
+    user_id?: string;
     titulo: string;
     plataforma: 'facebook' | 'instagram' | 'marketplace';
     fechaPublicacion: string;
