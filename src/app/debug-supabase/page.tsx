@@ -9,67 +9,55 @@ export default function DebugSupabasePage() {
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const runTests = async () => {
+    const runDiscovery = async () => {
         setLoading(true);
         setResults([]);
         const newResults = [];
 
-        // Test 1: Simple insert into campanas with camelCase
+        // 1. Fetch any record from campanas
         try {
-            const { data, error } = await supabase
-                .from('campanas')
-                .insert([{
-                    id: `test-camel-${Date.now()}`,
-                    titulo: 'Test CamelCase',
-                    plataforma: 'facebook',
-                    fechaPublicacion: new Date().toISOString().slice(0, 10),
-                    presupuesto: 0,
-                    leadsGenerados: 0,
-                    activa: false
-                }]);
-            newResults.push({ name: 'Test 1: campanas (camelCase)', success: !error, error: error?.message, details: error });
+            const { data, error } = await supabase.from('campanas').select('*').limit(1);
+            if (error) {
+                newResults.push({ name: 'Fetch campanas', success: false, error: error.message, details: error });
+            } else if (data && data.length > 0) {
+                newResults.push({ name: 'Fetch campanas', success: true, details: { columns: Object.keys(data[0]), sample: data[0] } });
+            } else {
+                newResults.push({ name: 'Fetch campanas', success: true, details: 'No records found to inspect columns.' });
+            }
         } catch (e: any) {
-            newResults.push({ name: 'Test 1: campanas (camelCase)', success: false, error: e.message });
+            newResults.push({ name: 'Fetch campanas', success: false, error: e.message });
         }
 
-        // Test 2: Simple insert into campanas with snake_case
+        // 2. Fetch any record from clientes
         try {
-            const { data, error } = await supabase
-                .from('campanas')
-                .insert([{
-                    id: `test-snake-${Date.now()}`,
-                    titulo: 'Test SnakeCase',
-                    plataforma: 'facebook',
-                    fecha_publicacion: new Date().toISOString().slice(0, 10),
-                    presupuesto: 0,
-                    leads_generados: 0,
-                    activa: false
-                }]);
-            newResults.push({ name: 'Test 2: campanas (snake_case)', success: !error, error: error?.message, details: error });
+            const { data, error } = await supabase.from('clientes').select('*').limit(1);
+            if (error) {
+                newResults.push({ name: 'Fetch clientes', success: false, error: error.message, details: error });
+            } else if (data && data.length > 0) {
+                newResults.push({ name: 'Fetch clientes', success: true, details: { columns: Object.keys(data[0]), sample: data[0] } });
+            } else {
+                newResults.push({ name: 'Fetch clientes', success: true, details: 'No records found to inspect columns.' });
+            }
         } catch (e: any) {
-            newResults.push({ name: 'Test 2: campanas (snake_case)', success: false, error: e.message });
+            newResults.push({ name: 'Fetch clientes', success: false, error: e.message });
         }
 
-        // Test 3: Check if id must be UUID
+        // 3. Try "Blind" Minimal Insert into campanas (only title and user_id)
         try {
-            const testId = crypto.randomUUID();
-            const { data, error } = await supabase
-                .from('campanas')
-                .insert([{
-                    id: testId,
-                    titulo: 'Test UUID',
-                    plataforma: 'facebook',
-                    leadsGenerados: 0,
-                    activa: false
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { error } = await supabase.from('campanas').insert([{
+                    id: crypto.randomUUID(),
+                    titulo: 'Minimal Test',
+                    user_id: user.id
                 }]);
-            newResults.push({ name: 'Test 3: campanas (UUID id)', success: !error, error: error?.message, details: error });
+                newResults.push({ name: 'Minimal Insert (id, titulo, user_id)', success: !error, error: error?.message, details: error });
+            } else {
+                newResults.push({ name: 'Minimal Insert', success: false, error: 'No user session' });
+            }
         } catch (e: any) {
-            newResults.push({ name: 'Test 3: campanas (UUID id)', success: false, error: e.message });
+            newResults.push({ name: 'Minimal Insert', success: false, error: e.message });
         }
-
-        // Test 4: session check
-        const { data: { user } } = await supabase.auth.getUser();
-        newResults.push({ name: 'Test 4: User Session', success: !!user, details: user ? `User ID: ${user.id}` : 'No user found' });
 
         setResults(newResults);
         setLoading(false);
@@ -79,12 +67,12 @@ export default function DebugSupabasePage() {
         <div className="p-6 max-w-4xl mx-auto space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Supabase Diagnostic Tool</CardTitle>
+                    <CardTitle>Supabase Structure Discovery</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="mb-4 text-gray-600">Este herramienta ejecutará pruebas de inserción para detectar qué formato de columnas espera tu base de datos.</p>
-                    <Button onClick={runTests} disabled={loading}>
-                        {loading ? 'Ejecutando...' : 'Ejecutar Pruebas'}
+                    <p className="mb-4 text-gray-600">Este herramienta intentará leer los nombres de las columnas reales de tu base de datos.</p>
+                    <Button onClick={runDiscovery} disabled={loading}>
+                        {loading ? 'Descubrir Columnas' : 'Descubrir Columnas'}
                     </Button>
                 </CardContent>
             </Card>
@@ -97,7 +85,7 @@ export default function DebugSupabasePage() {
                                 {res.success ? '✅' : '❌'} {res.name}
                             </h3>
                             {res.error && <p className="text-sm text-red-600 mt-1">Error: {res.error}</p>}
-                            <pre className="text-xs mt-2 overflow-auto bg-white/50 p-2 rounded">
+                            <pre className="text-xs mt-2 overflow-auto bg-white/50 p-2 rounded max-h-60">
                                 {JSON.stringify(res.details || res.error, null, 2)}
                             </pre>
                         </CardContent>
