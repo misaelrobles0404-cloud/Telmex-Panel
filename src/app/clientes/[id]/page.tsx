@@ -153,7 +153,7 @@ CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
 ESTADO: ${cliente.estado.toUpperCase()}
 —————————————————
-PAQUETE COMERCIAL: ${cliente.paquete}
+PAQUETE COMERCIAL: ${cliente.paquete} ($${cliente.precioMensual + 100})
 —————————————————
 GASTOS DE INSTALACION
 ☐ $400 DE PAGO INICIAL & 12 MESES DE $100 (TOTAL) $1,600`;
@@ -255,7 +255,7 @@ CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
 ESTADO: ${cliente.estado.toUpperCase()}
 —————————————————
-PAQUETE: ${cliente.paquete}
+PAQUETE: ${cliente.paquete} ($${cliente.precioMensual + 100})
 INTERNET Y TELEFONÍA 
 —————————————————
 GASTOS DE INSTALACION
