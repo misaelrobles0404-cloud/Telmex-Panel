@@ -7,7 +7,7 @@ import { Input, Select } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { Plus, Facebook, Instagram, Calendar as CalendarIcon, DollarSign, Users, BarChart2, Zap, Pause, Play, Trash2 } from 'lucide-react';
 import { Publicacion } from '@/types';
-import { obtenerPublicaciones, obtenerClientes, guardarPublicacion } from '@/lib/storage';
+import { obtenerPublicaciones, obtenerClientes, guardarPublicacion, eliminarPublicacion } from '@/lib/storage';
 import { formatearMoneda, formatearFecha, generarId, calcularEstadisticasCampana } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -41,7 +41,7 @@ export default function CampanasPage() {
         cargarDatos();
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const nuevaPublicacion: Publicacion = {
@@ -56,13 +56,15 @@ export default function CampanasPage() {
             activa: true
         };
 
-        const nuevasPublicaciones = [...publicaciones, nuevaPublicacion];
-        setPublicaciones(nuevasPublicaciones);
-        guardarPublicacion(nuevaPublicacion); // Nota: guardarPublicacion en storage.ts actualiza si existe o agrega, pero aquí estamos agregando a state local primero. Deberíamos iterar o solo guardar. 
-        // Corrección: guardarPublicacion maneja el array completo internamente obteniendo y guardando, pero para UI optimista actualizamos state.
-
-        setModalOpen(false);
-        resetForm();
+        try {
+            await guardarPublicacion(nuevaPublicacion);
+            const nuevasPublicaciones = [...publicaciones, nuevaPublicacion];
+            setPublicaciones(nuevasPublicaciones);
+            setModalOpen(false);
+            resetForm();
+        } catch (error) {
+            alert('Error al guardar campaña');
+        }
     };
 
     const resetForm = () => {
@@ -72,24 +74,32 @@ export default function CampanasPage() {
         setFecha(new Date().toISOString().slice(0, 10));
     };
 
-    const toggleEstado = (id: string) => {
+    const toggleEstado = async (id: string) => {
         const updated = publicaciones.map(p =>
             p.id === id ? { ...p, activa: !p.activa } : p
         );
-        setPublicaciones(updated);
-        // Actualizar en storage una por una (ineficiente pero funcional para mockup) o guardar todo el array si tuvieramos esa función, 
-        // pero guardarPublicacion es para UNA. Así que actualizamos la especifica.
+
         const pub = updated.find(p => p.id === id);
-        if (pub) guardarPublicacion(pub);
+        if (pub) {
+            try {
+                await guardarPublicacion(pub);
+                setPublicaciones(updated);
+            } catch (error) {
+                alert('Error al actualizar estado de la campaña');
+            }
+        }
     };
 
-    const eliminarPublicacion = (id: string) => {
+    const handleDeletePublicacion = async (id: string) => {
         if (!confirm('¿Eliminar publicación?')) return;
-        const updated = publicaciones.filter(p => p.id !== id);
-        setPublicaciones(updated);
-        // localStorage hack directo ya que no expuse eliminarPublicacion en el storage.ts original (oops), 
-        // pero puedo simularlo guardando el array filtrado.
-        localStorage.setItem('telmex_publicaciones', JSON.stringify(updated));
+
+        try {
+            await eliminarPublicacion(id);
+            const updated = publicaciones.filter(p => p.id !== id);
+            setPublicaciones(updated);
+        } catch (error) {
+            alert('Error al eliminar campaña');
+        }
     };
 
     // Cálculos
@@ -219,7 +229,7 @@ export default function CampanasPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() => eliminarPublicacion(pub.id)}
+                                                onClick={() => handleDeletePublicacion(pub.id)}
                                                 className="text-red-400 hover:text-red-600"
                                             >
                                                 <Trash2 size={18} />

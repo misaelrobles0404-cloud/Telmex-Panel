@@ -71,53 +71,56 @@ export default function EditarClientePage({ params }: { params: { id: string } }
     const [archivoDocumentos, setArchivoDocumentos] = useState<any[]>([]);
 
     useEffect(() => {
-        const cliente = obtenerCliente(params.id);
-        if (cliente) {
-            setClienteId(cliente.id);
-            setFechaCreacion(cliente.creadoEn);
-            setEstadoPipeline(cliente.estadoPipeline);
-            setArchivoActividades(cliente.actividades);
-            setArchivoDocumentos(cliente.documentos);
-            setTipoServicio(cliente.tipoServicio);
+        const fetchCliente = async () => {
+            const cliente = await obtenerCliente(params.id);
+            if (cliente) {
+                setClienteId(cliente.id);
+                setFechaCreacion(cliente.creadoEn);
+                setEstadoPipeline(cliente.estadoPipeline);
+                setArchivoActividades(cliente.actividades);
+                setArchivoDocumentos(cliente.documentos);
+                setTipoServicio(cliente.tipoServicio);
 
-            setFormData({
-                nombre: cliente.nombre,
-                noTT: cliente.noTT,
-                noRef: cliente.noRef === 'PENDIENTE' ? '' : cliente.noRef,
-                correo: cliente.correo === 'pendiente@correo.com' ? '' : cliente.correo,
+                setFormData({
+                    nombre: cliente.nombre,
+                    noTT: cliente.noTT,
+                    noRef: cliente.noRef === 'PENDIENTE' ? '' : cliente.noRef,
+                    correo: cliente.correo === 'pendiente@correo.com' ? '' : cliente.correo,
 
-                calle: cliente.calle === 'PENDIENTE' ? '' : cliente.calle,
-                colonia: cliente.colonia === 'PENDIENTE' ? '' : cliente.colonia,
-                cp: cliente.cp === '00000' ? '' : cliente.cp,
-                cd: cliente.cd === 'PENDIENTE' ? '' : cliente.cd,
-                estado: cliente.estado === 'PENDIENTE' ? '' : cliente.estado,
-                entreCalle1: cliente.entreCalle1 || '',
-                entreCalle2: cliente.entreCalle2 || '',
+                    calle: cliente.calle === 'PENDIENTE' ? '' : cliente.calle,
+                    colonia: cliente.colonia === 'PENDIENTE' ? '' : cliente.colonia,
+                    cp: cliente.cp === '00000' ? '' : cliente.cp,
+                    cd: cliente.cd === 'PENDIENTE' ? '' : cliente.cd,
+                    estado: cliente.estado === 'PENDIENTE' ? '' : cliente.estado,
+                    entreCalle1: cliente.entreCalle1 || '',
+                    entreCalle2: cliente.entreCalle2 || '',
 
-                ine: cliente.ine || '',
-                curp: cliente.curp === 'PENDIENTE' ? '' : cliente.curp,
-                usuario: cliente.usuario || '',
+                    ine: cliente.ine || '',
+                    curp: cliente.curp === 'PENDIENTE' ? '' : cliente.curp,
+                    usuario: cliente.usuario || '',
 
-                tipoCliente: cliente.tipoCliente,
-                paqueteId: cliente.clavePaquete === 'pendiente' ? '' : cliente.clavePaquete,
+                    tipoCliente: cliente.tipoCliente,
+                    paqueteId: cliente.clavePaquete === 'pendiente' ? '' : cliente.clavePaquete,
 
-                tieneInternet: cliente.tieneInternet,
-                tieneTelefonoFijo: cliente.tieneTelefonoFijo,
-                proveedorActual: cliente.proveedorActual || '',
+                    tieneInternet: cliente.tieneInternet,
+                    tieneTelefonoFijo: cliente.tieneTelefonoFijo,
+                    proveedorActual: cliente.proveedorActual || '',
 
-                numeroAPortar: cliente.numeroAPortar || '',
-                nipPortabilidad: cliente.nipPortabilidad || '',
-                fechaVigencia: cliente.fechaVigencia || '',
-                formatoPortabilidad: cliente.formatoPortabilidad || false,
-                cartaBaja: cliente.cartaBaja || false,
+                    numeroAPortar: cliente.numeroAPortar || '',
+                    nipPortabilidad: cliente.nipPortabilidad || '',
+                    fechaVigencia: cliente.fechaVigencia || '',
+                    formatoPortabilidad: cliente.formatoPortabilidad || false,
+                    cartaBaja: cliente.cartaBaja || false,
 
-                estadoCuentaMegacable: cliente.estadoCuentaMegacable || false,
-                notas: cliente.notas,
+                    estadoCuentaMegacable: cliente.estadoCuentaMegacable || false,
+                    notas: cliente.notas,
 
-                folioSiac: cliente.folioSiac || '',
-            });
-        }
-        setLoading(false);
+                    folioSiac: cliente.folioSiac || '',
+                });
+            }
+            setLoading(false);
+        };
+        fetchCliente();
     }, [params.id]);
 
     const handleTipoServicioChange = (nuevoTipo: TipoServicio) => {
@@ -131,7 +134,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const paquetesDisponibles = obtenerPaquetesPorTipo(formData.tipoCliente);
@@ -189,7 +192,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             folioSiac: formData.folioSiac,
         };
 
-        guardarCliente(clienteActualizado);
+        await guardarCliente(clienteActualizado);
         alert('Cliente actualizado correctamente');
         router.push(`/clientes/${params.id}`);
     };

@@ -133,6 +133,18 @@ export async function obtenerPublicaciones(): Promise<Publicacion[]> {
     return data || [];
 }
 
+export async function eliminarPublicacion(id: string): Promise<void> {
+    const { error } = await supabase
+        .from('campanas')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error al eliminar campaña en Supabase:', error);
+        throw error;
+    }
+}
+
 // ============================================
 // DOCUMENTOS & ACTIVIDADES (Next Phase)
 // ============================================
