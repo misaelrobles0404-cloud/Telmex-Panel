@@ -68,25 +68,33 @@ export default function CoberturaPage() {
         setHoraLocal('');
 
         try {
-            // Usando API de COPOMEX (con token de pruebas gratuito)
-            const response = await fetch(`https://api.copomex.com/query/info_cp/${cp}?token=pruebas`);
+            // Usando Nominatim (OpenStreetMap) para obtener datos precisos y sin ofuscación
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?postalcode=${cp}&country=Mexico&format=json&addressdetails=1`,
+                {
+                    headers: {
+                        'User-Agent': 'TelmexPanel/1.0 (misaelrobles0404@gmail.com)'
+                    }
+                }
+            );
 
             if (response.ok) {
                 const data = await response.json();
 
-                // COPOMEX devuelve un array si hay múltiples colonias (asentamientos)
-                // Tomamos el primero para la información general
-                const info = Array.isArray(data) ? data[0].response : data.response;
-
-                if (!info) {
+                if (data.length === 0) {
                     alert("No se encontró información para este Código Postal.");
                     return;
                 }
 
-                const estado = info.estado;
-                const municipio = info.municipio;
-                const ciudad = info.ciudad || municipio; // A veces ciudad es null, usamos municipio
-                const colonia = info.asentamiento;
+                // Nominatim devuelve un array de posibles ubicaciones, tomamos la más relevante
+                const info = data[0].address;
+
+                const estado = info.state || '';
+                const municipio = info.county || info.municipality || info.city_district || '';
+                const ciudad = info.city || info.town || info.village || municipio || '';
+                const colonia = info.neighbourhood || info.suburb || info.quarter || '';
+                const pais = info.country || 'México';
+
                 const zonaHoraria = obtenerZonaHoraria(estado);
 
                 // Calculamos la hora inicial inmediatamente
@@ -108,7 +116,7 @@ export default function CoberturaPage() {
                     colonia: colonia,
                     ciudad: ciudad,
                     municipio: municipio,
-                    pais: 'México',
+                    pais: pais,
                     zonaHoraria: zonaHoraria
                 });
             } else {
