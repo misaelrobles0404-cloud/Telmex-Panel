@@ -2,8 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Calendar, MessageSquare, BarChart3, Calculator, Settings, Menu, X, ImageIcon, CheckCircle, MapPin, Megaphone } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { LayoutDashboard, Users, Calendar, MessageSquare, BarChart3, Calculator, Settings, Menu, X, ImageIcon, CheckCircle, MapPin, Megaphone, LogOut } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -19,6 +20,24 @@ const navigation = [
 
 export function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const [user, setUser] = React.useState<any>(null);
+
+    React.useEffect(() => {
+        const getSession = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+        };
+        getSession();
+    }, []);
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
+        router.refresh();
+    };
+
+    if (pathname === '/login') return null;
 
     return (
         <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-telmex-darkblue">
@@ -62,10 +81,17 @@ export function Sidebar() {
                             U
                         </div>
                         <div>
-                            <p className="font-medium text-white">Usuario</p>
-                            <p className="text-xs">Agente TELMEX</p>
+                            <p className="font-medium text-white truncate max-w-[140px]">{user?.email?.split('@')[0] || 'Usuario'}</p>
+                            <p className="text-xs text-blue-200">{user?.email || 'Agente TELMEX'}</p>
                         </div>
                     </div>
+                    <button
+                        onClick={handleLogout}
+                        className="mt-4 flex items-center gap-2 text-xs text-red-300 hover:text-red-100 transition-colors w-full"
+                    >
+                        <LogOut size={14} />
+                        Cerrar Sesión
+                    </button>
                 </div>
             </div>
         </div>

@@ -3,20 +3,34 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { calcularMetricas, formatearMoneda } from '@/lib/utils';
-import { obtenerPublicaciones } from '@/lib/storage';
+import { obtenerPublicaciones, obtenerClientes } from '@/lib/storage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 
 export default function ReportesPage() {
     const [metricas, setMetricas] = useState(calcularMetricas());
     const [roiData, setRoiData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setMetricas(calcularMetricas());
-        calcularRoiPorPlataforma();
+        const cargarDatos = async () => {
+            try {
+                const [clientes, pubs] = await Promise.all([
+                    obtenerClientes(),
+                    obtenerPublicaciones()
+                ]);
+
+                setMetricas(calcularMetricas(clientes));
+                calcularRoiPorPlataforma(pubs);
+            } catch (error) {
+                console.error("Error al cargar reportes:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        cargarDatos();
     }, []);
 
-    const calcularRoiPorPlataforma = () => {
-        const pubs = obtenerPublicaciones();
+    const calcularRoiPorPlataforma = (pubs: any[]) => {
         const stats = {
             facebook: { gasto: 0, leads: 0 },
             instagram: { gasto: 0, leads: 0 },
@@ -56,6 +70,14 @@ export default function ReportesPage() {
     ];
 
     const COLORS = ['#94A3B8', '#3B82F6', '#F59E0B', '#8B5CF6', '#10B981'];
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="w-12 h-12 border-4 border-telmex-blue border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-6">
