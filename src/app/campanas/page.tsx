@@ -116,9 +116,9 @@ export default function CampanasPage() {
         }
     };
 
-    // Cálculos
-    const gastadoMes = publicaciones.reduce((acc, curr) => acc + (curr.activa ? (curr.presupuesto || 0) : 0), 0) * 30; // Proyección simple
-    const leadsTotal = publicaciones.reduce((acc, curr) => acc + (curr.leads_generados || 0), 0);
+    // Cálculos con protección anti-NaN
+    const gastadoMes = (publicaciones || []).reduce((acc, curr) => acc + (curr?.activa ? (Number(curr.presupuesto) || 0) : 0), 0) * 30;
+    const leadsTotal = (publicaciones || []).reduce((acc, curr) => acc + (Number(curr?.leads_generados) || 0), 0);
 
     // Calendario
     const hoy = new Date();
@@ -291,9 +291,17 @@ export default function CampanasPage() {
                             </div>
                             <div className="grid grid-cols-7 gap-1">
                                 {diasCalendario.map((dia, i) => {
-                                    const tienePublicacion = publicaciones.some(p =>
-                                        isSameDay(new Date(p.fecha_publicacion), dia) && p.activa
-                                    );
+                                    const tienePublicacion = (publicaciones || []).some(p => {
+                                        if (!p.fecha_publicacion || !p.activa) return false;
+                                        try {
+                                            const fechaP = new Date(p.fecha_publicacion);
+                                            // Validar que la fecha sea válida
+                                            if (isNaN(fechaP.getTime())) return false;
+                                            return isSameDay(fechaP, dia);
+                                        } catch (e) {
+                                            return false;
+                                        }
+                                    });
                                     return (
                                         <div
                                             key={i}

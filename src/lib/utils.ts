@@ -157,16 +157,21 @@ export function calcularEstadisticasCampana(campanasInput: any[], clientesInput:
         const leads = clientes.filter(c => c.campana_id === campana.id).length;
 
         // Simulación de Alcance y Clicks basada en el presupuesto diario y días activa
-        const factorRendimiento = campana.presupuesto / 35;
+        // Manejo defensivo: asegurar que el presupuesto sea un número y no 0 para el factor
+        const presupuestoSeguro = Number(campana.presupuesto) || 0;
+        const factorRendimiento = presupuestoSeguro > 0 ? presupuestoSeguro / 35 : 0;
         const diasActiva = campana.activa ? 1 : 0.5;
 
-        const alcanceSimulado = Math.floor(1200 * factorRendimiento * (leads > 0 ? leads : 1) * (Math.random() * 0.5 + 0.8));
-        const clicksSimulados = Math.floor(40 * factorRendimiento * (leads > 0 ? leads : 1) * (Math.random() * 0.4 + 0.7));
+        // Validar que el factor sea un número finito
+        const factorFinal = isFinite(factorRendimiento) ? factorRendimiento : 0;
+
+        const alcanceSimulado = Math.floor(1200 * factorFinal * (leads > 0 ? leads : 1) * (Math.random() * 0.5 + 0.8));
+        const clicksSimulados = Math.floor(40 * factorFinal * (leads > 0 ? leads : 1) * (Math.random() * 0.4 + 0.7));
 
         return {
             ...campana,
-            alcance: alcanceSimulado,
-            interacciones: clicksSimulados,
+            alcance: isNaN(alcanceSimulado) ? 0 : alcanceSimulado,
+            interacciones: isNaN(clicksSimulados) ? 0 : clicksSimulados,
             leads_generados: leads
         };
     });
