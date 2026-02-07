@@ -203,11 +203,11 @@ export default function DashboardPage() {
 
                 <Card
                     className="cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => router.push('/publicaciones')}
+                    onClick={() => router.push('/campanas')}
                 >
                     <CardContent className="p-6 text-center">
                         <div className="text-4xl mb-3">📢</div>
-                        <h3 className="font-semibold text-gray-900">Publicaciones</h3>
+                        <h3 className="font-semibold text-gray-900">Campañas</h3>
                         <p className="text-sm text-gray-600 mt-1">
                             Gestionar anuncios y presupuesto
                         </p>

@@ -12,16 +12,16 @@ import { formatearMoneda, formatearFecha, generarId } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export default function PublicacionesPage() {
+export default function CampanasPage() {
     const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
-    const [presupuestoDiario] = useState(20);
+    const [presupuestoDiario] = useState(35);
 
     // Form states
     const [titulo, setTitulo] = useState('');
     const [plataforma, setPlataforma] = useState<'facebook' | 'instagram' | 'marketplace'>('facebook');
-    const [presupuesto, setPresupuesto] = useState('20');
+    const [presupuesto, setPresupuesto] = useState('35');
     const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));
 
     useEffect(() => {
@@ -56,7 +56,7 @@ export default function PublicacionesPage() {
     const resetForm = () => {
         setTitulo('');
         setPlataforma('facebook');
-        setPresupuesto('20');
+        setPresupuesto('35');
         setFecha(new Date().toISOString().slice(0, 10));
     };
 
@@ -94,7 +94,7 @@ export default function PublicacionesPage() {
         <div className="p-6 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Gestor de Publicaciones</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Gestor de Campañas</h1>
                     <p className="text-gray-600 mt-1">
                         Controla tus campañas y presupuesto diario
                     </p>
@@ -176,8 +176,8 @@ export default function PublicacionesPage() {
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-start gap-3">
                                             <div className={`p-2 rounded-lg ${pub.plataforma === 'facebook' ? 'bg-blue-100 text-blue-600' :
-                                                    pub.plataforma === 'instagram' ? 'bg-pink-100 text-pink-600' :
-                                                        'bg-orange-100 text-orange-600'
+                                                pub.plataforma === 'instagram' ? 'bg-pink-100 text-pink-600' :
+                                                    'bg-orange-100 text-orange-600'
                                                 }`}>
                                                 {pub.plataforma === 'facebook' && <Facebook size={20} />}
                                                 {pub.plataforma === 'instagram' && <Instagram size={20} />}
@@ -300,7 +300,7 @@ export default function PublicacionesPage() {
             <Modal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
-                title="Nueva Publicación"
+                title="Nueva Campaña"
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input

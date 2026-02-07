@@ -11,7 +11,7 @@ const navigation = [
     { name: 'Agenda', href: '/agenda', icon: Calendar },
     { name: 'Plantillas WhatsApp', href: '/plantillas', icon: MessageSquare },
     { name: 'Verificar Comisiones', href: '/comisiones', icon: CheckCircle }, // Nuevo módulo
-    { name: 'Publicaciones', href: '/publicaciones', icon: Megaphone },
+    { name: 'Campañas', href: '/campanas', icon: Megaphone },
     { name: 'Calculadora', href: '/calculadora', icon: Calculator },
     { name: 'Cobertura', href: '/cobertura', icon: MapPin },
     { name: 'Reportes', href: '/reportes', icon: BarChart3 },

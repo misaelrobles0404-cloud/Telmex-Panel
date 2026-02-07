@@ -143,7 +143,7 @@ export default function ReportesPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Inversión Publicitaria Estimada (Mensual)</CardTitle>
+                        <CardTitle>Inversión en Campañas Estimada (Mensual)</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ResponsiveContainer width="100%" height={300}>
