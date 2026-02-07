@@ -222,10 +222,7 @@ export default function CalculadoraPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-lg">Netflix Incluido</p>
-                                            <p className="text-xs text-white/90 leading-tight">
-                                                Gratis por 6 meses.<br />
-                                                + 3 meses gratis (4º, 8º y 12º mes)
-                                            </p>
+                                            <p className="text-sm text-white/90">Gratis por 6 meses</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
@@ -250,11 +247,11 @@ export default function CalculadoraPage() {
                                     </div>
                                     <div className="flex items-start gap-3">
                                         <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                                            <span className="text-2xl">🛡️</span>
+                                            <span className="text-2xl">🎁</span>
                                         </div>
                                         <div>
-                                            <p className="font-bold text-lg">Antivirus Gratis</p>
-                                            <p className="text-sm text-white/90">Protección McAfee</p>
+                                            <p className="font-bold text-lg">3 Meses Gratis</p>
+                                            <p className="text-xs text-white/90">4º, 8º y 12º mes sin costo</p>
                                         </div>
                                     </div>
                                 </div>
