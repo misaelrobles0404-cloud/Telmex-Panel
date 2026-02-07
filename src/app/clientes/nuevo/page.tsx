@@ -74,14 +74,16 @@ export default function NuevoClientePage() {
     };
 
     const handleGuardarProspecto = () => {
-        if (!formData.nombre || !formData.noTT) {
-            alert('Para prospecto se requiere al menos Nombre y Teléfono');
+        if (!formData.noTT) {
+            alert('Para prospecto se requiere al menos el Teléfono');
             return;
         }
 
+        const nombreFinal = formData.nombre.trim() || `Prospecto ${formData.noTT}`;
+
         const cliente: Cliente = {
             id: generarId(),
-            nombre: formData.nombre,
+            nombre: nombreFinal,
             noTT: formData.noTT,
             noRef: formData.noRef || 'PENDIENTE',
             correo: formData.correo || 'pendiente@correo.com',
@@ -138,6 +140,11 @@ export default function NuevoClientePage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!formData.nombre.trim()) {
+            alert('El Nombre Completo es obligatorio para registrar un cliente.');
+            return;
+        }
 
         const paquetesDisponibles = obtenerPaquetesPorTipo(formData.tipoCliente);
         const paqueteSeleccionado = paquetesDisponibles.find(p => p.id === formData.paqueteId);
@@ -352,7 +359,7 @@ export default function NuevoClientePage() {
                                 label="Nombre Completo"
                                 value={formData.nombre}
                                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                                required
+                                placeholder="Opcional para prospectos"
                             />
 
                             <Input
