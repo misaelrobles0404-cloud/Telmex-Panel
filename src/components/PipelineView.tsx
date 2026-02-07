@@ -23,7 +23,7 @@ export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
         clientes.filter((c) => c.estadoPipeline === estado);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="flex flex-nowrap lg:grid lg:grid-cols-5 gap-4 overflow-x-auto pb-4 lg:pb-0 lg:overflow-x-visible">
             {ESTADOS.map(({ estado, label, color }) => {
                 const clientesEnEstado = clientesPorEstado(estado);
                 const totalComision = clientesEnEstado.reduce((sum, c) => sum + c.comision, 0);
