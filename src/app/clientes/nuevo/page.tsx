@@ -11,6 +11,7 @@ import { clasificarServicio, calcularComision, generarId } from '@/lib/utils';
 import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
 import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus } from 'lucide-react';
 import { Publicacion } from '@/types';
+import { supabase } from '@/lib/supabase';
 
 export default function NuevoClientePage() {
     const router = useRouter();
@@ -81,6 +82,7 @@ export default function NuevoClientePage() {
     };
 
     const [user, setUser] = useState<any>(null);
+    const [campanas, setCampanas] = useState<Publicacion[]>([]);
 
     useEffect(() => {
         const cargarDatos = async () => {
@@ -165,8 +167,9 @@ export default function NuevoClientePage() {
         try {
             await guardarCliente(cliente);
             router.push('/clientes');
-        } catch (error) {
-            alert('Error al guardar prospecto');
+        } catch (error: any) {
+            console.error('Error al guardar prospecto:', error);
+            alert(`Error al guardar prospecto: ${error?.message || 'Error desconocido'}`);
         } finally {
             setLoading(false);
         }
@@ -262,8 +265,9 @@ export default function NuevoClientePage() {
         try {
             await guardarCliente(clienteFinal);
             router.push('/clientes');
-        } catch (error) {
-            alert('Error al guardar cliente');
+        } catch (error: any) {
+            console.error('Error al guardar cliente:', error);
+            alert(`Error al guardar cliente: ${error?.message || 'Error desconocido'}`);
         } finally {
             setLoading(false);
         }
