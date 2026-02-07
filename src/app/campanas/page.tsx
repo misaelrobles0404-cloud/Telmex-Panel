@@ -29,8 +29,11 @@ export default function CampanasPage() {
     useEffect(() => {
         const cargarDatos = async () => {
             try {
-                const { data: { user } } = await supabase.auth.getUser();
-                setUser(user);
+                const response = await supabase.auth.getUser();
+                const user = response?.data?.user;
+                if (user) {
+                    setUser(user);
+                }
 
                 const [pubs, clients] = await Promise.all([
                     obtenerPublicaciones(),
