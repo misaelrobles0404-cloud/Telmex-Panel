@@ -40,7 +40,7 @@ export default function ReportesPage() {
         pubs.forEach(pub => {
             if (pub.plataforma && stats[pub.plataforma]) {
                 stats[pub.plataforma].gasto += (pub.activa ? pub.presupuesto * 30 : 0); // Estimado mensual
-                stats[pub.plataforma].leads += pub.leadsGenerados;
+                stats[pub.plataforma].leads += (pub.leads_generados || 0);
             }
         });
 

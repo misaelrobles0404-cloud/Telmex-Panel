@@ -75,16 +75,14 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             const cliente = await obtenerCliente(params.id);
             if (cliente) {
                 setClienteId(cliente.id);
-                setFechaCreacion(cliente.creadoEn);
-                setEstadoPipeline(cliente.estadoPipeline);
-                setArchivoActividades(cliente.actividades);
-                setArchivoDocumentos(cliente.documentos);
-                setTipoServicio(cliente.tipoServicio);
+                setFechaCreacion(cliente.creado_en);
+                setEstadoPipeline(cliente.estado_pipeline);
+                setTipoServicio(cliente.tipo_servicio);
 
                 setFormData({
                     nombre: cliente.nombre,
-                    noTT: cliente.noTT,
-                    noRef: cliente.noRef === 'PENDIENTE' ? '' : cliente.noRef,
+                    noTT: cliente.no_tt,
+                    noRef: cliente.no_ref === 'PENDIENTE' ? '' : cliente.no_ref,
                     correo: cliente.correo === 'pendiente@correo.com' ? '' : cliente.correo,
 
                     calle: cliente.calle === 'PENDIENTE' ? '' : cliente.calle,
@@ -92,30 +90,30 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     cp: cliente.cp === '00000' ? '' : cliente.cp,
                     cd: cliente.cd === 'PENDIENTE' ? '' : cliente.cd,
                     estado: cliente.estado === 'PENDIENTE' ? '' : cliente.estado,
-                    entreCalle1: cliente.entreCalle1 || '',
-                    entreCalle2: cliente.entreCalle2 || '',
+                    entreCalle1: cliente.entre_calle_1 || '',
+                    entreCalle2: cliente.entre_calle_2 || '',
 
                     ine: cliente.ine || '',
                     curp: cliente.curp === 'PENDIENTE' ? '' : cliente.curp,
                     usuario: cliente.usuario || '',
 
-                    tipoCliente: cliente.tipoCliente,
-                    paqueteId: cliente.clavePaquete === 'pendiente' ? '' : cliente.clavePaquete,
+                    tipoCliente: cliente.tipo_cliente,
+                    paqueteId: cliente.clave_paquete === 'pendiente' ? '' : cliente.clave_paquete,
 
-                    tieneInternet: cliente.tieneInternet,
-                    tieneTelefonoFijo: cliente.tieneTelefonoFijo,
-                    proveedorActual: cliente.proveedorActual || '',
+                    tieneInternet: cliente.tiene_internet,
+                    tieneTelefonoFijo: cliente.tiene_telefono_fijo,
+                    proveedorActual: cliente.proveedor_actual || '',
 
-                    numeroAPortar: cliente.numeroAPortar || '',
-                    nipPortabilidad: cliente.nipPortabilidad || '',
-                    fechaVigencia: cliente.fechaVigencia || '',
-                    formatoPortabilidad: cliente.formatoPortabilidad || false,
-                    cartaBaja: cliente.cartaBaja || false,
+                    numeroAPortar: cliente.numero_a_portar || '',
+                    nipPortabilidad: cliente.nip_portabilidad || '',
+                    fechaVigencia: cliente.fecha_vigencia || '',
+                    formatoPortabilidad: cliente.formato_portabilidad || false,
+                    cartaBaja: cliente.carta_baja || false,
 
-                    estadoCuentaMegacable: cliente.estadoCuentaMegacable || false,
+                    estadoCuentaMegacable: cliente.estado_cuenta_megacable || false,
                     notas: cliente.notas,
 
-                    folioSiac: cliente.folioSiac || '',
+                    folioSiac: cliente.folio_siac || '',
                 });
             }
             setLoading(false);
@@ -146,50 +144,46 @@ export default function EditarClientePage({ params }: { params: { id: string } }
         }
 
         const clienteActualizado: Cliente = {
-            id: clienteId, // Mantiene el ID original
+            id: clienteId,
             nombre: formData.nombre,
-            noTT: formData.noTT,
-            noRef: formData.noRef,
+            no_tt: formData.noTT,
+            no_ref: formData.noRef,
             correo: formData.correo,
             calle: formData.calle,
             colonia: formData.colonia,
             cp: formData.cp,
             cd: formData.cd,
             estado: formData.estado,
-            entreCalle1: formData.entreCalle1,
-            entreCalle2: formData.entreCalle2,
+            entre_calle_1: formData.entreCalle1,
+            entre_calle_2: formData.entreCalle2,
             ine: formData.ine,
             curp: formData.curp,
             usuario: formData.usuario,
-            tipoServicio,
-            tipoCliente: formData.tipoCliente,
+            tipo_servicio: tipoServicio,
+            tipo_cliente: formData.tipoCliente,
             paquete: `${paqueteSeleccionado.velocidad} Mbps`,
-            clavePaquete: paqueteSeleccionado.id,
+            clave_paquete: paqueteSeleccionado.id,
             velocidad: paqueteSeleccionado.velocidad,
-            precioMensual: paqueteSeleccionado.precioPromo,
-            tieneInternet: formData.tieneInternet,
-            tieneTelefonoFijo: formData.tieneTelefonoFijo,
-            proveedorActual: formData.proveedorActual as any,
-            numeroAPortar: formData.numeroAPortar,
-            nipPortabilidad: formData.nipPortabilidad,
-            fechaVigencia: formData.fechaVigencia,
-            formatoPortabilidad: formData.formatoPortabilidad,
-            cartaBaja: formData.cartaBaja,
-            estadoCuentaMegacable: formData.estadoCuentaMegacable,
-
-            // Si tiene Folio SIAC y no está vendido, mover a cierre_programado logic
-            estadoPipeline: (formData.folioSiac && formData.folioSiac.trim() !== '' && estadoPipeline !== 'vendido')
+            precio_mensual: paqueteSeleccionado.precioPromo,
+            tiene_internet: formData.tieneInternet,
+            tiene_telefono_fijo: formData.tieneTelefonoFijo,
+            proveedor_actual: formData.proveedorActual as any,
+            numero_a_portar: formData.numeroAPortar,
+            nip_portabilidad: formData.nipPortabilidad,
+            fecha_vigencia: formData.fechaVigencia,
+            formato_portabilidad: formData.formatoPortabilidad,
+            carta_baja: formData.cartaBaja,
+            estado_cuenta_megacable: formData.estadoCuentaMegacable,
+            estado_pipeline: (formData.folioSiac && formData.folioSiac.trim() !== '' && estadoPipeline !== 'vendido')
                 ? 'cierre_programado'
                 : estadoPipeline as any,
-            fechaContacto: fechaCreacion, // Mantiene fecha original
-            fechaUltimaActividad: new Date().toISOString(), // Actualiza última actividad
+            fecha_contacto: fechaCreacion,
+            fecha_ultima_actividad: new Date().toISOString(),
             comision: calcularComision(tipoServicio),
             notas: formData.notas,
-            documentos: archivoDocumentos, // Mantiene documentos
-            actividades: archivoActividades, // Mantiene actividades
-            creadoEn: fechaCreacion, // Mantiene fecha creación
-            actualizadoEn: new Date().toISOString(),
-            folioSiac: formData.folioSiac,
+            creado_en: fechaCreacion,
+            actualizado_en: new Date().toISOString(),
+            folio_siac: formData.folioSiac,
         };
 
         await guardarCliente(clienteActualizado);

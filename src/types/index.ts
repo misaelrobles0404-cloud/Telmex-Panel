@@ -12,25 +12,25 @@ export type Proveedor = 'totalplay' | 'izzi' | 'megacable' | 'axtel' | 'dish' | 
 // ============================================
 
 export interface Cliente {
-    id: string;
+    id: string; // Will use UUID
     user_id?: string;
 
     // Información básica
     nombre: string;
-    noTT: string; // Número de teléfono
-    noRef: string; // Número de referencia
+    no_tt: string; // Número de teléfono (antes noTT)
+    no_ref: string; // Número de referencia (antes noRef)
     correo: string;
 
     // Dirección
     calle: string;
-    numeroExterior?: string;
-    numeroInterior?: string;
+    numero_exterior?: string;
+    numero_interior?: string;
     colonia: string;
     cp: string;
     cd: string; // Ciudad
     estado: string;
-    entreCalle1: string;
-    entreCalle2: string;
+    entre_calle_1: string;
+    entre_calle_2: string;
 
     // Documentación
     ine: string;
@@ -38,41 +38,41 @@ export interface Cliente {
     usuario: string;
 
     // Tipo de servicio y clasificación
-    tipoServicio: TipoServicio;
-    tipoCliente: TipoCliente;
+    tipo_servicio: TipoServicio;
+    tipo_cliente: TipoCliente;
 
     // Paquete seleccionado
     paquete: string;
-    clavePaquete: string;
+    clave_paquete: string;
     velocidad: number; // Mbps
-    precioMensual: number;
+    precio_mensual: number;
 
     // Información de competencia (para portabilidad)
-    tieneInternet: boolean;
-    tieneTelefonoFijo: boolean;
-    proveedorActual?: Proveedor;
+    tiene_internet: boolean;
+    tiene_telefono_fijo: boolean;
+    proveedor_actual?: Proveedor;
 
     // Datos específicos de portabilidad
-    numeroAPortar?: string;
-    nipPortabilidad?: string;
-    fechaVigencia?: string;
-    formatoPortabilidad?: boolean;
-    cartaBaja?: boolean;
+    numero_a_portar?: string;
+    nip_portabilidad?: string;
+    fecha_vigencia?: string;
+    formato_portabilidad?: boolean;
+    carta_baja?: boolean;
 
     // Datos específicos de Winback (Megacable)
-    estadoCuentaMegacable?: boolean;
+    estado_cuenta_megacable?: boolean;
 
     // SIAC
-    folioSiac?: string;
+    folio_siac?: string;
 
     // Campaña de origen
-    campanaId?: string;
+    campana_id?: string;
 
     // Pipeline y seguimiento
-    estadoPipeline: EstadoPipeline;
-    fechaContacto: string;
-    fechaUltimaActividad: string;
-    proximoSeguimiento?: string;
+    estado_pipeline: EstadoPipeline;
+    fecha_contacto: string;
+    fecha_ultima_actividad: string;
+    proximo_seguimiento?: string;
 
     // Comisión
     comision: number; // 250 o 300
@@ -80,15 +80,9 @@ export interface Cliente {
     // Notas
     notas: string;
 
-    // Documentos adjuntos
-    documentos: Documento[];
-
-    // Actividades
-    actividades: Actividad[];
-
     // Metadata
-    creadoEn: string;
-    actualizadoEn: string;
+    creado_en: string;
+    actualizado_en: string;
 }
 
 // ============================================
@@ -153,16 +147,16 @@ export interface PlantillaWhatsApp {
 // ============================================
 
 export interface Publicacion {
-    id: string;
+    id: string; // Will use UUID
     user_id?: string;
     titulo: string;
     plataforma: 'facebook' | 'instagram' | 'marketplace';
-    fechaPublicacion: string;
+    fecha_publicacion: string;
     presupuesto: number;
     alcance?: number;
     interacciones?: number;
-    leadsGenerados: number;
-    urlPublicacion?: string;
+    leads_generados: number;
+    url_publicacion?: string;
     activa: boolean;
 }
 

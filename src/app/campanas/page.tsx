@@ -55,13 +55,13 @@ export default function CampanasPage() {
         }
 
         const nuevaPublicacion: Publicacion = {
-            id: generarId(),
+            id: crypto.randomUUID(),
             user_id: user.id,
             titulo,
             plataforma,
-            fechaPublicacion: fecha,
+            fecha_publicacion: fecha,
             presupuesto: parseFloat(presupuesto),
-            leadsGenerados: 0,
+            leads_generados: 0,
             alcance: 0,
             interacciones: 0,
             activa: true
@@ -117,8 +117,8 @@ export default function CampanasPage() {
     };
 
     // Cálculos
-    const gastadoMes = publicaciones.reduce((acc, curr) => acc + (curr.activa ? curr.presupuesto : 0), 0) * 30; // Proyección simple
-    const leadsTotal = publicaciones.reduce((acc, curr) => acc + curr.leadsGenerados, 0);
+    const gastadoMes = publicaciones.reduce((acc, curr) => acc + (curr.activa ? (curr.presupuesto || 0) : 0), 0) * 30; // Proyección simple
+    const leadsTotal = publicaciones.reduce((acc, curr) => acc + (curr.leads_generados || 0), 0);
 
     // Calendario
     const hoy = new Date();
@@ -222,7 +222,7 @@ export default function CampanasPage() {
                                             <div>
                                                 <h3 className="font-semibold text-gray-900">{pub.titulo}</h3>
                                                 <p className="text-sm text-gray-500 flex items-center gap-2">
-                                                    <span>{formatearFecha(pub.fechaPublicacion)}</span>
+                                                    <span>{formatearFecha(pub.fecha_publicacion)}</span>
                                                     <span>•</span>
                                                     <span className="font-medium text-green-600">
                                                         {formatearMoneda(pub.presupuesto)}/día
@@ -264,7 +264,7 @@ export default function CampanasPage() {
                                             </div>
                                             <div>
                                                 <p className="text-gray-500">Leads</p>
-                                                <p className="font-semibold text-telmex-blue">{pub.leadsGenerados || 0}</p>
+                                                <p className="font-semibold text-telmex-blue">{pub.leads_generados || 0}</p>
                                             </div>
                                         </div>
                                     )}
@@ -292,7 +292,7 @@ export default function CampanasPage() {
                             <div className="grid grid-cols-7 gap-1">
                                 {diasCalendario.map((dia, i) => {
                                     const tienePublicacion = publicaciones.some(p =>
-                                        isSameDay(new Date(p.fechaPublicacion), dia) && p.activa
+                                        isSameDay(new Date(p.fecha_publicacion), dia) && p.activa
                                     );
                                     return (
                                         <div

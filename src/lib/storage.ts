@@ -53,10 +53,7 @@ export function eliminarRecordatorio(id: string): void {
 export async function guardarCliente(cliente: Cliente): Promise<void> {
     const { error } = await supabase
         .from('clientes')
-        .upsert({
-            ...cliente,
-            actualizadoEn: new Date().toISOString()
-        });
+        .upsert(cliente);
 
     if (error) {
         console.error('Error al guardar cliente en Supabase:', error);
@@ -68,7 +65,7 @@ export async function obtenerClientes(): Promise<Cliente[]> {
     const { data, error } = await supabase
         .from('clientes')
         .select('*')
-        .order('fechaContacto', { ascending: false });
+        .order('fecha_contacto', { ascending: false });
 
     if (error) {
         console.error('Error al obtener clientes de Supabase:', error);

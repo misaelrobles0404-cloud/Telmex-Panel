@@ -86,39 +86,38 @@ export function calcularMetricas(clientesInput?: Cliente[]): Metricas {
 
     // Filtrar por fechas
     const clientesHoy = clientes.filter(c =>
-        isAfter(new Date(c.fechaContacto), hoy)
+        isAfter(new Date(c.fecha_contacto), hoy)
     );
     const clientesSemana = clientes.filter(c =>
-        isAfter(new Date(c.fechaContacto), inicioSemana)
+        isAfter(new Date(c.fecha_contacto), inicioSemana)
     );
     const clientesMes = clientes.filter(c =>
-        isAfter(new Date(c.fechaContacto), inicioMes)
+        isAfter(new Date(c.fecha_contacto), inicioMes)
     );
 
     // Ventas
-    const ventasHoy = clientesHoy.filter(c => c.estadoPipeline === 'vendido').length;
-    const ventasSemana = clientesSemana.filter(c => c.estadoPipeline === 'vendido').length;
-    const ventasMes = clientesMes.filter(c => c.estadoPipeline === 'vendido').length;
+    const ventasHoy = clientesHoy.filter(c => c.estado_pipeline === 'vendido').length;
+    const ventasSemana = clientesSemana.filter(c => c.estado_pipeline === 'vendido').length;
+    const ventasMes = clientesMes.filter(c => c.estado_pipeline === 'vendido').length;
 
     // Comisiones
     const comisionesHoy = clientesHoy
-        .filter(c => c.estadoPipeline === 'vendido')
+        .filter(c => c.estado_pipeline === 'vendido')
         .reduce((sum, c) => sum + c.comision, 0);
     const comisionesSemana = clientesSemana
-        .filter(c => c.estadoPipeline === 'vendido')
+        .filter(c => c.estado_pipeline === 'vendido')
         .reduce((sum, c) => sum + c.comision, 0);
     const comisionesMes = clientesMes
-        .filter(c => c.estadoPipeline === 'vendido')
+        .filter(c => c.estado_pipeline === 'vendido')
         .reduce((sum, c) => sum + c.comision, 0);
 
     // Pipeline
-    const contactados = clientes.filter(c => c.estadoPipeline === 'contactado').length;
-    const interesados = clientes.filter(c => c.estadoPipeline === 'interesado').length;
-    // const cotizaciones = clientes.filter(c => c.estadoPipeline === 'cotizacion').length; // Removed
+    const contactados = clientes.filter(c => c.estado_pipeline === 'contactado').length;
+    const interesados = clientes.filter(c => c.estado_pipeline === 'interesado').length;
     const cotizaciones = 0; // Placeholder to avoid breaking interface
-    const cierresProgramados = clientes.filter(c => c.estadoPipeline === 'cierre_programado').length;
-    const vendidos = clientes.filter(c => c.estadoPipeline === 'vendido').length;
-    const perdidos = clientes.filter(c => c.estadoPipeline === 'perdido').length;
+    const cierresProgramados = clientes.filter(c => c.estado_pipeline === 'cierre_programado').length;
+    const vendidos = clientes.filter(c => c.estado_pipeline === 'vendido').length;
+    const perdidos = clientes.filter(c => c.estado_pipeline === 'perdido').length;
 
     // Tasa de conversión
     const totalLeads = clientes.length;
@@ -151,18 +150,16 @@ export function calcularMetricas(clientesInput?: Cliente[]): Metricas {
 // ESTADÍSTICAS DE CAMPAÑAS
 // ============================================
 
-export function calcularEstadisticasCampana(campanas: any[], clientes: Cliente[]) {
+export function calcularEstadisticasCampana(campanasInput: any[], clientesInput: Cliente[]) {
+    const campanas = campanasInput || [];
+    const clientes = clientesInput || [];
     return campanas.map(campana => {
         // Leads reales vinculados
-        const leads = clientes.filter(c => c.campanaId === campana.id).length;
+        const leads = clientes.filter(c => c.campana_id === campana.id).length;
 
         // Simulación de Alcance y Clicks basada en el presupuesto diario y días activa
-        // Asumimos un rendimiento promedio de mercado para anuncios inmobiliarios/servicios locales
-        // Alcance: ~1200 personas por cada $35 diarios
-        // Clicks: ~40 clicks (3.3% CTR) por cada $35 diarios
-
         const factorRendimiento = campana.presupuesto / 35;
-        const diasActiva = campana.activa ? 1 : 0.5; // Simplificación para demo
+        const diasActiva = campana.activa ? 1 : 0.5;
 
         const alcanceSimulado = Math.floor(1200 * factorRendimiento * (leads > 0 ? leads : 1) * (Math.random() * 0.5 + 0.8));
         const clicksSimulados = Math.floor(40 * factorRendimiento * (leads > 0 ? leads : 1) * (Math.random() * 0.4 + 0.7));
@@ -171,7 +168,7 @@ export function calcularEstadisticasCampana(campanas: any[], clientes: Cliente[]
             ...campana,
             alcance: alcanceSimulado,
             interacciones: clicksSimulados,
-            leadsGenerados: leads
+            leads_generados: leads
         };
     });
 }
@@ -185,7 +182,7 @@ export function validarRequisitos(cliente: Partial<Cliente>): string[] {
 
     // Campos básicos
     if (!cliente.nombre?.trim()) errores.push('Nombre es requerido');
-    if (!cliente.noTT?.trim()) errores.push('Número de teléfono es requerido');
+    if (!cliente.no_tt?.trim()) errores.push('Número de teléfono es requerido');
     if (!cliente.correo?.trim()) errores.push('Correo es requerido');
     if (!cliente.curp?.trim()) errores.push('CURP es requerido');
 
@@ -197,13 +194,13 @@ export function validarRequisitos(cliente: Partial<Cliente>): string[] {
     if (!cliente.estado?.trim()) errores.push('Estado es requerido');
 
     // Requisitos específicos por tipo de servicio
-    if (cliente.tipoServicio === 'portabilidad') {
-        if (!cliente.numeroAPortar?.trim()) errores.push('Número a portar es requerido');
-        if (!cliente.nipPortabilidad?.trim()) errores.push('NIP de portabilidad es requerido');
+    if (cliente.tipo_servicio === 'portabilidad') {
+        if (!cliente.numero_a_portar?.trim()) errores.push('Número a portar es requerido');
+        if (!cliente.nip_portabilidad?.trim()) errores.push('NIP de portabilidad es requerido');
     }
 
-    if (cliente.tipoServicio === 'winback') {
-        if (!cliente.numeroAPortar?.trim()) errores.push('Número a portar es requerido');
+    if (cliente.tipo_servicio === 'winback') {
+        if (!cliente.numero_a_portar?.trim()) errores.push('Número a portar es requerido');
     }
 
     return errores;
