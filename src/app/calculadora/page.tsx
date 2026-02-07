@@ -222,7 +222,10 @@ export default function CalculadoraPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-lg">Netflix Incluido</p>
-                                            <p className="text-sm text-white/90">Ahorras $139 al mes</p>
+                                            <p className="text-xs text-white/90 leading-tight">
+                                                Gratis por 6 meses.<br />
+                                                + 3 meses gratis (4º, 8º y 12º mes)
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
