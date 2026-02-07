@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Cliente, Actividad, Documento, EstadoPipeline } from '@/types';
-import { obtenerClientes, guardarCliente, eliminarCliente } from '@/lib/storage';
+import { obtenerClientes, obtenerCliente, guardarCliente, eliminarCliente } from '@/lib/storage';
 import { formatearMoneda, formatearFecha, formatearFechaHora, generarId } from '@/lib/utils';
 import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle, Copy, Save } from 'lucide-react';
 import { Textarea } from '@/components/ui/Input';
@@ -23,29 +23,34 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const [folioSiacInput, setFolioSiacInput] = useState('');
 
     useEffect(() => {
-        const clientes = obtenerClientes();
-        const clienteEncontrado = clientes.find(c => c.id === params.id);
-        setCliente(clienteEncontrado || null);
-        if (clienteEncontrado) {
-            setFolioSiacInput(clienteEncontrado.folioSiac || '');
-        }
-        setLoading(false);
+        const cargarCliente = async () => {
+            try {
+                const data = await obtenerCliente(params.id);
+                if (data) {
+                    setCliente(data);
+                    setFolioSiacInput(data.folioSiac || '');
+                }
+            } catch (error) {
+                console.error("Error al cargar cliente:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        cargarCliente();
     }, [params.id]);
 
     if (loading) return <div className="p-6">Cargando...</div>;
     if (!cliente) return <div className="p-6">Cliente no encontrado</div>;
 
-    const actualizarEstado = (nuevoEstado: EstadoPipeline) => {
+    const actualizarEstado = async (nuevoEstado: EstadoPipeline) => {
         if (!cliente) return;
 
-        // Crear actividad de cambio de estado
         const actividad: Actividad = {
             id: generarId(),
             clienteId: cliente.id,
             tipo: 'cambio_estado',
             descripcion: `Estado actualizado de ${cliente.estadoPipeline} a ${nuevoEstado}`,
             fecha: new Date().toISOString(),
-            // realizada: true // Removed as it's not in the type definition, implied by existence in history
         };
 
         const clienteActualizado = {
@@ -55,11 +60,15 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
             actualizadoEn: new Date().toISOString()
         };
 
-        guardarCliente(clienteActualizado);
-        setCliente(clienteActualizado);
+        try {
+            await guardarCliente(clienteActualizado);
+            setCliente(clienteActualizado);
+        } catch (error) {
+            alert('Error al actualizar estado');
+        }
     };
 
-    const agregarNota = (e: React.FormEvent) => {
+    const agregarNota = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!cliente || !nuevaNota.trim()) return;
 
@@ -69,7 +78,6 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
             tipo: 'nota',
             descripcion: nuevaNota,
             fecha: new Date().toISOString(),
-            // realizada: true
         };
 
         const clienteActualizado = {
@@ -78,32 +86,38 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
             actualizadoEn: new Date().toISOString()
         };
 
-        guardarCliente(clienteActualizado);
-        setCliente(clienteActualizado);
-        setNuevaNota('');
+        try {
+            await guardarCliente(clienteActualizado);
+            setCliente(clienteActualizado);
+            setNuevaNota('');
+        } catch (error) {
+            alert('Error al agregar nota');
+        }
     };
 
-    const handleDocumentosChange = (nuevosDocumentos: Documento[]) => {
+    const handleDocumentosChange = async (nuevosDocumentos: Documento[]) => {
         if (!cliente) return;
         const clienteActualizado = { ...cliente, documentos: nuevosDocumentos };
-        guardarCliente(clienteActualizado);
-        setCliente(clienteActualizado);
+        try {
+            await guardarCliente(clienteActualizado);
+            setCliente(clienteActualizado);
+        } catch (error) {
+            alert('Error al actualizar documentos');
+        }
     };
 
-    const guardarFolioSiac = () => {
+    const guardarFolioSiac = async () => {
         if (!cliente) return;
 
-        // Al guardar Folio SIAC, movemos a Cierre Programado automáticamente
         const nuevoEstado: EstadoPipeline = 'cierre_programado';
 
         const clienteActualizado: Cliente = {
             ...cliente,
             folioSiac: folioSiacInput,
-            estadoPipeline: cliente.estadoPipeline === 'vendido' ? 'vendido' : nuevoEstado, // No regresar si ya está vendido
+            estadoPipeline: cliente.estadoPipeline === 'vendido' ? 'vendido' : nuevoEstado,
             actualizadoEn: new Date().toISOString()
         };
 
-        // Registrar actividad
         if (cliente.estadoPipeline !== nuevoEstado && cliente.estadoPipeline !== 'vendido') {
             clienteActualizado.actividades = [
                 {
@@ -117,9 +131,13 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
             ];
         }
 
-        guardarCliente(clienteActualizado);
-        setCliente(clienteActualizado);
-        alert('Folio SIAC guardado. Cliente movido a Cierre Programado.');
+        try {
+            await guardarCliente(clienteActualizado);
+            setCliente(clienteActualizado);
+            alert('Folio SIAC guardado en la nube.');
+        } catch (error) {
+            alert('Error al guardar Folio SIAC');
+        }
     };
 
     const generarFormatoSIAC = () => {
@@ -388,11 +406,15 @@ Solo necesito que me confirmes para agendar.
                     <Button variant="secondary" onClick={() => router.push(`/clientes/${cliente.id}/editar`)}>
                         <Edit size={16} /> Editar
                     </Button>
-                    <Button variant="danger" onClick={() => {
+                    <Button variant="danger" onClick={async () => {
                         if (confirm('¿Estás seguro de eliminar este cliente? Esta acción no se puede deshacer.')) {
                             if (cliente) {
-                                eliminarCliente(cliente.id);
-                                router.push('/clientes');
+                                try {
+                                    await eliminarCliente(cliente.id);
+                                    router.push('/clientes');
+                                } catch (error) {
+                                    alert('Error al eliminar cliente');
+                                }
                             }
                         }
                     }}>

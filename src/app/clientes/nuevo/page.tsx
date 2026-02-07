@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input, Select, Textarea } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -63,6 +63,7 @@ export default function NuevoClientePage() {
         campanaId: '',
     });
 
+    const [loading, setLoading] = useState(false);
     const [tipoServicio, setTipoServicio] = useState<TipoServicio>('linea_nueva');
 
     // Manejar cambio manual de tipo de servicio
@@ -79,12 +80,23 @@ export default function NuevoClientePage() {
         }
     };
 
-    const handleGuardarProspecto = () => {
+    const [campanas, setCampanas] = useState<Publicacion[]>([]);
+
+    useEffect(() => {
+        const cargarDatos = async () => {
+            const pubs = await obtenerPublicaciones();
+            setCampanas(pubs);
+        };
+        cargarDatos();
+    }, []);
+
+    const handleGuardarProspecto = async () => {
         if (!formData.noTT) {
             alert('Para prospecto se requiere al menos el Teléfono');
             return;
         }
 
+        setLoading(true);
         const nombreFinal = formData.nombre.trim() || `Prospecto ${formData.noTT}`;
 
         const cliente: Cliente = {
@@ -120,7 +132,7 @@ export default function NuevoClientePage() {
             formatoPortabilidad: false,
             cartaBaja: false,
             estadoCuentaMegacable: false,
-            estadoPipeline: 'interesado', // Estado inicial para prospectos
+            estadoPipeline: 'interesado',
             fechaContacto: new Date().toISOString(),
             fechaUltimaActividad: new Date().toISOString(),
             comision: 0,
@@ -132,7 +144,6 @@ export default function NuevoClientePage() {
             actualizadoEn: new Date().toISOString(),
         };
 
-        // Si hay notas iniciales
         if (formData.notas.trim()) {
             cliente.actividades.push({
                 id: generarId(),
@@ -143,15 +154,23 @@ export default function NuevoClientePage() {
             });
         }
 
-        guardarCliente(cliente);
-        router.push('/clientes');
+        try {
+            await guardarCliente(cliente);
+            router.push('/clientes');
+        } catch (error) {
+            alert('Error al guardar prospecto');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
 
         if (!formData.nombre.trim()) {
             alert('El Nombre Completo es obligatorio para registrar un cliente.');
+            setLoading(false);
             return;
         }
 
@@ -160,6 +179,7 @@ export default function NuevoClientePage() {
 
         if (!paqueteSeleccionado) {
             alert('Por favor selecciona un paquete');
+            setLoading(false);
             return;
         }
 
@@ -208,7 +228,6 @@ export default function NuevoClientePage() {
             actualizadoEn: new Date().toISOString(),
         };
 
-        // Si hay notas iniciales, agregarlas al historial de actividades
         const actividadesIniciales = [];
         if (formData.notas.trim()) {
             actividadesIniciales.push({
@@ -225,8 +244,14 @@ export default function NuevoClientePage() {
             actividades: actividadesIniciales as any[],
         };
 
-        guardarCliente(clienteFinal);
-        router.push('/clientes');
+        try {
+            await guardarCliente(clienteFinal);
+            router.push('/clientes');
+        } catch (error) {
+            alert('Error al guardar cliente');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const comision = calcularComision(tipoServicio);
@@ -669,7 +694,7 @@ export default function NuevoClientePage() {
                             onChange={(e) => setFormData({ ...formData, campanaId: e.target.value })}
                             options={[
                                 { value: '', label: 'Sin campaña (Directo)' },
-                                ...obtenerPublicaciones().map((p: Publicacion) => ({
+                                ...campanas.map((p: Publicacion) => ({
                                     value: p.id,
                                     label: p.titulo
                                 }))

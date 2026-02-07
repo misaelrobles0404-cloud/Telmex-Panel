@@ -15,10 +15,29 @@ export default function ClientesPage() {
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState('');
     const [filtroEstado, setFiltroEstado] = useState<string>('todos');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setClientes(obtenerClientes());
+        const cargarClientes = async () => {
+            try {
+                const data = await obtenerClientes();
+                setClientes(data);
+            } catch (error) {
+                console.error("Error al cargar clientes:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        cargarClientes();
     }, []);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="w-12 h-12 border-4 border-telmex-blue border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     const clientesFiltrados = clientes.filter(cliente => {
         const matchBusqueda = cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -92,11 +111,11 @@ export default function ClientesPage() {
                                     <div className="flex items-center gap-3 mb-2">
                                         <h3 className="text-lg font-semibold text-gray-900">{cliente.nombre}</h3>
                                         <span className={`badge ${cliente.estadoPipeline === 'vendido' ? 'badge-green' :
-                                                cliente.estadoPipeline === 'cierre_programado' ? 'badge-purple' :
-                                                    cliente.estadoPipeline === 'cotizacion' ? 'badge-yellow' :
-                                                        cliente.estadoPipeline === 'interesado' ? 'badge-blue' :
-                                                            cliente.estadoPipeline === 'perdido' ? 'badge-red' :
-                                                                'bg-gray-100 text-gray-800'
+                                            cliente.estadoPipeline === 'cierre_programado' ? 'badge-purple' :
+                                                cliente.estadoPipeline === 'cotizacion' ? 'badge-yellow' :
+                                                    cliente.estadoPipeline === 'interesado' ? 'badge-blue' :
+                                                        cliente.estadoPipeline === 'perdido' ? 'badge-red' :
+                                                            'bg-gray-100 text-gray-800'
                                             }`}>
                                             {cliente.estadoPipeline === 'vendido' && 'Vendido'}
                                             {cliente.estadoPipeline === 'cierre_programado' && 'Cierre Programado'}
@@ -106,8 +125,8 @@ export default function ClientesPage() {
                                             {cliente.estadoPipeline === 'perdido' && 'Perdido'}
                                         </span>
                                         <span className={`badge ${cliente.tipoServicio === 'linea_nueva' ? 'badge-blue' :
-                                                cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
-                                                    'badge-green'
+                                            cliente.tipoServicio === 'portabilidad' ? 'badge-purple' :
+                                                'badge-green'
                                             }`}>
                                             {cliente.tipoServicio === 'linea_nueva' && 'Línea Nueva'}
                                             {cliente.tipoServicio === 'portabilidad' && 'Portabilidad'}

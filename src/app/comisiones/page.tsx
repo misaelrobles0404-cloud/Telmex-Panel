@@ -18,27 +18,30 @@ export default function ComisionesPage() {
         cargarClientes();
     }, []);
 
-    const cargarClientes = () => {
-        const todos = obtenerClientes();
-        // Filtramos clientes que tienen Folio SIAC pero que NO están vendidos ni perdidos
-        // Es decir, están en el limbo de "En proceso de instalación"
-        // Ojo: Ajustar según el flujo. Si 'cierre_programado' es el estado previo a 'vendido'.
-        const filtrados = todos.filter(c =>
-            c.folioSiac &&
-            c.folioSiac.trim() !== '' &&
-            c.estadoPipeline !== 'vendido' &&
-            c.estadoPipeline !== 'perdido'
-        );
-        setClientes(filtrados);
-        setLoading(false);
+    const cargarClientes = async () => {
+        try {
+            const todos = await obtenerClientes();
+            const filtrados = todos.filter(c =>
+                c.folioSiac &&
+                c.folioSiac.trim() !== '' &&
+                c.estadoPipeline !== 'vendido' &&
+                c.estadoPipeline !== 'perdido'
+            );
+            setClientes(filtrados);
+        } catch (error) {
+            console.error("Error al cargar comisiones:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const confirmarInstalacion = (cliente: Cliente) => {
+    const confirmarInstalacion = async (cliente: Cliente) => {
         if (!confirm(`¿Confirmar instalación del folio ${cliente.folioSiac}?\n\nEsto marcará al cliente como VENDIDO y sumará la comisión a tus reportes.`)) return;
 
+        setLoading(true);
         const clienteActualizado: Cliente = {
             ...cliente,
-            estadoPipeline: 'vendido', // ESTADO CRÍTICO: Este activa el conteo en reportes
+            estadoPipeline: 'vendido',
             actualizadoEn: new Date().toISOString(),
             actividades: [
                 {
@@ -52,14 +55,20 @@ export default function ComisionesPage() {
             ]
         };
 
-        guardarCliente(clienteActualizado);
-        cargarClientes(); // Recargar lista
+        try {
+            await guardarCliente(clienteActualizado);
+            await cargarClientes();
+        } catch (error) {
+            alert('Error al confirmar instalación');
+            setLoading(false);
+        }
     };
 
-    const reportarRechazo = (cliente: Cliente) => {
+    const reportarRechazo = async (cliente: Cliente) => {
         const motivo = prompt('Motivo del rechazo (ej. Facilidades técnicas, Cliente canceló):');
         if (!motivo) return;
 
+        setLoading(true);
         const clienteActualizado: Cliente = {
             ...cliente,
             estadoPipeline: 'perdido',
@@ -76,8 +85,13 @@ export default function ComisionesPage() {
             ]
         };
 
-        guardarCliente(clienteActualizado);
-        cargarClientes();
+        try {
+            await guardarCliente(clienteActualizado);
+            await cargarClientes();
+        } catch (error) {
+            alert('Error al reportar rechazo');
+            setLoading(false);
+        }
     };
 
     const clientesFiltrados = clientes.filter(c =>
