@@ -5,7 +5,7 @@ import React, { useState, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Input';
-import { PAQUETES_RESIDENCIALES } from '@/data/paquetes';
+import { PAQUETES_RESIDENCIALES, PAQUETES_PYME } from '@/data/paquetes';
 import { formatearMoneda } from '@/lib/utils';
 import { Calculator as CalcIcon, Download, Share2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -14,10 +14,15 @@ export default function CalculadoraPage() {
     const [paqueteSeleccionado, setPaqueteSeleccionado] = useState('');
     const [precioActual, setPrecioActual] = useState('');
     const [velocidadActual, setVelocidadActual] = useState('');
+    const [tipoPaquete, setTipoPaquete] = useState<'residencial' | 'pyme'>('residencial');
+    const [mostrarSoloInternet, setMostrarSoloInternet] = useState(false);
     const [exporting, setExporting] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
 
-    const paquete = PAQUETES_RESIDENCIALES.find(p => p.id === paqueteSeleccionado);
+    const paquetesDisponibles = (tipoPaquete === 'residencial' ? PAQUETES_RESIDENCIALES : PAQUETES_PYME)
+        .filter(p => mostrarSoloInternet ? !p.llamadasIlimitadas : p.llamadasIlimitadas);
+
+    const paquete = [...PAQUETES_RESIDENCIALES, ...PAQUETES_PYME].find(p => p.id === paqueteSeleccionado);
     const ahorro = precioActual ? parseFloat(precioActual) - (paquete?.precioPromo || 0) : 0;
     const ahorroAnual = ahorro * 12;
 
@@ -138,12 +143,42 @@ export default function CalculadoraPage() {
                     <CardHeader>
                         <CardTitle>Paquete TELMEX a Ofrecer</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-4">
+                        <div className="flex bg-gray-100 p-1 rounded-lg gap-1">
+                            <button
+                                onClick={() => { setTipoPaquete('residencial'); setPaqueteSeleccionado(''); }}
+                                className={`flex-1 py-1 px-3 text-sm font-medium rounded-md transition-all ${tipoPaquete === 'residencial' ? 'bg-white shadow-sm text-telmex-blue' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Residencial
+                            </button>
+                            <button
+                                onClick={() => { setTipoPaquete('pyme'); setPaqueteSeleccionado(''); }}
+                                className={`flex-1 py-1 px-3 text-sm font-medium rounded-md transition-all ${tipoPaquete === 'pyme' ? 'bg-white shadow-sm text-telmex-blue' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Negocio/PYME
+                            </button>
+                        </div>
+
+                        <div className="flex bg-gray-100 p-1 rounded-lg gap-1">
+                            <button
+                                onClick={() => { setMostrarSoloInternet(false); setPaqueteSeleccionado(''); }}
+                                className={`flex-1 py-1 px-3 text-sm font-medium rounded-md transition-all ${!mostrarSoloInternet ? 'bg-white shadow-sm text-telmex-blue' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Internet + Telefonía
+                            </button>
+                            <button
+                                onClick={() => { setMostrarSoloInternet(true); setPaqueteSeleccionado(''); }}
+                                className={`flex-1 py-1 px-3 text-sm font-medium rounded-md transition-all ${mostrarSoloInternet ? 'bg-white shadow-sm text-telmex-blue' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Solo Internet
+                            </button>
+                        </div>
+
                         <Select
                             label="Seleccionar Paquete"
                             value={paqueteSeleccionado}
                             onChange={(e) => setPaqueteSeleccionado(e.target.value)}
-                            options={PAQUETES_RESIDENCIALES.map(p => ({
+                            options={paquetesDisponibles.map(p => ({
                                 value: p.id,
                                 label: `${p.velocidad} Mbps - ${formatearMoneda(p.precioPromo)}/mes`
                             }))}
@@ -154,7 +189,7 @@ export default function CalculadoraPage() {
                                 <div className="bg-telmex-blue/10 p-4 rounded-lg">
                                     <h4 className="font-semibold text-telmex-blue mb-2">Incluye:</h4>
                                     <ul className="space-y-1">
-                                        {paquete.incluye.map((item, i) => (
+                                        {paquete.incluye.map((item: string, i: number) => (
                                             <li key={i} className="text-sm text-gray-700 flex items-center gap-2">
                                                 <span className="text-success">✓</span>
                                                 {item}
@@ -242,15 +277,17 @@ export default function CalculadoraPage() {
                                     <span>🎁</span> Beneficios Exclusivos
                                 </h3>
                                 <div id="benefits-grid" className="grid grid-cols-2 gap-6">
-                                    <div className="flex items-start gap-3">
-                                        <div>
-                                            <span className="text-2xl">📺</span>
+                                    {paquete.netflix && (
+                                        <div className="flex items-start gap-3">
+                                            <div>
+                                                <span className="text-2xl">📺</span>
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-lg">Netflix Incluido</p>
+                                                <p className="text-sm text-white/90">Gratis por 6 meses</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-bold text-lg">Netflix Incluido</p>
-                                            <p className="text-sm text-white/90">Gratis por 6 meses</p>
-                                        </div>
-                                    </div>
+                                    )}
                                     <div className="flex items-start gap-3">
                                         <div>
                                             <span className="text-2xl">🚀</span>
@@ -262,15 +299,17 @@ export default function CalculadoraPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-start gap-3">
-                                        <div>
-                                            <span className="text-2xl">📞</span>
+                                    {paquete.llamadasIlimitadas && (
+                                        <div className="flex items-start gap-3">
+                                            <div>
+                                                <span className="text-2xl">📞</span>
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-lg">Llamadas Ilimitadas</p>
+                                                <p className="text-sm text-white/90">Celulares y fijos</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-bold text-lg">Llamadas Ilimitadas</p>
-                                            <p className="text-sm text-white/90">Celulares y fijos</p>
-                                        </div>
-                                    </div>
+                                    )}
                                     <div className="flex items-start gap-3">
                                         <div>
                                             <span className="text-2xl">🎁</span>
@@ -309,11 +348,14 @@ export default function CalculadoraPage() {
             {/* Catálogo de Paquetes */}
             <Card className="mt-12">
                 <CardHeader>
-                    <CardTitle>Todos los Paquetes Residenciales</CardTitle>
+                    <CardTitle>
+                        {tipoPaquete === 'residencial' ? 'Paquetes Residenciales' : 'Paquetes Negocio/PYME'}
+                        ({mostrarSoloInternet ? 'Solo Internet' : 'Internet + Telefonía'})
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {PAQUETES_RESIDENCIALES.map((pkg) => (
+                        {paquetesDisponibles.map((pkg: any) => (
                             <div
                                 key={pkg.id}
                                 className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${paqueteSeleccionado === pkg.id
