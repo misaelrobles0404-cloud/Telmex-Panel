@@ -68,13 +68,25 @@ export default function CoberturaPage() {
         setHoraLocal('');
 
         try {
-            const response = await fetch(`https://api.zippopotam.us/mx/${cp}`);
+            // Usando API de COPOMEX (con token de pruebas gratuito)
+            const response = await fetch(`https://api.copomex.com/query/info_cp/${cp}?token=pruebas`);
 
             if (response.ok) {
                 const data = await response.json();
-                const lugar = data.places[0];
-                const estado = lugar['state'];
-                const municipio = lugar['place name'];
+
+                // COPOMEX devuelve un array si hay múltiples colonias (asentamientos)
+                // Tomamos el primero para la información general
+                const info = Array.isArray(data) ? data[0].response : data.response;
+
+                if (!info) {
+                    alert("No se encontró información para este Código Postal.");
+                    return;
+                }
+
+                const estado = info.estado;
+                const municipio = info.municipio;
+                const ciudad = info.ciudad || municipio; // A veces ciudad es null, usamos municipio
+                const colonia = info.asentamiento;
                 const zonaHoraria = obtenerZonaHoraria(estado);
 
                 // Calculamos la hora inicial inmediatamente
@@ -93,13 +105,11 @@ export default function CoberturaPage() {
                     estado: estado,
                     calle: calle,
                     numero: numero,
-                    colonia: municipio, // Zippopotam a veces pone la colonia o el municipio aquí
-                    ciudad: municipio,
+                    colonia: colonia,
+                    ciudad: ciudad,
                     municipio: municipio,
-                    pais: data['country'],
-                    zonaHoraria: zonaHoraria,
-                    lat: lugar['latitude'],
-                    lon: lugar['longitude']
+                    pais: 'México',
+                    zonaHoraria: zonaHoraria
                 });
             } else {
                 alert("No se encontró información para este Código Postal.");
@@ -229,9 +239,12 @@ export default function CoberturaPage() {
                                                     <p className="text-xl text-telmex-blue font-semibold">
                                                         Col. {resultado.colonia}
                                                     </p>
-                                                    <p className="text-lg text-gray-700">
-                                                        {resultado.municipio}, {resultado.estado}
-                                                    </p>
+                                                    <div className="text-lg text-gray-700">
+                                                        {resultado.ciudad && resultado.ciudad !== resultado.municipio && (
+                                                            <p>Ciudad: {resultado.ciudad}</p>
+                                                        )}
+                                                        <p>{resultado.municipio}, {resultado.estado}</p>
+                                                    </div>
                                                     <div className="flex items-center gap-4 mt-2">
                                                         <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm font-mono tracking-wider">
                                                             CP: {resultado.cp}
@@ -266,7 +279,8 @@ export default function CoberturaPage() {
                                 variant="outline"
                                 className="w-full py-6 text-lg border-2"
                                 onClick={() => {
-                                    const texto = `📍 UBICACIÓN VERIFICADA:\nCalle: ${resultado.calle}\nNúmero: ${resultado.numero}\nColonia: ${resultado.colonia}\nCiudad/Mun: ${resultado.municipio}\nEstado: ${resultado.estado}\nCP: ${resultado.cp}\n\n⏰ Hora Local: ${horaLocal}`;
+                                    const ciudadStr = resultado.ciudad && resultado.ciudad !== resultado.municipio ? `Ciudad: ${resultado.ciudad}\n` : '';
+                                    const texto = `📍 UBICACIÓN VERIFICADA:\nCalle: ${resultado.calle}\nNúmero: ${resultado.numero}\nColonia: ${resultado.colonia}\n${ciudadStr}Municipio/Alc: ${resultado.municipio}\nEstado: ${resultado.estado}\nCP: ${resultado.cp}\n\n⏰ Hora Local: ${horaLocal}`;
                                     navigator.clipboard.writeText(texto);
                                     alert('Dirección completa copiada.');
                                 }}
