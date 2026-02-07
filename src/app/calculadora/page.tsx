@@ -26,22 +26,39 @@ export default function CalculadoraPage() {
         try {
             setExporting(true);
             const canvas = await html2canvas(cardRef.current, {
-                scale: 2, // Mejor calidad
+                scale: 2,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
+                windowWidth: 1400, // Simular pantalla de escritorio
                 onclone: (clonedDoc) => {
                     const element = clonedDoc.getElementById('export-card-container');
                     if (element) {
-                        element.style.width = '1000px'; // Forzar ancho fijo para evitar saltos de línea
+                        element.style.width = '1000px';
                         element.style.padding = '40px';
 
-                        // Quitar transformaciones que pueden causar desfases
+                        // 1. Forzar Grid Principal (3 columnas)
+                        const comparisonGrid = element.querySelector('#comparison-grid');
+                        if (comparisonGrid) {
+                            (comparisonGrid as HTMLElement).style.display = 'grid';
+                            (comparisonGrid as HTMLElement).style.gridTemplateColumns = 'repeat(3, 1fr)';
+                            (comparisonGrid as HTMLElement).style.gap = '24px';
+                        }
+
+                        // 2. Forzar Grid Beneficios (2 columnas)
+                        const benefitsGrid = element.querySelector('#benefits-grid');
+                        if (benefitsGrid) {
+                            (benefitsGrid as HTMLElement).style.display = 'grid';
+                            (benefitsGrid as HTMLElement).style.gridTemplateColumns = 'repeat(2, 1fr)';
+                            (benefitsGrid as HTMLElement).style.gap = '24px';
+                        }
+
+                        // 3. Quitar transformaciones
                         const greenCard = element.querySelector('.transform');
                         if (greenCard) {
                             (greenCard as HTMLElement).style.transform = 'none';
                             (greenCard as HTMLElement).style.boxShadow = 'none';
-                            (greenCard as HTMLElement).style.border = '2px solid #bbf7d0'; // Mantener borde visible
+                            (greenCard as HTMLElement).style.border = '2px solid #bbf7d0';
                         }
                     }
                 }
@@ -191,7 +208,7 @@ export default function CalculadoraPage() {
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div id="comparison-grid" className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="text-center p-6 bg-red-50 rounded-lg border border-red-100">
                                     <p className="text-sm text-gray-600 mb-2 font-medium">Estás pagando</p>
                                     <p className="text-3xl font-bold text-gray-900">
@@ -213,7 +230,7 @@ export default function CalculadoraPage() {
                                     <p className="text-3xl font-bold text-warning">
                                         {formatearMoneda(ahorro)}
                                     </p>
-                                    <p className="text-sm text-gray-500 mt-1 font-medium bg-yellow-100 rounded-full px-2 py-0.5 inline-block">
+                                    <p className="text-sm text-gray-500 mt-4 font-medium bg-yellow-100 rounded-full px-2 py-0.5 inline-block">
                                         {formatearMoneda(ahorroAnual)}/año
                                     </p>
                                 </div>
@@ -223,9 +240,9 @@ export default function CalculadoraPage() {
                                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                                     <span>🎁</span> Beneficios Exclusivos
                                 </h3>
-                                <div className="grid grid-cols-2 gap-6">
+                                <div id="benefits-grid" className="grid grid-cols-2 gap-6">
                                     <div className="flex items-start gap-3">
-                                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                                        <div>
                                             <span className="text-2xl">📺</span>
                                         </div>
                                         <div>
@@ -234,7 +251,7 @@ export default function CalculadoraPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                                        <div>
                                             <span className="text-2xl">🚀</span>
                                         </div>
                                         <div>
@@ -245,7 +262,7 @@ export default function CalculadoraPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                                        <div>
                                             <span className="text-2xl">📞</span>
                                         </div>
                                         <div>
@@ -254,7 +271,7 @@ export default function CalculadoraPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                                        <div>
                                             <span className="text-2xl">🎁</span>
                                         </div>
                                         <div>
