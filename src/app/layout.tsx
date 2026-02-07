@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Sidebar } from '@/components/Sidebar';
-import { FacebookPixelWrapper } from '@/components/FacebookPixelWrapper';
+import { ClientLayout } from '@/components/ClientLayout';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,23 +31,10 @@ export default function RootLayout({
     return (
         <html lang="es">
             <body className={inter.className}>
-                <LayoutWrapper>
+                <ClientLayout>
                     {children}
-                </LayoutWrapper>
-                <FacebookPixelWrapper />
+                </ClientLayout>
             </body>
         </html>
-    );
-}
-
-// Separate component to handle layout logic (Sidebar and Margins)
-function LayoutWrapper({ children }: { children: React.ReactNode }) {
-    return (
-        <div className="flex h-screen overflow-hidden">
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto w-full bg-gray-50">
-                {children}
-            </main>
-        </div>
     );
 }
