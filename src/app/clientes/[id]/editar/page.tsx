@@ -170,7 +170,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             proveedor_actual: formData.proveedorActual as any,
             numero_a_portar: formData.numeroAPortar,
             nip_portabilidad: formData.nipPortabilidad,
-            fecha_vigencia: formData.fechaVigencia,
+            fecha_vigencia: formData.fechaVigencia || undefined,
             formato_portabilidad: formData.formatoPortabilidad,
             carta_baja: formData.cartaBaja,
             estado_cuenta_megacable: formData.estadoCuentaMegacable,

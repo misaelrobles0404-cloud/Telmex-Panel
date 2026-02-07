@@ -53,9 +53,15 @@ export function eliminarRecordatorio(id: string): void {
 export async function guardarCliente(cliente: Cliente): Promise<void> {
     const { actividades, documentos, ...datosParaGuardar } = cliente;
 
-    // Sanitización de UUIDs: Si campana_id es una cadena vacía, debe ser null
+    // Sanitización de campos especiales para evitar errores de sintaxis SQL (UUID, DATE)
     if (datosParaGuardar.campana_id === '') {
         datosParaGuardar.campana_id = undefined;
+    }
+
+    // Si la fecha de vigencia es una cadena vacía, debe ser null para Postgres
+    const d = datosParaGuardar as any;
+    if (d.fecha_vigencia === '') {
+        d.fecha_vigencia = undefined;
     }
 
     const { error } = await supabase
