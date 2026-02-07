@@ -33,8 +33,16 @@ export default function CalculadoraPage() {
                 onclone: (clonedDoc) => {
                     const element = clonedDoc.getElementById('export-card-container');
                     if (element) {
+                        element.style.width = '1000px'; // Forzar ancho fijo para evitar saltos de línea
                         element.style.padding = '40px';
-                        // Asegurar que los botones ocultos sigan ocultos (ya lo hace el data-ignore, pero por si acaso)
+
+                        // Quitar transformaciones que pueden causar desfases
+                        const greenCard = element.querySelector('.transform');
+                        if (greenCard) {
+                            (greenCard as HTMLElement).style.transform = 'none';
+                            (greenCard as HTMLElement).style.boxShadow = 'none';
+                            (greenCard as HTMLElement).style.border = '2px solid #bbf7d0'; // Mantener borde visible
+                        }
                     }
                 }
             });
