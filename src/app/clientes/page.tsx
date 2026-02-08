@@ -142,8 +142,15 @@ export default function ClientesPage() {
 
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                         <div>
-                                            <p className="text-gray-500">Teléfono</p>
+                                            <p className="text-gray-500">Teléfono (TT)</p>
                                             <p className="font-medium text-gray-900">{cliente.no_tt}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-500">Referencias</p>
+                                            <p className="font-medium text-gray-900">R1: {cliente.no_ref}</p>
+                                            {cliente.no_ref_2 && (
+                                                <p className="text-xs text-gray-500">R2: {cliente.no_ref_2}</p>
+                                            )}
                                         </div>
                                         <div>
                                             <p className="text-gray-500">Correo</p>
