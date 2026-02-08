@@ -170,16 +170,22 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             precio_mensual: paqueteSeleccionado.precioPromo,
             tiene_internet: formData.tieneInternet,
             tiene_telefono_fijo: formData.tieneTelefonoFijo,
-            proveedor_actual: formData.proveedorActual as any,
+            proveedor_actual: (formData.proveedorActual as any) || undefined,
             numero_a_portar: formData.numeroAPortar,
             nip_portabilidad: formData.nipPortabilidad,
             fecha_vigencia: formData.fechaVigencia || undefined,
             formato_portabilidad: formData.formatoPortabilidad,
             carta_baja: formData.cartaBaja,
             estado_cuenta_megacable: formData.estadoCuentaMegacable,
-            estado_pipeline: (formData.folioSiac && formData.folioSiac.trim() !== '' && estadoPipeline !== 'vendido')
-                ? 'cierre_programado'
-                : estadoPipeline as any,
+            estado_pipeline: (() => {
+                if (formData.folioSiac && formData.folioSiac.trim() !== '' && estadoPipeline !== 'vendido') {
+                    return 'cierre_programado';
+                }
+                // Sanitizar estados obsoletos para evitar errores de restricción
+                if (estadoPipeline === 'perdido') return 'sin_cobertura';
+                if (estadoPipeline === 'cotizacion') return 'interesado';
+                return estadoPipeline as any;
+            })(),
             fecha_contacto: fechaCreacion,
             fecha_ultima_actividad: new Date().toISOString(),
             comision: calcularComision(tipoServicio),
@@ -189,9 +195,14 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             folio_siac: formData.folioSiac,
         };
 
-        await guardarCliente(clienteActualizado);
-        alert('Cliente actualizado correctamente');
-        router.push(`/clientes/${params.id}`);
+        try {
+            await guardarCliente(clienteActualizado);
+            alert('Cliente actualizado correctamente');
+            router.push(`/clientes/${params.id}`);
+        } catch (error: any) {
+            console.error('Error al actualizar cliente:', error);
+            alert(`Error al actualizar: ${error.message || 'Error desconocido'}`);
+        }
     };
 
     if (loading) return <div className="p-6">Cargando...</div>;
