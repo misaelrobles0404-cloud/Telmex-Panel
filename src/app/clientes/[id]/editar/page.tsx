@@ -145,6 +145,17 @@ export default function EditarClientePage({ params }: { params: { id: string } }
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Verificar sesión actual para asegurar el user_id
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user && !userId) {
+            alert('Error de sesión: No se pudo identificar al usuario. Por favor recarga la página o inicia sesión nuevamente.');
+            return;
+        }
+
+        // Usar el ID del usuario actual si el cliente no tiene uno asignado
+        const finalUserId = userId || user?.id;
+
         const paquetesDisponibles = obtenerPaquetesPorTipo(formData.tipoCliente);
         const paqueteSeleccionado = paquetesDisponibles.find(p => p.id === formData.paqueteId);
 
@@ -155,7 +166,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
 
         const clienteActualizado: Cliente = {
             id: clienteId,
-            user_id: userId, // Ahora garantizado si existe un usuario logueado
+            user_id: finalUserId,
             nombre: formData.nombre,
             no_tt: formData.noTT,
             no_ref: formData.noRef,
@@ -190,7 +201,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                 if (formData.folioSiac && formData.folioSiac.trim() !== '' && estadoPipeline !== 'vendido') {
                     return 'cierre_programado';
                 }
-                // Sanitizar estados obsoletos para evitar errores de restricción
+                // Sanitizar estados obsoletos
                 if (estadoPipeline === 'perdido') return 'sin_cobertura';
                 if (estadoPipeline === 'cotizacion') return 'interesado';
                 return estadoPipeline as any;
@@ -204,13 +215,15 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             folio_siac: formData.folioSiac,
         };
 
+        console.log('Enviando actualización de cliente:', clienteActualizado);
+
         try {
             await guardarCliente(clienteActualizado);
             alert('Cliente actualizado correctamente');
             router.push(`/clientes/${params.id}`);
         } catch (error: any) {
-            console.error('Error al actualizar cliente:', error);
-            alert(`Error al actualizar: ${error.message || 'Error desconocido'}`);
+            console.error('Error FULL al actualizar cliente:', error);
+            alert(`Error al actualizar: ${error.message || JSON.stringify(error)}`);
         }
     };
 
