@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types';
 import { guardarCliente, obtenerCliente } from '@/lib/storage';
+import { supabase } from '@/lib/supabase';
 import { calcularComision } from '@/lib/utils';
 import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
 import { ArrowLeft, Save, Building2, Home as HomeIcon } from 'lucide-react';
@@ -66,6 +67,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
     });
 
     const [clienteId, setClienteId] = useState('');
+    const [userId, setUserId] = useState<string | undefined>(undefined);
     const [fechaCreacion, setFechaCreacion] = useState('');
     const [estadoPipeline, setEstadoPipeline] = useState('');
     const [archivoActividades, setArchivoActividades] = useState<any[]>([]);
@@ -73,9 +75,15 @@ export default function EditarClientePage({ params }: { params: { id: string } }
 
     useEffect(() => {
         const fetchCliente = async () => {
-            const cliente = await obtenerCliente(params.id);
+            const [cliente, { data: { user } }] = await Promise.all([
+                obtenerCliente(params.id),
+                supabase.auth.getUser()
+            ]);
+
             if (cliente) {
                 setClienteId(cliente.id);
+                // Si el cliente no tiene user_id (antiguo), asignamos el usuario actual
+                setUserId(cliente.user_id || user?.id);
                 setFechaCreacion(cliente.creado_en);
                 setEstadoPipeline(cliente.estado_pipeline);
                 setTipoServicio(cliente.tipo_servicio);
@@ -147,6 +155,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
 
         const clienteActualizado: Cliente = {
             id: clienteId,
+            user_id: userId, // Ahora garantizado si existe un usuario logueado
             nombre: formData.nombre,
             no_tt: formData.noTT,
             no_ref: formData.noRef,
