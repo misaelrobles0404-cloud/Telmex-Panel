@@ -71,7 +71,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         e.preventDefault();
         if (!cliente || !nuevaNota.trim()) return;
 
-        const actividad: Actividad = {
+        const nuevaActividad: Actividad = {
             id: generarId(),
             clienteId: cliente.id,
             tipo: 'nota',
@@ -81,6 +81,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
 
         const clienteActualizado = {
             ...cliente,
+            actividades: [nuevaActividad, ...(cliente.actividades || [])],
             actualizado_en: new Date().toISOString()
         };
 

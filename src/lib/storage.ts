@@ -51,7 +51,7 @@ export function eliminarRecordatorio(id: string): void {
 // ============================================
 
 export async function guardarCliente(cliente: Cliente): Promise<void> {
-    const { actividades, documentos, ...datosParaGuardar } = cliente;
+    const { documentos, ...datosParaGuardar } = cliente;
 
     // Sanitización de campos especiales para evitar errores de sintaxis SQL (UUID, DATE)
     if (datosParaGuardar.campana_id === '') {

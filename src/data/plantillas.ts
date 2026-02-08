@@ -12,12 +12,30 @@ export const PLANTILLAS_WHATSAPP: PlantillaWhatsApp[] = [
         categoria: 'prospeccion',
         contenido: `¡Hola! 👋 Gracias por contactar a TELMEX.
 
-Para poder decirte exactamente qué promociones y qué velocidad de Fibra Óptica llegan a tu casa, ¿me podrías proporcionar estos dos datos?
+Para poder decirte exactamente qué promociones y qué velocidad de Fibra Óptica llegan a tu casa, ¿me podrías proporcionar tu dirección?
 
-📍 **Código Postal:** 
-🏠 **Calle y Número:**
+Puedes enviarla de estas 3 formas (la que se te haga más fácil):
+1️⃣ Escribiendo tu **Código Postal, Calle y Número**.
+2️⃣ Enviando tu **Ubicación actual** aquí por WhatsApp. 📍
+3️⃣ Enviando una **foto de tu credencial** (solo por el frente) para sacar el domicilio. 🪪
 
 En cuanto me los pases, verifico tu cobertura en el sistema y te doy respuesta inmediata. 😊`,
+        variables: []
+    },
+    {
+        id: 'info-solicitud-cobertura',
+        nombre: 'Respuesta a Solicitud de Información',
+        categoria: 'prospeccion',
+        contenido: `¡Hola! Con mucho gusto te proporciono toda la información de nuestros paquetes y promociones. 😊
+
+Como primer paso, para darte la información **exacta** de la velocidad y tecnología que llega a tu domicilio, ¿me podrías compartir tu dirección? 
+
+Elige la forma más sencilla para ti:
+✅ Escribir tu **Código Postal, Calle y Número**.
+✅ Enviar tu **Ubicación en tiempo real** por aquí. 📍
+✅ Enviar una **foto de tu INE** (solo frente) y yo saco los datos. 🪪
+
+¡Quedo atento para darte respuesta inmediata! 🚀`,
         variables: []
     },
     {
