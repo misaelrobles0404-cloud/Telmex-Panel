@@ -22,6 +22,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
         nombre: '',
         noTT: '',
         noRef: '',
+        noRef2: '',
         correo: '',
 
         // Dirección
@@ -83,6 +84,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     nombre: cliente.nombre,
                     noTT: cliente.no_tt,
                     noRef: cliente.no_ref === 'PENDIENTE' ? '' : cliente.no_ref,
+                    noRef2: cliente.no_ref_2 || '',
                     correo: cliente.correo === 'pendiente@correo.com' ? '' : cliente.correo,
 
                     calle: cliente.calle === 'PENDIENTE' ? '' : cliente.calle,
@@ -148,6 +150,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             nombre: formData.nombre,
             no_tt: formData.noTT,
             no_ref: formData.noRef,
+            no_ref_2: formData.noRef2 || undefined,
             correo: formData.correo,
             calle: formData.calle,
             colonia: formData.colonia,
@@ -287,6 +290,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                             <Input label="Nombre Completo" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required />
                             <Input label="No. TT (Teléfono)" value={formData.noTT} onChange={(e) => setFormData({ ...formData, noTT: e.target.value })} required />
                             <Input label="No. Ref (Referencia)" value={formData.noRef} onChange={(e) => setFormData({ ...formData, noRef: e.target.value })} required />
+                            <Input label="No. Ref 2 (Opcional)" value={formData.noRef2} onChange={(e) => setFormData({ ...formData, noRef2: e.target.value })} />
                             <Input label="Correo" type="email" value={formData.correo} onChange={(e) => setFormData({ ...formData, correo: e.target.value })} required />
                         </div>
                     </CardContent>

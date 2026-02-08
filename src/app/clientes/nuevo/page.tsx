@@ -20,6 +20,7 @@ export default function NuevoClientePage() {
         nombre: '',
         noTT: '',
         noRef: '',
+        noRef2: '',
         correo: '',
 
         // Dirección
@@ -114,6 +115,7 @@ export default function NuevoClientePage() {
             nombre: nombreFinal,
             no_tt: formData.noTT,
             no_ref: formData.noRef || 'PENDIENTE',
+            no_ref_2: formData.noRef2 || undefined,
             correo: formData.correo || 'pendiente@correo.com',
             calle: 'PENDIENTE',
             numero_exterior: '',
@@ -194,6 +196,7 @@ export default function NuevoClientePage() {
             nombre: formData.nombre,
             no_tt: formData.noTT,
             no_ref: formData.noRef,
+            no_ref_2: formData.noRef2 || undefined,
             correo: formData.correo,
             calle: formData.calle,
             numero_exterior: formData.numeroExterior,
@@ -400,6 +403,12 @@ export default function NuevoClientePage() {
                                 value={formData.noRef}
                                 onChange={(e) => setFormData({ ...formData, noRef: e.target.value })}
                                 required
+                            />
+
+                            <Input
+                                label="No. Ref 2 (Opcional)"
+                                value={formData.noRef2}
+                                onChange={(e) => setFormData({ ...formData, noRef2: e.target.value })}
                             />
 
                             <Input

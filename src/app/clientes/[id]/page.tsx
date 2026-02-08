@@ -175,7 +175,7 @@ ${cliente.nombre.toUpperCase()}
 —————————————————
 ■ NUM. TITULAR:  ${cliente.no_tt}
 ■ NUM. REFERENCIA 1: ${cliente.no_ref}
-■ NUM. REFERENCIA 2: 
+■ NUM. REFERENCIA 2: ${cliente.no_ref_2 || ''}
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
@@ -211,7 +211,7 @@ ${cliente.nombre.toUpperCase()}
 —————————————————
 ■ NUM. TITULAR:  ${cliente.no_tt}
 ■ NUM. REFERENCIA 1: ${cliente.no_ref}
-■ NUM. REFERENCIA 2: 
+■ NUM. REFERENCIA 2: ${cliente.no_ref_2 || ''}
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
@@ -244,7 +244,7 @@ ${cliente.nombre.toUpperCase()}
 —————————————————
 ■ NUM. TITULAR:  ${cliente.no_tt}
 ■ NUM. REFERENCIA 1: ${cliente.no_ref}
-■ NUM. REFERENCIA 2: 
+■ NUM. REFERENCIA 2: ${cliente.no_ref_2 || ''}
 ■ CORREO: ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
@@ -276,8 +276,10 @@ ${cliente.nombre.toUpperCase()}
 —————————————————
 NUM. TITULAR:  
 ${cliente.no_tt}
-NUM. REFERENCIA:
+NUM. REFERENCIA 1:
 ${cliente.no_ref}
+NUM. REFERENCIA 2:
+${cliente.no_ref_2 || ''}
 CORREO:
 ${cliente.correo}
 —————————————————
@@ -642,7 +644,11 @@ Solo necesito que me confirmes para agendar.
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm">
                             <div>
-                                <p className="font-medium text-gray-900">{cliente.no_ref}</p>
+                                <p className="text-gray-500 mb-1">Referencias</p>
+                                <p className="font-medium text-gray-900">Ref 1: {cliente.no_ref}</p>
+                                {cliente.no_ref_2 && (
+                                    <p className="font-medium text-gray-900 mt-1">Ref 2: {cliente.no_ref_2}</p>
+                                )}
                             </div>
 
                             <div className="pt-4 border-t border-gray-100">

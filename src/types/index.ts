@@ -19,6 +19,7 @@ export interface Cliente {
     nombre: string;
     no_tt: string; // Número de teléfono (antes noTT)
     no_ref: string; // Número de referencia (antes noRef)
+    no_ref_2?: string; // Segundo número de referencia (opcional)
     correo: string;
 
     // Dirección
