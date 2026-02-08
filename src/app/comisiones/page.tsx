@@ -24,8 +24,7 @@ export default function ComisionesPage() {
             const filtrados = todos.filter(c =>
                 c.folio_siac &&
                 c.folio_siac.trim() !== '' &&
-                c.estado_pipeline !== 'vendido' &&
-                c.estado_pipeline !== 'perdido'
+                c.estado_pipeline !== 'vendido'
             );
             setClientes(filtrados);
         } catch (error) {
@@ -71,7 +70,7 @@ export default function ComisionesPage() {
         setLoading(true);
         const clienteActualizado: Cliente = {
             ...cliente,
-            estado_pipeline: 'perdido',
+            estado_pipeline: 'sin_cobertura',
             actualizado_en: new Date().toISOString(),
             actividades: [
                 {
