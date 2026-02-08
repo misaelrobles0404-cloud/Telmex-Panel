@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Cliente, Actividad, Documento, EstadoPipeline } from '@/types';
 import { obtenerClientes, obtenerCliente, guardarCliente, eliminarCliente } from '@/lib/storage';
+import { supabase } from '@/lib/supabase';
 import { formatearMoneda, formatearFecha, formatearFechaHora, generarId } from '@/lib/utils';
 import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle, Copy, Save } from 'lucide-react';
 import { Textarea } from '@/components/ui/Input';
@@ -25,8 +26,16 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     useEffect(() => {
         const cargarCliente = async () => {
             try {
-                const data = await obtenerCliente(params.id);
+                const [data, { data: { user } }] = await Promise.all([
+                    obtenerCliente(params.id),
+                    supabase.auth.getUser()
+                ]);
+
                 if (data) {
+                    // Si el cliente no tiene user_id, le asignamos el del usuario actual para evitar errores RLS
+                    if (!data.user_id && user) {
+                        data.user_id = user.id;
+                    }
                     setCliente(data);
                     setFolioSiacInput(data.folio_siac || '');
                 }
@@ -56,14 +65,16 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         const clienteActualizado = {
             ...cliente,
             estado_pipeline: nuevoEstado,
-            actualizado_en: new Date().toISOString()
+            actualizado_en: new Date().toISOString(),
+            actividades: [actividad, ...(cliente.actividades || [])] // También guardamos la actividad aquí
         };
 
         try {
             await guardarCliente(clienteActualizado);
             setCliente(clienteActualizado);
-        } catch (error) {
-            alert('Error al actualizar estado');
+        } catch (error: any) {
+            console.error('Error al actualizar estado:', error);
+            alert(`Error al actualizar estado: ${error.message || 'Desconocido'}`);
         }
     };
 
