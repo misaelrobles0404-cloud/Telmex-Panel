@@ -9,7 +9,7 @@ import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types
 import { guardarCliente, obtenerPublicaciones } from '@/lib/storage';
 import { clasificarServicio, calcularComision, generarId } from '@/lib/utils';
 import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
-import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus } from 'lucide-react';
+import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { Publicacion } from '@/types';
 import { supabase } from '@/lib/supabase';
 
@@ -262,6 +262,32 @@ export default function NuevoClientePage() {
 
                 <h1 className="text-3xl font-bold text-gray-900">Nuevo Cliente</h1>
                 <p className="text-gray-600 mt-1">Formulario de captura TELMEX</p>
+            </div>
+
+            {/* Advertencia de Requisitos para Comisión */}
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r shadow-sm">
+                <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                        <AlertTriangle className="h-6 w-6 text-yellow-600" aria-hidden="true" />
+                    </div>
+                    <div className="ml-3">
+                        <h3 className="text-lg font-bold text-yellow-800">
+                            REQUISITOS OBLIGATORIOS PARA COMISIONAR
+                        </h3>
+                        <div className="mt-2 text-sm text-yellow-700">
+                            <p className="font-semibold mb-2">Asegúrate de tener las siguientes capturas:</p>
+                            <ul className="list-decimal list-inside space-y-1 font-medium">
+                                <li>ACEPTO DEL CLIENTE (Audio o Mensaje)</li>
+                                <li>DATOS Y MAPA EN PORTAL</li>
+                                <li>PAQUETE ELEGIDO EN PORTAL</li>
+                                <li>CAPTURA DE FOLIO EN PORTAL</li>
+                                <li>CAPTURA DE FOLIO SIAC EN CHAT-CLIENTE</li>
+                                <li>CAPTURA DEL CURP</li>
+                                <li>FOTO DE COBERTURA</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Selector Tipo Cliente (Residencial / Negocio) */}
