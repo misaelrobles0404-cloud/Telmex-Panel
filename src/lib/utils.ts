@@ -113,10 +113,10 @@ export function calcularMetricas(clientesInput?: Cliente[]): Metricas {
     // Pipeline
     const contactados = clientes.filter(c => c.estado_pipeline === 'contactado').length;
     const interesados = clientes.filter(c => c.estado_pipeline === 'interesado').length;
-    const cotizaciones = 0; // Placeholder to avoid breaking interface
     const cierresProgramados = clientes.filter(c => c.estado_pipeline === 'cierre_programado').length;
     const vendidos = clientes.filter(c => c.estado_pipeline === 'vendido').length;
-    const perdidos = clientes.filter(c => c.estado_pipeline === 'perdido').length;
+    const sin_cobertura = clientes.filter(c => c.estado_pipeline === 'sin_cobertura').length;
+    const cobertura_cobre = clientes.filter(c => c.estado_pipeline === 'cobertura_cobre').length;
 
     // Tasa de conversión
     const totalLeads = clientes.length;
@@ -135,10 +135,10 @@ export function calcularMetricas(clientesInput?: Cliente[]): Metricas {
         comisionesMes,
         contactados,
         interesados,
-        cotizaciones,
         cierresProgramados,
         vendidos,
-        perdidos,
+        sin_cobertura,
+        cobertura_cobre,
         presupuestoGastadoHoy: 20, // Placeholder
         presupuestoGastadoMes: 0, // Placeholder
         roi: 0, // Placeholder

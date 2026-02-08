@@ -396,7 +396,7 @@ Solo necesito que me confirmes para agendar.
                 </div>
 
                 <div className="flex gap-2">
-                    {cliente.estado_pipeline !== 'vendido' && cliente.estado_pipeline !== 'perdido' && (
+                    {cliente.estado_pipeline !== 'vendido' && cliente.estado_pipeline !== 'sin_cobertura' && (
                         <Button
                             variant="secondary"
                             onClick={() => setModalSeguimientoOpen(true)}
@@ -449,16 +449,18 @@ Solo necesito que me confirmes para agendar.
                         <CardContent className="p-6">
                             <label className="label mb-2">Estado del Pipeline</label>
                             <div className="flex flex-wrap gap-2">
-                                {['contactado', 'interesado', 'cotizacion', 'cierre_programado', 'vendido', 'perdido'].map((estado) => (
+                                {['contactado', 'interesado', 'cierre_programado', 'vendido', 'sin_cobertura', 'cobertura_cobre'].map((estado) => (
                                     <button
                                         key={estado}
                                         onClick={() => actualizarEstado(estado as EstadoPipeline)}
                                         className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${cliente.estado_pipeline === estado
                                             ? 'bg-telmex-blue text-white border-telmex-blue'
-                                            : 'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
+                                            : estado === 'sin_cobertura' ? 'bg-red-50 text-red-600 border-red-200 hover:border-red-400' :
+                                                estado === 'cobertura_cobre' ? 'bg-orange-50 text-orange-600 border-orange-200 hover:border-orange-400' :
+                                                    'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
                                             }`}
                                     >
-                                        {estado.replace('_', ' ').toUpperCase()}
+                                        {estado.replace(/_/g, ' ').toUpperCase()}
                                     </button>
                                 ))}
                             </div>

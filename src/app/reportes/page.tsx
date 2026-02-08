@@ -55,9 +55,10 @@ export default function ReportesPage() {
     const dataPipeline = [
         { name: 'Contactado', value: metricas.contactados },
         { name: 'Interesado', value: metricas.interesados },
-        // { name: 'Cotización', value: metricas.cotizaciones },
         { name: 'Cierre', value: metricas.cierresProgramados },
         { name: 'Vendido', value: metricas.vendidos },
+        { name: 'Sin Cobertura', value: metricas.sin_cobertura },
+        { name: 'Cobre', value: metricas.cobertura_cobre },
     ];
 
     // Datos simulados para razones de rechazo (basado en industria común)

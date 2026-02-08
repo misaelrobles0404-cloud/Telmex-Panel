@@ -44,7 +44,13 @@ export default function ClientesPage() {
             cliente.no_tt.includes(busqueda) ||
             cliente.correo.toLowerCase().includes(busqueda.toLowerCase());
 
-        const matchEstado = filtroEstado === 'todos' || cliente.estado_pipeline === filtroEstado;
+        let matchEstado = false;
+        if (filtroEstado === 'todos') {
+            // Excluir sin_cobertura y cobertura_cobre de la vista general por defecto
+            matchEstado = cliente.estado_pipeline !== 'sin_cobertura' && cliente.estado_pipeline !== 'cobertura_cobre';
+        } else {
+            matchEstado = cliente.estado_pipeline === filtroEstado;
+        }
 
         return matchBusqueda && matchEstado;
     });
@@ -87,13 +93,13 @@ export default function ClientesPage() {
                     onChange={(e) => setFiltroEstado(e.target.value)}
                     className="input"
                 >
-                    <option value="todos">Todos los estados</option>
+                    <option value="todos">Todos los prospectos activos</option>
                     <option value="contactado">Contactado</option>
                     <option value="interesado">Interesado</option>
-                    <option value="cotizacion">Cotización</option>
                     <option value="cierre_programado">Cierre Programado</option>
                     <option value="vendido">Vendido</option>
-                    <option value="perdido">Perdido</option>
+                    <option value="sin_cobertura">Sin Cobertura</option>
+                    <option value="cobertura_cobre">Cobertura Cobre</option>
                 </select>
             </div>
 
@@ -112,17 +118,17 @@ export default function ClientesPage() {
                                         <h3 className="text-lg font-semibold text-gray-900">{cliente.nombre}</h3>
                                         <span className={`badge ${cliente.estado_pipeline === 'vendido' ? 'badge-green' :
                                             cliente.estado_pipeline === 'cierre_programado' ? 'badge-purple' :
-                                                cliente.estado_pipeline === 'cotizacion' ? 'badge-yellow' :
-                                                    cliente.estado_pipeline === 'interesado' ? 'badge-blue' :
-                                                        cliente.estado_pipeline === 'perdido' ? 'badge-red' :
+                                                cliente.estado_pipeline === 'interesado' ? 'badge-blue' :
+                                                    cliente.estado_pipeline === 'sin_cobertura' ? 'bg-red-100 text-red-700' :
+                                                        cliente.estado_pipeline === 'cobertura_cobre' ? 'bg-orange-100 text-orange-700' :
                                                             'bg-gray-100 text-gray-800'
                                             }`}>
                                             {cliente.estado_pipeline === 'vendido' && 'Vendido'}
                                             {cliente.estado_pipeline === 'cierre_programado' && 'Cierre Programado'}
-                                            {cliente.estado_pipeline === 'cotizacion' && 'Cotización'}
                                             {cliente.estado_pipeline === 'interesado' && 'Interesado'}
                                             {cliente.estado_pipeline === 'contactado' && 'Contactado'}
-                                            {cliente.estado_pipeline === 'perdido' && 'Perdido'}
+                                            {cliente.estado_pipeline === 'sin_cobertura' && 'Sin Cobertura'}
+                                            {cliente.estado_pipeline === 'cobertura_cobre' && 'Cobertura Cobre'}
                                         </span>
                                         <span className={`badge ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
                                             cliente.tipo_servicio === 'portabilidad' ? 'badge-purple' :

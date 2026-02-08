@@ -4,7 +4,7 @@
 
 export type TipoServicio = 'linea_nueva' | 'portabilidad' | 'winback';
 export type TipoCliente = 'residencial' | 'pyme';
-export type EstadoPipeline = 'contactado' | 'interesado' | 'cotizacion' | 'cierre_programado' | 'vendido' | 'perdido';
+export type EstadoPipeline = 'contactado' | 'interesado' | 'cierre_programado' | 'vendido' | 'sin_cobertura' | 'cobertura_cobre';
 export type Proveedor = 'totalplay' | 'izzi' | 'megacable' | 'axtel' | 'dish' | 'otro';
 
 // ============================================
@@ -200,10 +200,10 @@ export interface Metricas {
     // Pipeline
     contactados: number;
     interesados: number;
-    cotizaciones: number;
     cierresProgramados: number;
     vendidos: number;
-    perdidos: number;
+    sin_cobertura: number;
+    cobertura_cobre: number;
 
     // Presupuesto publicitario
     presupuestoGastadoHoy: number;
