@@ -12,6 +12,7 @@ import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, Check
 import { Textarea } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { DocumentManager } from '@/components/DocumentManager';
+import { ClavesPortalCard } from '@/components/ClavesPortalCard';
 
 export default function ClienteDetallePage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -710,6 +711,11 @@ Solo necesito que me confirmes para agendar.
                         </CardContent>
                     </Card>
                 </div>
+            </div>
+
+            {/* Claves del Portal (Si aplica) */}
+            <div className="mt-6">
+                <ClavesPortalCard ciudad={cliente.cd} modo="detalle" />
             </div>
 
             {/* Modal de Documentos */}

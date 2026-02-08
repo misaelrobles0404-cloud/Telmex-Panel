@@ -12,6 +12,7 @@ import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@
 import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { Publicacion } from '@/types';
 import { supabase } from '@/lib/supabase';
+import { ClavesPortalCard } from '@/components/ClavesPortalCard';
 
 export default function NuevoClientePage() {
     const router = useRouter();
@@ -249,7 +250,7 @@ export default function NuevoClientePage() {
     const comision = calcularComision(tipoServicio);
 
     return (
-        <div className="p-6 max-w-5xl mx-auto">
+        <div className="p-6 max-w-7xl mx-auto">
             <div className="mb-6">
                 <Button
                     variant="ghost"
@@ -264,501 +265,513 @@ export default function NuevoClientePage() {
                 <p className="text-gray-600 mt-1">Formulario de captura TELMEX</p>
             </div>
 
-            {/* Advertencia de Requisitos para Comisión */}
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r shadow-sm">
-                <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                        <AlertTriangle className="h-6 w-6 text-yellow-600" aria-hidden="true" />
-                    </div>
-                    <div className="ml-3">
-                        <h3 className="text-lg font-bold text-yellow-800">
-                            REQUISITOS OBLIGATORIOS PARA COMISIONAR
-                        </h3>
-                        <div className="mt-2 text-sm text-yellow-700">
-                            <p className="font-semibold mb-2">Asegúrate de tener las siguientes capturas:</p>
-                            <ul className="list-decimal list-inside space-y-1 font-medium">
-                                <li>ACEPTO DEL CLIENTE (Audio o Mensaje)</li>
-                                <li>DATOS Y MAPA EN PORTAL</li>
-                                <li>PAQUETE ELEGIDO EN PORTAL</li>
-                                <li>CAPTURA DE FOLIO EN PORTAL</li>
-                                <li>CAPTURA DE FOLIO SIAC EN CHAT-CLIENTE</li>
-                                <li>CAPTURA DEL CURP</li>
-                                <li>FOTO DE COBERTURA</li>
-                            </ul>
-                        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                {/* Sidebar Izquierda - Claves Portal */}
+                <div className="hidden lg:block lg:col-span-1">
+                    <div className="sticky top-6">
+                        <ClavesPortalCard />
                     </div>
                 </div>
-            </div>
 
-            {/* Selector Tipo Cliente (Residencial / Negocio) */}
-            <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm flex mb-6 w-fit">
-                <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, tipoCliente: 'residencial', paqueteId: '' }))}
-                    className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${formData.tipoCliente === 'residencial'
-                        ? 'bg-telmex-blue text-white shadow-sm'
-                        : 'text-gray-600 hover:bg-gray-50'
-                        }`}
-                >
-                    <HomeIcon size={16} />
-                    Residencial
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, tipoCliente: 'pyme', paqueteId: '' }))}
-                    className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${formData.tipoCliente === 'pyme'
-                        ? 'bg-telmex-blue text-white shadow-sm'
-                        : 'text-gray-600 hover:bg-gray-50'
-                        }`}
-                >
-                    <Building2 size={16} />
-                    Negocio
-                </button>
-            </div>
-
-            {/* Selector de Tipo de Servicio */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div
-                    onClick={() => handleTipoServicioChange('linea_nueva')}
-                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'linea_nueva'
-                        ? 'border-telmex-blue bg-blue-50/50 shadow-md'
-                        : 'border-gray-200 hover:border-blue-300 bg-white'
-                        }`}
-                >
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-gray-900">Línea Nueva</span>
-                        <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'linea_nueva' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
-                            }`} />
-                    </div>
-                    <p className="text-sm text-gray-500">
-                        Cliente sin servicio actual o instalación nueva.
-                    </p>
-                    <p className="text-telmex-blue font-bold mt-2 text-lg">$250 MXN</p>
-                </div>
-
-                <div
-                    onClick={() => handleTipoServicioChange('portabilidad')}
-                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'portabilidad'
-                        ? 'border-telmex-blue bg-blue-50/50 shadow-md'
-                        : 'border-gray-200 hover:border-blue-300 bg-white'
-                        }`}
-                >
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-gray-900">Portabilidad</span>
-                        <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'portabilidad' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
-                            }`} />
-                    </div>
-                    <p className="text-sm text-gray-500">
-                        Cambio de compañía (Izzi, Totalplay) conservando número.
-                    </p>
-                    <p className="text-telmex-blue font-bold mt-2 text-lg">$300 MXN</p>
-                </div>
-
-                <div
-                    onClick={() => handleTipoServicioChange('winback')}
-                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'winback'
-                        ? 'border-telmex-blue bg-blue-50/50 shadow-md'
-                        : 'border-gray-200 hover:border-blue-300 bg-white'
-                        }`}
-                >
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-gray-900">Winback</span>
-                        <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'winback' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
-                            }`} />
-                    </div>
-                    <p className="text-sm text-gray-500">
-                        Recuperación de clientes específicos (Megacable).
-                    </p>
-                    <p className="text-telmex-blue font-bold mt-2 text-lg">$300 MXN</p>
-                </div>
-            </div>
-
-            {/* Requisitos del Trámite */}
-            <Card className="mb-6 bg-blue-50 border-blue-200">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center gap-2 text-telmex-blue">
-                        <span role="img" aria-label="info">ℹ️</span> Requisitos para {REQUISITOS_SERVICIO[tipoServicio].tipoServicio.replace('_', ' ').toUpperCase()}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-semibold text-sm mb-2 text-gray-700">Documentos Necesarios:</h4>
-                            <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                {REQUISITOS_SERVICIO[tipoServicio].documentos.map((req, idx) => (
-                                    <li key={idx}>{req}</li>
-                                ))}
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm mb-2 text-gray-700">Datos a Capturar:</h4>
-                            <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                {REQUISITOS_SERVICIO[tipoServicio].campos.map((campo, idx) => (
-                                    <li key={idx}>{campo}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Información Básica */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Información Básica</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input
-                                label="Nombre Completo"
-                                value={formData.nombre}
-                                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                                placeholder="Opcional para prospectos"
-                            />
-
-                            <Input
-                                label="No. TT (Teléfono)"
-                                value={formData.noTT}
-                                onChange={(e) => setFormData({ ...formData, noTT: e.target.value })}
-                                required
-                            />
-
-                            <Input
-                                label="No. Ref (Referencia)"
-                                value={formData.noRef}
-                                onChange={(e) => setFormData({ ...formData, noRef: e.target.value })}
-                                required
-                            />
-
-                            <Input
-                                label="No. Ref 2 (Opcional)"
-                                value={formData.noRef2}
-                                onChange={(e) => setFormData({ ...formData, noRef2: e.target.value })}
-                            />
-
-                            <Input
-                                label="Correo"
-                                type="email"
-                                value={formData.correo}
-                                onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
-                                required
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Dirección */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Dirección</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input
-                                label="Calle"
-                                value={formData.calle}
-                                onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
-                                required
-                            />
-
-                            <Input
-                                label="Número Exterior"
-                                value={formData.numeroExterior}
-                                onChange={(e) => setFormData({ ...formData, numeroExterior: e.target.value })}
-                                placeholder="Opcional"
-                            />
-
-                            <Input
-                                label="Número Interior"
-                                value={formData.numeroInterior}
-                                onChange={(e) => setFormData({ ...formData, numeroInterior: e.target.value })}
-                                placeholder="Opcional"
-                            />
-
-                            <Input
-                                label="Colonia"
-                                value={formData.colonia}
-                                onChange={(e) => setFormData({ ...formData, colonia: e.target.value })}
-                                required
-                            />
-
-                            <Input
-                                label="CP (Código Postal)"
-                                value={formData.cp}
-                                onChange={(e) => setFormData({ ...formData, cp: e.target.value })}
-                                required
-                            />
-
-                            <Input
-                                label="CD (Ciudad)"
-                                value={formData.cd}
-                                onChange={(e) => setFormData({ ...formData, cd: e.target.value })}
-                                required
-                            />
-
-                            <Input
-                                label="Estado"
-                                value={formData.estado}
-                                onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                                required
-                            />
-
-                            <Input
-                                label="Entre Calle 1"
-                                value={formData.entreCalle1}
-                                onChange={(e) => setFormData({ ...formData, entreCalle1: e.target.value })}
-                            />
-
-                            <Input
-                                label="Entre Calle 2"
-                                value={formData.entreCalle2}
-                                onChange={(e) => setFormData({ ...formData, entreCalle2: e.target.value })}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Documentación */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Documentación</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Input
-                                label="INE"
-                                value={formData.ine}
-                                onChange={(e) => setFormData({ ...formData, ine: e.target.value })}
-                            />
-
-                            <Input
-                                label="CURP"
-                                value={formData.curp}
-                                onChange={(e) => setFormData({ ...formData, curp: e.target.value })}
-                                required
-                            />
-
-                            <Input
-                                label="Usuario"
-                                value={formData.usuario}
-                                onChange={(e) => setFormData({ ...formData, usuario: e.target.value })}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Clasificación de Servicio - Solo si NO es Línea Nueva */}
-                {tipoServicio !== 'linea_nueva' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Clasificación de Servicio</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.tieneInternet}
-                                            onChange={(e) => setFormData({ ...formData, tieneInternet: e.target.checked })}
-                                            className="w-4 h-4"
-                                        />
-                                        <span className="text-sm font-medium text-gray-700">
-                                            ¿Tiene internet actualmente?
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <div>
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.tieneTelefonoFijo}
-                                            onChange={(e) => setFormData({ ...formData, tieneTelefonoFijo: e.target.checked })}
-                                            className="w-4 h-4"
-                                        />
-                                        <span className="text-sm font-medium text-gray-700">
-                                            ¿Tiene teléfono fijo?
-                                        </span>
-                                    </label>
+                {/* Contenido Principal - Formulario */}
+                <div className="lg:col-span-3">
+                    {/* Advertencia de Requisitos para Comisión */}
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r shadow-sm">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                <AlertTriangle className="h-6 w-6 text-yellow-600" aria-hidden="true" />
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-lg font-bold text-yellow-800">
+                                    REQUISITOS OBLIGATORIOS PARA COMISIONAR
+                                </h3>
+                                <div className="mt-2 text-sm text-yellow-700">
+                                    <p className="font-semibold mb-2">Asegúrate de tener las siguientes capturas:</p>
+                                    <ul className="list-decimal list-inside space-y-1 font-medium">
+                                        <li>ACEPTO DEL CLIENTE (Audio o Mensaje)</li>
+                                        <li>DATOS Y MAPA EN PORTAL</li>
+                                        <li>PAQUETE ELEGIDO EN PORTAL</li>
+                                        <li>CAPTURA DE FOLIO EN PORTAL</li>
+                                        <li>CAPTURA DE FOLIO SIAC EN CHAT-CLIENTE</li>
+                                        <li>CAPTURA DEL CURP</li>
+                                        <li>FOTO DE COBERTURA</li>
+                                    </ul>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            {formData.tieneInternet && (
-                                <Select
-                                    label="Proveedor Actual"
-                                    value={formData.proveedorActual}
-                                    onChange={(e) => setFormData({ ...formData, proveedorActual: e.target.value })}
-                                    options={[
-                                        { value: 'totalplay', label: 'Totalplay' },
-                                        { value: 'izzi', label: 'Izzi' },
-                                        { value: 'megacable', label: 'Megacable' },
-                                        { value: 'axtel', label: 'Axtel' },
-                                        { value: 'dish', label: 'Dish' },
-                                        { value: 'otro', label: 'Otro' },
-                                    ]}
-                                />
-                            )}
-                        </CardContent>
-                    </Card>
-                )}
+                    {/* Selector Tipo Cliente (Residencial / Negocio) */}
+                    <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm flex mb-6 w-fit">
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, tipoCliente: 'residencial', paqueteId: '' }))}
+                            className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${formData.tipoCliente === 'residencial'
+                                ? 'bg-telmex-blue text-white shadow-sm'
+                                : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                        >
+                            <HomeIcon size={16} />
+                            Residencial
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, tipoCliente: 'pyme', paqueteId: '' }))}
+                            className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${formData.tipoCliente === 'pyme'
+                                ? 'bg-telmex-blue text-white shadow-sm'
+                                : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                        >
+                            <Building2 size={16} />
+                            Negocio
+                        </button>
+                    </div>
 
-                {/* Paquete */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Paquete {formData.tipoCliente === 'residencial' ? 'TELMEX' : 'NEGOCIO'}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Select
-                            label="Seleccionar Paquete"
-                            value={formData.paqueteId}
-                            onChange={(e) => setFormData({ ...formData, paqueteId: e.target.value })}
-                            options={obtenerPaquetesPorTipo(formData.tipoCliente).map(p => ({
-                                value: p.id,
-                                label: `${p.velocidad} Mbps - $${p.precioPromo}/mes ${p.netflix ? '(Netflix)' : ''} ${!p.llamadasIlimitadas ? '(Solo Internet)' : ''}`
-                            }))}
-                            required
-                        />
-                    </CardContent>
-                </Card>
+                    {/* Selector de Tipo de Servicio */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div
+                            onClick={() => handleTipoServicioChange('linea_nueva')}
+                            className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'linea_nueva'
+                                ? 'border-telmex-blue bg-blue-50/50 shadow-md'
+                                : 'border-gray-200 hover:border-blue-300 bg-white'
+                                }`}
+                        >
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="font-bold text-gray-900">Línea Nueva</span>
+                                <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'linea_nueva' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
+                                    }`} />
+                            </div>
+                            <p className="text-sm text-gray-500">
+                                Cliente sin servicio actual o instalación nueva.
+                            </p>
+                            <p className="text-telmex-blue font-bold mt-2 text-lg">$250 MXN</p>
+                        </div>
 
-                {/* Datos de Portabilidad */}
-                {(tipoServicio === 'portabilidad' || tipoServicio === 'winback') && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                Datos de {tipoServicio === 'portabilidad' ? 'Portabilidad' : 'Winback'}
+                        <div
+                            onClick={() => handleTipoServicioChange('portabilidad')}
+                            className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'portabilidad'
+                                ? 'border-telmex-blue bg-blue-50/50 shadow-md'
+                                : 'border-gray-200 hover:border-blue-300 bg-white'
+                                }`}
+                        >
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="font-bold text-gray-900">Portabilidad</span>
+                                <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'portabilidad' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
+                                    }`} />
+                            </div>
+                            <p className="text-sm text-gray-500">
+                                Cambio de compañía (Izzi, Totalplay) conservando número.
+                            </p>
+                            <p className="text-telmex-blue font-bold mt-2 text-lg">$300 MXN</p>
+                        </div>
+
+                        <div
+                            onClick={() => handleTipoServicioChange('winback')}
+                            className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'winback'
+                                ? 'border-telmex-blue bg-blue-50/50 shadow-md'
+                                : 'border-gray-200 hover:border-blue-300 bg-white'
+                                }`}
+                        >
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="font-bold text-gray-900">Winback</span>
+                                <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'winback' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
+                                    }`} />
+                            </div>
+                            <p className="text-sm text-gray-500">
+                                Recuperación de clientes específicos (Megacable).
+                            </p>
+                            <p className="text-telmex-blue font-bold mt-2 text-lg">$300 MXN</p>
+                        </div>
+                    </div>
+
+                    {/* Requisitos del Trámite */}
+                    <Card className="mb-6 bg-blue-50 border-blue-200">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-lg flex items-center gap-2 text-telmex-blue">
+                                <span role="img" aria-label="info">ℹ️</span> Requisitos para {REQUISITOS_SERVICIO[tipoServicio].tipoServicio.replace('_', ' ').toUpperCase()}
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Input
-                                    label="Número a Portar"
-                                    value={formData.numeroAPortar}
-                                    onChange={(e) => setFormData({ ...formData, numeroAPortar: e.target.value })}
+                                <div>
+                                    <h4 className="font-semibold text-sm mb-2 text-gray-700">Documentos Necesarios:</h4>
+                                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                        {REQUISITOS_SERVICIO[tipoServicio].documentos.map((req, idx) => (
+                                            <li key={idx}>{req}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-sm mb-2 text-gray-700">Datos a Capturar:</h4>
+                                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                        {REQUISITOS_SERVICIO[tipoServicio].campos.map((campo, idx) => (
+                                            <li key={idx}>{campo}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Información Básica */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Información Básica</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input
+                                        label="Nombre Completo"
+                                        value={formData.nombre}
+                                        onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                                        placeholder="Opcional para prospectos"
+                                    />
+
+                                    <Input
+                                        label="No. TT (Teléfono)"
+                                        value={formData.noTT}
+                                        onChange={(e) => setFormData({ ...formData, noTT: e.target.value })}
+                                        required
+                                    />
+
+                                    <Input
+                                        label="No. Ref (Referencia)"
+                                        value={formData.noRef}
+                                        onChange={(e) => setFormData({ ...formData, noRef: e.target.value })}
+                                        required
+                                    />
+
+                                    <Input
+                                        label="No. Ref 2 (Opcional)"
+                                        value={formData.noRef2}
+                                        onChange={(e) => setFormData({ ...formData, noRef2: e.target.value })}
+                                    />
+
+                                    <Input
+                                        label="Correo"
+                                        type="email"
+                                        value={formData.correo}
+                                        onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Dirección */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Dirección</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input
+                                        label="Calle"
+                                        value={formData.calle}
+                                        onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
+                                        required
+                                    />
+
+                                    <Input
+                                        label="Número Exterior"
+                                        value={formData.numeroExterior}
+                                        onChange={(e) => setFormData({ ...formData, numeroExterior: e.target.value })}
+                                        placeholder="Opcional"
+                                    />
+
+                                    <Input
+                                        label="Número Interior"
+                                        value={formData.numeroInterior}
+                                        onChange={(e) => setFormData({ ...formData, numeroInterior: e.target.value })}
+                                        placeholder="Opcional"
+                                    />
+
+                                    <Input
+                                        label="Colonia"
+                                        value={formData.colonia}
+                                        onChange={(e) => setFormData({ ...formData, colonia: e.target.value })}
+                                        required
+                                    />
+
+                                    <Input
+                                        label="CP (Código Postal)"
+                                        value={formData.cp}
+                                        onChange={(e) => setFormData({ ...formData, cp: e.target.value })}
+                                        required
+                                    />
+
+                                    <Input
+                                        label="CD (Ciudad)"
+                                        value={formData.cd}
+                                        onChange={(e) => setFormData({ ...formData, cd: e.target.value })}
+                                        required
+                                    />
+
+                                    <Input
+                                        label="Estado"
+                                        value={formData.estado}
+                                        onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                                        required
+                                    />
+
+                                    <Input
+                                        label="Entre Calle 1"
+                                        value={formData.entreCalle1}
+                                        onChange={(e) => setFormData({ ...formData, entreCalle1: e.target.value })}
+                                    />
+
+                                    <Input
+                                        label="Entre Calle 2"
+                                        value={formData.entreCalle2}
+                                        onChange={(e) => setFormData({ ...formData, entreCalle2: e.target.value })}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Documentación */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Documentación</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <Input
+                                        label="INE"
+                                        value={formData.ine}
+                                        onChange={(e) => setFormData({ ...formData, ine: e.target.value })}
+                                    />
+
+                                    <Input
+                                        label="CURP"
+                                        value={formData.curp}
+                                        onChange={(e) => setFormData({ ...formData, curp: e.target.value })}
+                                        required
+                                    />
+
+                                    <Input
+                                        label="Usuario"
+                                        value={formData.usuario}
+                                        onChange={(e) => setFormData({ ...formData, usuario: e.target.value })}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Clasificación de Servicio - Solo si NO es Línea Nueva */}
+                        {tipoServicio !== 'linea_nueva' && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Clasificación de Servicio</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.tieneInternet}
+                                                    onChange={(e) => setFormData({ ...formData, tieneInternet: e.target.checked })}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    ¿Tiene internet actualmente?
+                                                </span>
+                                            </label>
+                                        </div>
+
+                                        <div>
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.tieneTelefonoFijo}
+                                                    onChange={(e) => setFormData({ ...formData, tieneTelefonoFijo: e.target.checked })}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    ¿Tiene teléfono fijo?
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {formData.tieneInternet && (
+                                        <Select
+                                            label="Proveedor Actual"
+                                            value={formData.proveedorActual}
+                                            onChange={(e) => setFormData({ ...formData, proveedorActual: e.target.value })}
+                                            options={[
+                                                { value: 'totalplay', label: 'Totalplay' },
+                                                { value: 'izzi', label: 'Izzi' },
+                                                { value: 'megacable', label: 'Megacable' },
+                                                { value: 'axtel', label: 'Axtel' },
+                                                { value: 'dish', label: 'Dish' },
+                                                { value: 'otro', label: 'Otro' },
+                                            ]}
+                                        />
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* Paquete */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Paquete {formData.tipoCliente === 'residencial' ? 'TELMEX' : 'NEGOCIO'}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Select
+                                    label="Seleccionar Paquete"
+                                    value={formData.paqueteId}
+                                    onChange={(e) => setFormData({ ...formData, paqueteId: e.target.value })}
+                                    options={obtenerPaquetesPorTipo(formData.tipoCliente).map(p => ({
+                                        value: p.id,
+                                        label: `${p.velocidad} Mbps - $${p.precioPromo}/mes ${p.netflix ? '(Netflix)' : ''} ${!p.llamadasIlimitadas ? '(Solo Internet)' : ''}`
+                                    }))}
                                     required
                                 />
+                            </CardContent>
+                        </Card>
 
-                                {tipoServicio === 'portabilidad' && (
-                                    <>
+                        {/* Datos de Portabilidad */}
+                        {(tipoServicio === 'portabilidad' || tipoServicio === 'winback') && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>
+                                        Datos de {tipoServicio === 'portabilidad' ? 'Portabilidad' : 'Winback'}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <Input
-                                            label="NIP Portabilidad (marcar 051)"
-                                            value={formData.nipPortabilidad}
-                                            onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })}
+                                            label="Número a Portar"
+                                            value={formData.numeroAPortar}
+                                            onChange={(e) => setFormData({ ...formData, numeroAPortar: e.target.value })}
                                             required
                                         />
 
-                                        <Input
-                                            label="Fecha de Vigencia"
-                                            type="date"
-                                            value={formData.fechaVigencia}
-                                            onChange={(e) => setFormData({ ...formData, fechaVigencia: e.target.value })}
-                                        />
-
-                                        <div>
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.formatoPortabilidad}
-                                                    onChange={(e) => setFormData({ ...formData, formatoPortabilidad: e.target.checked })}
-                                                    className="w-4 h-4"
+                                        {tipoServicio === 'portabilidad' && (
+                                            <>
+                                                <Input
+                                                    label="NIP Portabilidad (marcar 051)"
+                                                    value={formData.nipPortabilidad}
+                                                    onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })}
+                                                    required
                                                 />
-                                                <span className="text-sm font-medium text-gray-700">
-                                                    Formato de Portabilidad
-                                                </span>
-                                            </label>
-                                        </div>
 
-                                        <div>
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.cartaBaja}
-                                                    onChange={(e) => setFormData({ ...formData, cartaBaja: e.target.checked })}
-                                                    className="w-4 h-4"
+                                                <Input
+                                                    label="Fecha de Vigencia"
+                                                    type="date"
+                                                    value={formData.fechaVigencia}
+                                                    onChange={(e) => setFormData({ ...formData, fechaVigencia: e.target.value })}
                                                 />
-                                                <span className="text-sm font-medium text-gray-700">
-                                                    Carta de Baja
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </>
-                                )}
 
-                                {tipoServicio === 'winback' && (
-                                    <div>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.estadoCuentaMegacable}
-                                                onChange={(e) => setFormData({ ...formData, estadoCuentaMegacable: e.target.checked })}
-                                                className="w-4 h-4"
-                                            />
-                                            <span className="text-sm font-medium text-gray-700">
-                                                Estado de Cuenta Megacable
-                                            </span>
-                                        </label>
+                                                <div>
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.formatoPortabilidad}
+                                                            onChange={(e) => setFormData({ ...formData, formatoPortabilidad: e.target.checked })}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm font-medium text-gray-700">
+                                                            Formato de Portabilidad
+                                                        </span>
+                                                    </label>
+                                                </div>
+
+                                                <div>
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.cartaBaja}
+                                                            onChange={(e) => setFormData({ ...formData, cartaBaja: e.target.checked })}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm font-medium text-gray-700">
+                                                            Carta de Baja
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {tipoServicio === 'winback' && (
+                                            <div>
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.estadoCuentaMegacable}
+                                                        onChange={(e) => setFormData({ ...formData, estadoCuentaMegacable: e.target.checked })}
+                                                        className="w-4 h-4"
+                                                    />
+                                                    <span className="text-sm font-medium text-gray-700">
+                                                        Estado de Cuenta Megacable
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
+                                </CardContent>
+                            </Card>
+                        )}
 
-                {/* Notas y Campaña */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Origen y Notas</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Select
-                            label="Campaña de Origen"
-                            value={formData.campanaId}
-                            onChange={(e) => setFormData({ ...formData, campanaId: e.target.value })}
-                            options={[
-                                { value: '', label: 'Sin campaña (Directo)' },
-                                ...campanas.map((p: Publicacion) => ({
-                                    value: p.id,
-                                    label: p.titulo
-                                }))
-                            ]}
-                        />
-                        <Textarea
-                            label="Notas adicionales"
-                            value={formData.notas}
-                            onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                            placeholder="Información adicional sobre el cliente..."
-                        />
-                    </CardContent>
-                </Card>
+                        {/* Notas y Campaña */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Origen y Notas</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <Select
+                                    label="Campaña de Origen"
+                                    value={formData.campanaId}
+                                    onChange={(e) => setFormData({ ...formData, campanaId: e.target.value })}
+                                    options={[
+                                        { value: '', label: 'Sin campaña (Directo)' },
+                                        ...campanas.map((p: Publicacion) => ({
+                                            value: p.id,
+                                            label: p.titulo
+                                        }))
+                                    ]}
+                                />
+                                <Textarea
+                                    label="Notas adicionales"
+                                    value={formData.notas}
+                                    onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+                                    placeholder="Información adicional sobre el cliente..."
+                                />
+                            </CardContent>
+                        </Card>
 
-                {/* Botones */}
-                <div className="flex gap-4 justify-end">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => router.back()}
-                        className="text-gray-500 hover:text-gray-700"
-                    >
-                        Cancelar
-                    </Button>
+                        {/* Botones */}
+                        <div className="flex gap-4 justify-end">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => router.back()}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                Cancelar
+                            </Button>
 
-                    <Button
-                        type="button"
-                        onClick={handleGuardarProspecto}
-                        className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
-                    >
-                        <UserPlus size={20} className="mr-2" />
-                        Guardar como Prospecto
-                    </Button>
+                            <Button
+                                type="button"
+                                onClick={handleGuardarProspecto}
+                                className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
+                            >
+                                <UserPlus size={20} className="mr-2" />
+                                Guardar como Prospecto
+                            </Button>
 
-                    <Button type="submit" variant="primary">
-                        <Save size={20} className="mr-2" />
-                        Guardar Cliente Completo
-                    </Button>
+                            <Button type="submit" variant="primary">
+                                <Save size={20} className="mr-2" />
+                                Guardar Cliente Completo
+                            </Button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     );
 }
