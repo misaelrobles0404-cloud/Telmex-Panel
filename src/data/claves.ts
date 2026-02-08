@@ -174,8 +174,13 @@ export function obtenerClavePorCiudad(busqueda: string): ClavePortal | undefined
     const term = busqueda.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
     // Buscar coincidencia exacta o parcial
-    return CLAVES_PORTAL.find(c => {
+    const match = CLAVES_PORTAL.find(c => {
         const ciudadNorm = c.ciudad.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         return ciudadNorm.includes(term) || term.includes(ciudadNorm);
     });
+
+    if (match) return match;
+
+    // Si no hay coincidencia, devolver la digital por defecto (como pidió el usuario)
+    return CLAVES_PORTAL.find(c => c.tipo === 'DIGITAL');
 }
