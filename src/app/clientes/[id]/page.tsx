@@ -105,6 +105,24 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         }
     };
 
+    const eliminarActividad = async (id: string) => {
+        if (!cliente || !confirm('¿Estás seguro de eliminar esta nota?')) return;
+
+        const nuevasActividades = (cliente.actividades || []).filter(a => a.id !== id);
+        const clienteActualizado = {
+            ...cliente,
+            actividades: nuevasActividades,
+            actualizado_en: new Date().toISOString()
+        };
+
+        try {
+            await guardarCliente(clienteActualizado);
+            setCliente(clienteActualizado);
+        } catch (error) {
+            alert('Error al eliminar la nota');
+        }
+    };
+
     const guardarFolioSiac = async () => {
         if (!cliente) return;
 
@@ -534,7 +552,7 @@ Solo necesito que me confirmes para agendar.
                                     <p className="text-gray-500 text-center py-4">No hay actividad registrada.</p>
                                 ) : (
                                     cliente.actividades.map((actividad) => (
-                                        <div key={actividad.id} className="flex gap-3 border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                                        <div key={actividad.id} className="group flex gap-3 border-b border-gray-100 pb-3 last:border-0 last:pb-0 relative">
                                             <div className={`mt-1 p-1.5 rounded-full ${actividad.tipo === 'cambio_estado' ? 'bg-blue-100 text-blue-600' :
                                                 actividad.tipo === 'llamada' ? 'bg-green-100 text-green-600' :
                                                     'bg-gray-100 text-gray-600'
@@ -545,12 +563,19 @@ Solo necesito que me confirmes para agendar.
                                                 {actividad.tipo === 'cita' && <Calendar size={14} />}
                                                 {actividad.tipo === 'nota' && <FileText size={14} />}
                                             </div>
-                                            <div>
+                                            <div className="flex-1">
                                                 <p className="text-sm text-gray-900">{actividad.descripcion}</p>
                                                 <p className="text-xs text-gray-500 mt-0.5">
                                                     {formatearFechaHora(actividad.fecha)}
                                                 </p>
                                             </div>
+                                            <button
+                                                onClick={() => eliminarActividad(actividad.id)}
+                                                className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-red-500 transition-all rounded-md hover:bg-red-50"
+                                                title="Eliminar nota"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
                                         </div>
                                     ))
                                 )}
