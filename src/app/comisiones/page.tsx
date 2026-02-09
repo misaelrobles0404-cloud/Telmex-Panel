@@ -10,7 +10,8 @@ import { CheckCircle, XCircle, Search, Calendar, AlertCircle } from 'lucide-reac
 import { Input } from '@/components/ui/Input';
 
 export default function ComisionesPage() {
-    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [clientesPendientes, setClientesPendientes] = useState<Cliente[]>([]);
+    const [clientesPagados, setClientesPagados] = useState<Record<string, { clientes: Cliente[], total: number }>>({});
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -21,12 +22,42 @@ export default function ComisionesPage() {
     const cargarClientes = async () => {
         try {
             const todos = await obtenerClientes();
-            const filtrados = todos.filter(c =>
+
+            // 1. Pendientes: Tienen folio SIAC pero no están vendidos
+            const pendientes = todos.filter(c =>
                 c.folio_siac &&
                 c.folio_siac.trim() !== '' &&
                 c.estado_pipeline !== 'vendido'
             );
-            setClientes(filtrados);
+            setClientesPendientes(pendientes);
+
+            // 2. Pagados/Vendidos: Estado 'vendido'
+            // Agrupar por semana de corte (Miércoles)
+            const vendidos = todos.filter(c => c.estado_pipeline === 'vendido');
+            const agrupados: Record<string, { clientes: Cliente[], total: number }> = {};
+
+            vendidos.forEach(cliente => {
+                // Usar fecha_instalacion o actualizado_en como fallback
+                const fechaRef = cliente.fecha_instalacion || cliente.actualizado_en;
+                const corte = getFechaCorte(fechaRef);
+
+                if (!agrupados[corte]) {
+                    agrupados[corte] = { clientes: [], total: 0 };
+                }
+
+                agrupados[corte].clientes.push(cliente);
+                agrupados[corte].total += cliente.comision;
+            });
+
+            // Ordenar claves de fecha descendente (más reciente primero)
+            const ordenados = Object.keys(agrupados).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+                .reduce((obj, key) => {
+                    obj[key] = agrupados[key];
+                    return obj;
+                }, {} as Record<string, { clientes: Cliente[], total: number }>);
+
+            setClientesPagados(ordenados);
+
         } catch (error) {
             console.error("Error al cargar comisiones:", error);
         } finally {
@@ -34,21 +65,38 @@ export default function ComisionesPage() {
         }
     };
 
+    // Función para obtener el próximo miércoles (o hoy si es miércoles)
+    const getFechaCorte = (fechaStr: string) => {
+        const fecha = new Date(fechaStr);
+        const diaSemana = fecha.getDay(); // 0 = Domingo, 1 = Lunes, ..., 3 = Miércoles
+
+        const diasParaMiercoles = (3 - diaSemana + 7) % 7;
+        // Si hoy es miércoles (diasParaMiercoles es 0), el corte es hoy.
+        // Si no, sumamos los días necesarios.
+
+        const fechaCorte = new Date(fecha);
+        fechaCorte.setDate(fecha.getDate() + diasParaMiercoles);
+
+        return fechaCorte.toISOString().split('T')[0]; // YYYY-MM-DD
+    };
+
     const confirmarInstalacion = async (cliente: Cliente) => {
         if (!confirm(`¿Confirmar instalación del folio ${cliente.folio_siac}?\n\nEsto marcará al cliente como VENDIDO y sumará la comisión a tus reportes.`)) return;
 
         setLoading(true);
+        const hoy = new Date().toISOString();
         const clienteActualizado: Cliente = {
             ...cliente,
             estado_pipeline: 'vendido',
-            actualizado_en: new Date().toISOString(),
+            fecha_instalacion: hoy, // Guardamos fecha exacta
+            actualizado_en: hoy,
             actividades: [
                 {
                     id: generarId(),
                     clienteId: cliente.id,
                     tipo: 'cambio_estado',
                     descripcion: 'Instalación confirmada. Comisión activada.',
-                    fecha: new Date().toISOString()
+                    fecha: hoy
                 },
                 ...cliente.actividades || []
             ]
@@ -93,7 +141,7 @@ export default function ComisionesPage() {
         }
     };
 
-    const clientesFiltrados = clientes.filter(c =>
+    const pendientesFiltrados = clientesPendientes.filter(c =>
         c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.folio_siac?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -108,24 +156,24 @@ export default function ComisionesPage() {
     if (loading) return <div className="p-6">Cargando verificación...</div>;
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Verificación de Comisiones</h1>
-                    <p className="text-gray-600 mt-1">Confirma las instalaciones para liberar tus comisiones.</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Gestión de Comisiones</h1>
+                    <p className="text-gray-600 mt-1">Cortes semanales los Miércoles.</p>
                 </div>
-                {/* <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm font-medium border border-blue-100 flex items-center gap-2">
-                    <AlertCircle size={16} />
-                    {clientes.length} instalaciones pendientes
-                </div> */}
             </div>
 
-            <Card>
+            {/* SECCIÓN 1: PENDIENTES DE INSTALACIÓN */}
+            <Card className="border-l-4 border-l-yellow-400">
                 <CardHeader className="pb-3">
-                    <div className="relative">
+                    <CardTitle className="text-xl flex items-center justify-between">
+                        <span>⏳ Pendientes de Instalación ({pendientesFiltrados.length})</span>
+                    </CardTitle>
+                    <div className="relative mt-4">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <Input
-                            placeholder="Buscar por nombre o folio SIAC..."
+                            placeholder="Buscar pendientes..."
                             className="pl-10"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -133,72 +181,41 @@ export default function ComisionesPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {clientesFiltrados.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500">
-                            <CheckCircle size={48} className="mx-auto mb-4 text-green-100" />
-                            <p>¡Todo al día! No tienes instalaciones pendientes de verificar.</p>
+                    {pendientesFiltrados.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                            <p>No hay instalaciones pendientes.</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-gray-200 text-left text-gray-500 font-medium">
-                                        <th className="py-3 px-4">Fecha Captura</th>
-                                        <th className="py-3 px-4">Folio SIAC</th>
-                                        <th className="py-3 px-4">Cliente</th>
-                                        <th className="py-3 px-4">Paquete</th>
-                                        <th className="py-3 px-4">Comisión</th>
-                                        <th className="py-3 px-4 text-right">Acciones</th>
+                                        <th className="py-2 px-4">Fecha</th>
+                                        <th className="py-2 px-4">Folio SIAC</th>
+                                        <th className="py-2 px-4">Cliente</th>
+                                        <th className="py-2 px-4">Comisión</th>
+                                        <th className="py-2 px-4 text-right">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {clientesFiltrados.map((cliente) => {
+                                    {pendientesFiltrados.map((cliente) => {
                                         const dias = getDiasTranscurridos(cliente.creado_en);
-                                        const esUrgente = dias >= 2;
-
                                         return (
-                                            <tr key={cliente.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                                <td className="py-3 px-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <Calendar size={14} className="text-gray-400" />
-                                                        {formatearFecha(cliente.creado_en)}
-                                                        {esUrgente && (
-                                                            <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-bold">
-                                                                {dias} días
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                            <tr key={cliente.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                <td className="py-2 px-4 text-gray-600">
+                                                    {formatearFecha(cliente.creado_en)}
+                                                    {dias >= 2 && <span className="ml-2 text-xs text-red-600 font-bold">({dias}d)</span>}
                                                 </td>
-                                                <td className="py-3 px-4 font-mono font-medium text-gray-700">
-                                                    {cliente.folio_siac}
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    <div className="font-medium text-gray-900">{cliente.nombre}</div>
-                                                    <div className="text-gray-500 text-xs">{cliente.tipo_servicio.replace('_', ' ').toUpperCase()}</div>
-                                                </td>
-                                                <td className="py-3 px-4 text-gray-600">{cliente.paquete}</td>
-                                                <td className="py-3 px-4 font-medium text-green-600">
-                                                    {formatearMoneda(cliente.comision)}
-                                                </td>
-                                                <td className="py-3 px-4 text-right">
+                                                <td className="py-2 px-4 font-mono">{cliente.folio_siac}</td>
+                                                <td className="py-2 px-4 font-medium">{cliente.nombre}</td>
+                                                <td className="py-2 px-4 text-green-600 font-medium">{formatearMoneda(cliente.comision)}</td>
+                                                <td className="py-2 px-4 text-right">
                                                     <div className="flex justify-end gap-2">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="danger"
-                                                            className="h-8 px-2 bg-red-50 text-red-600 hover:bg-red-100 border-red-200"
-                                                            onClick={() => reportarRechazo(cliente)}
-                                                            title="Reportar problema/rechazo"
-                                                        >
+                                                        <Button size="sm" variant="danger" onClick={() => reportarRechazo(cliente)} title="Rechazar">
                                                             <XCircle size={16} />
                                                         </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            className="h-8 bg-green-600 hover:bg-green-700 text-white border-green-700"
-                                                            onClick={() => confirmarInstalacion(cliente)}
-                                                            title="Confirmar Instalación"
-                                                        >
-                                                            <CheckCircle size={16} className="mr-1.5" />
-                                                            Confirmar
+                                                        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => confirmarInstalacion(cliente)} title="Confirmar">
+                                                            <CheckCircle size={16} /> Confirmar
                                                         </Button>
                                                     </div>
                                                 </td>
@@ -211,6 +228,63 @@ export default function ComisionesPage() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* SECCIÓN 2: HISTORIAL DE PAGOS (AGRUPADO POR CORTE) */}
+            <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <Calendar className="text-telmex-blue" />
+                    Historial de Cortes (Miércoles)
+                </h2>
+
+                {Object.entries(clientesPagados).length === 0 ? (
+                    <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-xl">
+                        <p className="text-gray-400">Aún no hay comisiones liberadas.</p>
+                    </div>
+                ) : (
+                    Object.entries(clientesPagados).map(([fechaCorte, datos]) => (
+                        <Card key={fechaCorte} className="overflow-hidden border-green-100">
+                            <div className="bg-green-50 p-4 flex justify-between items-center border-b border-green-100">
+                                <div>
+                                    <p className="text-sm text-green-700 font-medium uppercase tracking-wide">Corte Semana</p>
+                                    <p className="text-lg font-bold text-green-900">{formatearFecha(fechaCorte)} (Miércoles)</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm text-green-700 font-medium">Total a Pagar</p>
+                                    <p className="text-2xl font-bold text-green-700">{formatearMoneda(datos.total)}</p>
+                                </div>
+                            </div>
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-gray-50">
+                                            <tr className="text-left text-gray-500">
+                                                <th className="py-2 px-4 font-normal">Instalado el</th>
+                                                <th className="py-2 px-4 font-normal">Cliente</th>
+                                                <th className="py-2 px-4 font-normal">Folio SIAC</th>
+                                                <th className="py-2 px-4 font-normal text-right">Monto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {datos.clientes.map(cliente => (
+                                                <tr key={cliente.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                                                    <td className="py-2 px-4 text-gray-600">
+                                                        {formatearFecha(cliente.fecha_instalacion || cliente.actualizado_en)}
+                                                    </td>
+                                                    <td className="py-2 px-4 font-medium text-gray-900">{cliente.nombre}</td>
+                                                    <td className="py-2 px-4 font-mono text-gray-600">{cliente.folio_siac}</td>
+                                                    <td className="py-2 px-4 text-right font-medium text-green-600">
+                                                        {formatearMoneda(cliente.comision)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
+            </div>
         </div>
     );
 }

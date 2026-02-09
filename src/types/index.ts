@@ -75,6 +75,7 @@ export interface Cliente {
     fecha_contacto: string;
     fecha_ultima_actividad: string;
     proximo_seguimiento?: string;
+    fecha_instalacion?: string; // Fecha cuando se marcó como vendido (para corte de comisiones)
 
     // Comisión
     comision: number; // 250 o 300
