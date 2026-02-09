@@ -7,9 +7,16 @@ import { CLAVES_PORTAL, ClavePortal, obtenerClavePorCiudad } from '@/data/claves
 interface ClavesPortalCardProps {
     ciudad?: string; // Si se proporciona, filtra automáticamente
     modo?: 'sidebar' | 'detalle'; // Ajusta el estilo
+    claveSeleccionada?: string; // ID del usuario seleccionado
+    onSeleccionar?: (usuarioId: string) => void; // Callback al seleccionar
 }
 
-export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({ ciudad, modo = 'sidebar' }) => {
+export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
+    ciudad,
+    modo = 'sidebar',
+    claveSeleccionada,
+    onSeleccionar
+}) => {
     const [filtro, setFiltro] = useState('');
 
     const clavesFiltradas = useMemo(() => {
@@ -54,9 +61,23 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({ ciudad, modo
                         </div>
                         <div className="space-y-2">
                             {clave.usuarios.map((u, idx) => (
-                                <div key={idx} className="flex flex-col text-xs">
-                                    <span className="font-mono text-telmex-blue font-semibold">{u.usuario}</span>
-                                    <span className="text-gray-600 truncate">{u.nombre}</span>
+                                <div
+                                    key={idx}
+                                    className={`flex items-start gap-2 p-2 rounded-md transition-colors ${onSeleccionar ? 'cursor-pointer hover:bg-blue-50' : ''
+                                        } ${claveSeleccionada === u.usuario ? 'bg-blue-100 border border-blue-200' : ''}`}
+                                    onClick={() => onSeleccionar && onSeleccionar(u.usuario)}
+                                >
+                                    {onSeleccionar && (
+                                        <div className={`mt-0.5 w-4 h-4 rounded-full border flex items-center justify-center ${claveSeleccionada === u.usuario ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
+                                            }`}>
+                                            {claveSeleccionada === u.usuario && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                        </div>
+                                    )}
+                                    <div className="flex flex-col text-xs">
+                                        <span className={`font-mono font-semibold ${claveSeleccionada === u.usuario ? 'text-telmex-blue' : 'text-gray-700'
+                                            }`}>{u.usuario}</span>
+                                        <span className="text-gray-600 truncate">{u.nombre}</span>
+                                    </div>
                                 </div>
                             ))}
                         </div>

@@ -715,7 +715,30 @@ Solo necesito que me confirmes para agendar.
 
             {/* Claves del Portal (Si aplica) */}
             <div className="mt-6">
-                <ClavesPortalCard ciudad={cliente.cd} modo="detalle" />
+                <ClavesPortalCard
+                    ciudad={cliente.cd}
+                    modo="detalle"
+                    claveSeleccionada={cliente.usuario_portal_asignado}
+                    onSeleccionar={async (usuarioId) => {
+                        if (!cliente) return;
+
+                        // Si ya está seleccionado, deseleccionar (opcional) o no hacer nada
+                        if (cliente.usuario_portal_asignado === usuarioId) return;
+
+                        const clienteActualizado = {
+                            ...cliente,
+                            usuario_portal_asignado: usuarioId,
+                            actualizado_en: new Date().toISOString()
+                        };
+
+                        try {
+                            await guardarCliente(clienteActualizado);
+                            setCliente(clienteActualizado);
+                        } catch (error) {
+                            alert('Error al guardar la selección de clave');
+                        }
+                    }}
+                />
             </div>
 
             {/* Modal de Documentos */}

@@ -14,6 +14,11 @@ export default function ClientesPage() {
     const router = useRouter();
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState('');
+    const [stats, setStats] = useState({
+        hoy: 0,
+        semana: 0,
+        mes: 0
+    });
     const [filtroEstado, setFiltroEstado] = useState<string>('todos');
     const [loading, setLoading] = useState(true);
 
@@ -22,6 +27,30 @@ export default function ClientesPage() {
             try {
                 const data = await obtenerClientes();
                 setClientes(data);
+
+                // Calcular estadísticas
+                const hoy = new Date();
+                const inicioDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
+                const primerDiaSemana = new Date(hoy);
+                const diaSemana = hoy.getDay() || 7; // Hacer que lunes sea 1 y domingo 7
+                primerDiaSemana.setHours(0, 0, 0, 0);
+                primerDiaSemana.setDate(primerDiaSemana.getDate() - diaSemana + 1);
+
+                const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+                const statsCalculated = data.reduce((acc, cliente) => {
+                    const fechaCreacion = new Date(cliente.creado_en);
+
+                    if (fechaCreacion >= inicioDia) acc.hoy++;
+                    if (fechaCreacion >= primerDiaSemana) acc.semana++;
+                    if (fechaCreacion >= primerDiaMes) acc.mes++;
+
+                    return acc;
+                }, { hoy: 0, semana: 0, mes: 0 });
+
+                setStats(statsCalculated);
+
             } catch (error) {
                 console.error("Error al cargar clientes:", error);
             } finally {
@@ -34,7 +63,7 @@ export default function ClientesPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="w-12 h-12 border-4 border-telmex-blue border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-telmex-blue border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -73,6 +102,45 @@ export default function ClientesPage() {
                     <Plus size={20} />
                     Nuevo Cliente
                 </Button>
+            </div>
+
+            {/* Tarjetas de Estadísticas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <Card className="bg-blue-50 border-blue-200">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-blue-600 font-medium">Registrados Hoy</p>
+                            <p className="text-2xl font-bold text-blue-900">{stats.hoy}</p>
+                        </div>
+                        <div className="p-2 bg-blue-100 rounded-full text-blue-600">
+                            <span className="text-xl">📅</span>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-green-50 border-green-200">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-green-600 font-medium">Esta Semana</p>
+                            <p className="text-2xl font-bold text-green-900">{stats.semana}</p>
+                        </div>
+                        <div className="p-2 bg-green-100 rounded-full text-green-600">
+                            <span className="text-xl">📆</span>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-purple-50 border-purple-200">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-purple-600 font-medium">Este Mes</p>
+                            <p className="text-2xl font-bold text-purple-900">{stats.mes}</p>
+                        </div>
+                        <div className="p-2 bg-purple-100 rounded-full text-purple-600">
+                            <span className="text-xl">📊</span>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Filtros */}

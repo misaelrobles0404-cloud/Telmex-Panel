@@ -36,7 +36,8 @@ export interface Cliente {
     // Documentación
     ine: string;
     curp: string;
-    usuario: string;
+    usuario: string; // Usuario que registró al cliente
+    usuario_portal_asignado?: string; // ID del usuario del portal utilizado (ej: '328707')
 
     // Tipo de servicio y clasificación
     tipo_servicio: TipoServicio;
