@@ -73,6 +73,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     {/* Navigation */}
                     <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
                         {navigation.map((item) => {
+                            // Restricción para Auditoría
+                            if (item.name === 'Auditoría' && user?.email !== 'infinitummisael@gmail.com') {
+                                return null;
+                            }
+
                             const isActive = pathname === item.href;
                             const Icon = item.icon;
 
