@@ -74,7 +74,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
                         {navigation.map((item) => {
                             // Restricción para Auditoría
-                            if (item.name === 'Auditoría' && user?.email !== 'infinitummisael@gmail.com') {
+                            if (item.name === 'Auditoría' &&
+                                user?.email !== 'infinitummisael@gmail.com' &&
+                                user?.email !== 'misaelrobles0404@gmail.com') {
                                 return null;
                             }
 
