@@ -16,6 +16,8 @@ import {
     AlertCircle
 } from 'lucide-react';
 
+import * as XLSX from 'xlsx';
+
 export default function AuditoriaPage() {
     const [user, setUser] = useState<any>(null);
     const [foliosInput, setFoliosInput] = useState('');
@@ -38,6 +40,44 @@ export default function AuditoriaPage() {
             </div>
         );
     }
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const bstr = evt.target?.result;
+                const wb = XLSX.read(bstr, { type: 'binary' });
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                // Leer como array de arrays para flexibilidad
+                const data: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+                // Extraer primera columna de cada fila (asumiendo que ahí están los folios)
+                // Filtrar celdas vacías
+                const folios = data
+                    .flat() // Aplanar si hay múltiples columnas por error, o simplificar mapeo
+                    .map(cell => String(cell).trim())
+                    .filter(cell => cell.length > 0 && cell.toLowerCase() !== 'folio' && cell.toLowerCase() !== 'folios'); // Ignorar encabezados comunes
+
+                if (folios.length > 0) {
+                    setFoliosInput(prev => {
+                        const existing = prev ? prev + '\n' : '';
+                        return existing + folios.join('\n');
+                    });
+                    alert(`✅ Se cargaron ${folios.length} folios del archivo.`);
+                } else {
+                    alert("⚠️ No se encontraron datos válidos en el archivo.");
+                }
+            } catch (error) {
+                console.error("Error leyendo archivo:", error);
+                alert("❌ Error al procesar el archivo. Asegúrate que sea un Excel o CSV válido.");
+            }
+        };
+        reader.readAsBinaryString(file);
+    };
 
     const procesarFolios = async () => {
         setProcesando(true);
@@ -189,8 +229,27 @@ export default function AuditoriaPage() {
                 {/* Panel Lateral: Entrada */}
                 <Card className="lg:col-span-1 p-4 h-fit">
                     <h3 className="font-semibold mb-2 text-sm text-gray-600">Pegar Folios SIAC</h3>
+
+                    {/* Input de Archivo */}
+                    <div className="mb-4">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Cargar Excel / CSV</label>
+                        <input
+                            type="file"
+                            accept=".xlsx, .xls, .csv"
+                            onChange={handleFileUpload}
+                            className="block w-full text-xs text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-xs file:font-semibold
+                                file:bg-telmex-blue file:text-white
+                                hover:file:bg-blue-700
+                            "
+                        />
+                        <p className="text-xs text-gray-400 mt-1">Soporta .xlsx, .xls, .csv</p>
+                    </div>
+
                     <textarea
-                        className="w-full h-96 p-3 text-sm border border-gray-300 rounded-md font-mono focus:ring-2 focus:ring-telmex-blue focus:border-transparent"
+                        className="w-full h-80 p-3 text-sm border border-gray-300 rounded-md font-mono focus:ring-2 focus:ring-telmex-blue focus:border-transparent"
                         placeholder="Pega aquí la lista de folios (uno por línea)..."
                         value={foliosInput}
                         onChange={(e) => setFoliosInput(e.target.value)}
@@ -205,6 +264,9 @@ export default function AuditoriaPage() {
                             {procesando ? 'Procesando...' : 'Analizar Folios'}
                             <Search size={16} className="ml-2" />
                         </Button>
+                        <p className="text-xs text-center text-gray-500">
+                            Detecta saltos de línea o comas
+                        </p>
                     </div>
                 </Card>
 

@@ -8,12 +8,15 @@ import { obtenerClientes, guardarCliente } from '@/lib/storage';
 import { formatearFecha, formatearMoneda, generarId } from '@/lib/utils';
 import { CheckCircle, XCircle, Search, Calendar, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
+import { useRouter } from 'next/navigation';
 
 export default function ComisionesPage() {
     const [clientesPendientes, setClientesPendientes] = useState<Cliente[]>([]);
     const [clientesPagados, setClientesPagados] = useState<Record<string, { clientes: Cliente[], total: number }>>({});
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+
+    const router = useRouter(); // Agregar hook
 
     useEffect(() => {
         cargarClientes();
@@ -201,7 +204,11 @@ export default function ComisionesPage() {
                                     {pendientesFiltrados.map((cliente) => {
                                         const dias = getDiasTranscurridos(cliente.creado_en);
                                         return (
-                                            <tr key={cliente.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <tr
+                                                key={cliente.id}
+                                                className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                                                onClick={() => router.push(`/clientes/${cliente.id}`)}
+                                            >
                                                 <td className="py-2 px-4 text-gray-600">
                                                     {formatearFecha(cliente.creado_en)}
                                                     {dias >= 2 && <span className="ml-2 text-xs text-red-600 font-bold">({dias}d)</span>}
@@ -266,7 +273,11 @@ export default function ComisionesPage() {
                                         </thead>
                                         <tbody>
                                             {datos.clientes.map(cliente => (
-                                                <tr key={cliente.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                                                <tr
+                                                    key={cliente.id}
+                                                    className="border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer transition-colors"
+                                                    onClick={() => router.push(`/clientes/${cliente.id}`)}
+                                                >
                                                     <td className="py-2 px-4 text-gray-600">
                                                         {formatearFecha(cliente.fecha_instalacion || cliente.actualizado_en)}
                                                     </td>
