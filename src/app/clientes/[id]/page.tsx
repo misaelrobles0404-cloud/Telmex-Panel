@@ -275,6 +275,12 @@ GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
         } else {
             // Formato para Línea Nueva
+            // Determinamos si es paquete Solo Internet basado en la clave o el nombre
+            const esSoloInternet = (cliente.clave_paquete && cliente.clave_paquete.includes('-net')) ||
+                (cliente.paquete && cliente.paquete.toUpperCase().includes('SOLO INTERNET'));
+
+            const descripcionServicio = esSoloInternet ? 'SOLO INTERNET' : 'INTERNET Y TELEFONÍA';
+
             formato = `NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
@@ -305,7 +311,7 @@ CIUDAD: ${cliente.cd.toUpperCase()}
 ESTADO: ${cliente.estado.toUpperCase()}
 —————————————————
 PAQUETE: ${cliente.paquete} ($${cliente.precio_mensual + 100})
-INTERNET Y TELEFONÍA 
+${descripcionServicio} 
 —————————————————
 GASTOS DE INSTALACION
 ☐ $400 DE PAGO INICIAL & 12 MESES DE $100 (TOTAL) $1,600`;
@@ -734,8 +740,9 @@ Solo necesito que me confirmes para agendar.
                         try {
                             await guardarCliente(clienteActualizado);
                             setCliente(clienteActualizado);
-                        } catch (error) {
-                            alert('Error al guardar la selección de clave');
+                        } catch (error: any) {
+                            console.error('Error al guardar selección:', error);
+                            alert(`Error al guardar selección: ${error.message || JSON.stringify(error)}`);
                         }
                     }}
                 />

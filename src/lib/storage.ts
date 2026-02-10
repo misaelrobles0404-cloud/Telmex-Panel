@@ -64,6 +64,13 @@ export async function guardarCliente(cliente: Cliente): Promise<void> {
         d.fecha_vigencia = undefined;
     }
 
+    /*
+    console.log('Guardando cliente:', {
+        id: cliente.id,
+        usuario_portal_asignado: cliente.usuario_portal_asignado
+    });
+    */
+
     const { error } = await supabase
         .from('clientes')
         .upsert(datosParaGuardar);
