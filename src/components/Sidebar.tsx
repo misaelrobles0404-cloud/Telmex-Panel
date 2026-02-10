@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, Calendar, MessageSquare, BarChart3, Calculator, Settings, Menu, X, ImageIcon, CheckCircle, MapPin, Megaphone, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, MessageSquare, BarChart3, Calculator, Settings, Menu, X, ImageIcon, CheckCircle, MapPin, Megaphone, LogOut, ClipboardCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 const navigation = [
@@ -13,6 +13,7 @@ const navigation = [
     { name: 'Plantillas WhatsApp', href: '/plantillas', icon: MessageSquare },
     { name: 'Verificar Comisiones', href: '/comisiones', icon: CheckCircle }, // Nuevo módulo
     { name: 'Campañas', href: '/campanas', icon: Megaphone },
+    { name: 'Auditoría', href: '/auditoria', icon: ClipboardCheck },
     { name: 'Calculadora', href: '/calculadora', icon: Calculator },
     { name: 'Cobertura', href: '/cobertura', icon: MapPin },
     { name: 'Reportes', href: '/reportes', icon: BarChart3 },
