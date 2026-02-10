@@ -23,6 +23,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const [modalReferidosOpen, setModalReferidosOpen] = useState(false);
     const [modalSeguimientoOpen, setModalSeguimientoOpen] = useState(false);
     const [folioSiacInput, setFolioSiacInput] = useState('');
+    const [ordenServicioInput, setOrdenServicioInput] = useState('');
 
     useEffect(() => {
         const cargarCliente = async () => {
@@ -39,6 +40,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                     }
                     setCliente(data);
                     setFolioSiacInput(data.folio_siac || '');
+                    setOrdenServicioInput(data.orden_servicio || '');
                 }
             } catch (error) {
                 console.error("Error al cargar cliente:", error);
@@ -166,6 +168,24 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
             alert('Folio SIAC guardado en la nube.');
         } catch (error) {
             alert('Error al guardar Folio SIAC');
+        }
+    };
+
+    const guardarOrdenServicio = async () => {
+        if (!cliente) return;
+
+        const clienteActualizado: Cliente = {
+            ...cliente,
+            orden_servicio: ordenServicioInput,
+            actualizado_en: new Date().toISOString()
+        };
+
+        try {
+            await guardarCliente(clienteActualizado);
+            setCliente(clienteActualizado);
+            alert('Orden de Servicio guardada.');
+        } catch (error) {
+            alert('Error al guardar Orden de Servicio');
         }
     };
 
@@ -680,6 +700,31 @@ Solo necesito que me confirmes para agendar.
                                         className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
                                     />
                                     <Button variant="primary" size="sm" onClick={guardarFolioSiac} disabled={folioSiacInput === (cliente.folio_siac || '')}>
+                                        <Save size={14} />
+                                    </Button>
+                                </div>
+
+                                <div className="mt-2 text-sm">
+                                    <a
+                                        href="https://siac-interac.telmex.com/siac_interactivo"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                                    >
+                                        Ir a SIAC Interactivo ↗
+                                    </a>
+                                </div>
+
+                                <label className="text-gray-500 mb-1 block mt-4">Orden de Servicio (OS)</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={ordenServicioInput}
+                                        onChange={(e) => setOrdenServicioInput(e.target.value)}
+                                        placeholder="Orden de Servicio"
+                                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
+                                    />
+                                    <Button variant="primary" size="sm" onClick={guardarOrdenServicio} disabled={ordenServicioInput === (cliente.orden_servicio || '')}>
                                         <Save size={14} />
                                     </Button>
                                 </div>

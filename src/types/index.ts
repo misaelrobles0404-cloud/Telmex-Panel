@@ -66,6 +66,7 @@ export interface Cliente {
 
     // SIAC
     folio_siac?: string;
+    orden_servicio?: string;
 
     // Campaña de origen
     campana_id?: string;
