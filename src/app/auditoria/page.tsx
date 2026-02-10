@@ -29,9 +29,7 @@ export default function AuditoriaPage() {
         supabase.auth.getUser().then(({ data }) => setUser(data.user));
     });
 
-    if (user &&
-        user.email !== 'infinitummisael@gmail.com' &&
-        user.email !== 'misaelrobles0404@gmail.com') {
+    if (user && user.email !== 'misaelrobles0404@gmail.com') {
         return (
             <div className="flex items-center justify-center h-screen bg-gray-100">
                 <div className="text-center p-8 bg-white shadow-lg rounded-lg">
