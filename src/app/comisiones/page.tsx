@@ -12,11 +12,12 @@ import { useRouter } from 'next/navigation';
 
 export default function ComisionesPage() {
     const [clientesPendientes, setClientesPendientes] = useState<Cliente[]>([]);
+    const [clientesRechazados, setClientesRechazados] = useState<Cliente[]>([]); // Nuevo estado
     const [clientesPagados, setClientesPagados] = useState<Record<string, { clientes: Cliente[], total: number }>>({});
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const router = useRouter(); // Agregar hook
+    const router = useRouter();
 
     useEffect(() => {
         cargarClientes();
@@ -26,13 +27,23 @@ export default function ComisionesPage() {
         try {
             const todos = await obtenerClientes();
 
-            // 1. Pendientes: Tienen folio SIAC pero no están vendidos
+            // 1. Pendientes: Tienen folio SIAC pero no están vendidos NI rechazados
             const pendientes = todos.filter(c =>
                 c.folio_siac &&
                 c.folio_siac.trim() !== '' &&
-                c.estado_pipeline !== 'vendido'
+                c.estado_pipeline !== 'vendido' &&
+                c.estado_pipeline !== 'sin_cobertura' &&
+                c.estado_pipeline !== 'cobertura_cobre'
             );
             setClientesPendientes(pendientes);
+
+            // 1.5 Rechazados / No Instalados: Tienen folio SIAC y estado de rechazo
+            const rechazados = todos.filter(c =>
+                c.folio_siac &&
+                c.folio_siac.trim() !== '' &&
+                (c.estado_pipeline === 'sin_cobertura' || c.estado_pipeline === 'cobertura_cobre')
+            );
+            setClientesRechazados(rechazados);
 
             // 2. Pagados/Vendidos: Estado 'vendido'
             // Agrupar por semana de corte (Miércoles)
@@ -235,6 +246,59 @@ export default function ComisionesPage() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* SECCIÓN 1.5: RECHAZADAS / NO INSTALADAS */}
+            {clientesRechazados.length > 0 && (
+                <Card className="border-l-4 border-l-red-500 bg-red-50/50 mb-8">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-xl text-red-700 flex items-center gap-2">
+                            <XCircle size={24} />
+                            <span>No Instaladas / Rechazadas ({clientesRechazados.length})</span>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-red-200 text-left text-red-600 font-medium">
+                                        <th className="py-2 px-4">Fecha</th>
+                                        <th className="py-2 px-4">Folio SIAC</th>
+                                        <th className="py-2 px-4">Cliente</th>
+                                        <th className="py-2 px-4">Motivo / Estado</th>
+                                        <th className="py-2 px-4 text-right">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {clientesRechazados.map((cliente) => (
+                                        <tr
+                                            key={cliente.id}
+                                            className="border-b border-red-100 hover:bg-red-50 cursor-pointer transition-colors"
+                                            onClick={() => router.push(`/clientes/${cliente.id}`)}
+                                        >
+                                            <td className="py-2 px-4 text-gray-600">{formatearFecha(cliente.actualizado_en)}</td>
+                                            <td className="py-2 px-4 font-mono">{cliente.folio_siac}</td>
+                                            <td className="py-2 px-4 font-medium">{cliente.nombre}</td>
+                                            <td className="py-2 px-4">
+                                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                                    {cliente.estado_pipeline === 'cobertura_cobre' ? 'COBERTURA COBRE' : 'SIN COBERTURA'}
+                                                </span>
+                                            </td>
+                                            <td className="py-2 px-4 text-right">
+                                                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={(e) => {
+                                                    e.stopPropagation(); // Evitar navegación al clickear botón
+                                                    confirmarInstalacion(cliente);
+                                                }} title="Reactivar / Confirmar">
+                                                    <CheckCircle size={16} /> Reactivar
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* SECCIÓN 2: HISTORIAL DE PAGOS (AGRUPADO POR CORTE) */}
             <div className="space-y-6">
