@@ -728,6 +728,16 @@ Solo necesito que me confirmes para agendar.
                                         <Save size={14} />
                                     </Button>
                                 </div>
+                                <div className="mt-2 text-sm">
+                                    <a
+                                        href="https://portalwcex-2.telmex.com:4200/login"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                                    >
+                                        Ir a Portal WCEX (Instalaciones) ↗
+                                    </a>
+                                </div>
                             </div>
 
 
