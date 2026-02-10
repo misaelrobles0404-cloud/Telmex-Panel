@@ -27,7 +27,10 @@ export default function EditarClientePage({ params }: { params: { id: string } }
         correo: '',
 
         // Dirección
+        // Dirección
         calle: '',
+        numeroExterior: '',
+        numeroInterior: '',
         colonia: '',
         cp: '',
         cd: '',
@@ -96,6 +99,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     correo: cliente.correo === 'pendiente@correo.com' ? '' : cliente.correo,
 
                     calle: cliente.calle === 'PENDIENTE' ? '' : cliente.calle,
+                    numeroExterior: cliente.numero_exterior || '',
+                    numeroInterior: cliente.numero_interior || '',
                     colonia: cliente.colonia === 'PENDIENTE' ? '' : cliente.colonia,
                     cp: cliente.cp === '00000' ? '' : cliente.cp,
                     cd: cliente.cd === 'PENDIENTE' ? '' : cliente.cd,
@@ -173,6 +178,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             no_ref_2: formData.noRef2 || undefined,
             correo: formData.correo,
             calle: formData.calle,
+            numero_exterior: formData.numeroExterior,
+            numero_interior: formData.numeroInterior,
             colonia: formData.colonia,
             cp: formData.cp,
             cd: formData.cd,
@@ -335,6 +342,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input label="Calle" value={formData.calle} onChange={(e) => setFormData({ ...formData, calle: e.target.value })} required />
+                            <Input label="Número Exterior" value={formData.numeroExterior} onChange={(e) => setFormData({ ...formData, numeroExterior: e.target.value })} placeholder="Opcional" />
+                            <Input label="Número Interior" value={formData.numeroInterior} onChange={(e) => setFormData({ ...formData, numeroInterior: e.target.value })} placeholder="Opcional" />
                             <Input label="Colonia" value={formData.colonia} onChange={(e) => setFormData({ ...formData, colonia: e.target.value })} required />
                             <Input label="CP" value={formData.cp} onChange={(e) => setFormData({ ...formData, cp: e.target.value })} required />
                             <Input label="Ciudad" value={formData.cd} onChange={(e) => setFormData({ ...formData, cd: e.target.value })} required />
