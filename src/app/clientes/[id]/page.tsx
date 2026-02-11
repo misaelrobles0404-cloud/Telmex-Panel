@@ -194,9 +194,14 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
 
         let formato = '';
 
+        const nombrePromotor = prompt("Ingresa el Nombre Completo del Promotor:", "AILTON MISAEL AGUILAR ROBLES");
+        if (!nombrePromotor) return;
+
+        const promotorLine = `NOMBRE DE PROMOTOR: ${nombrePromotor.toUpperCase()}`;
+
         if (cliente.tipo_cliente === 'pyme') {
             formato = `PLANTILLA PARA CLIENTE PYME
-NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
+${promotorLine}
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
@@ -226,7 +231,7 @@ GASTOS DE INSTALACION
 ☐ $400 DE PAGO INICIAL & 12 MESES DE $100 (TOTAL) $1,600`;
         } else if (cliente.tipo_servicio === 'portabilidad') {
             formato = `PLANTILLA PARA PORTABILIDAD
-NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
+${promotorLine}
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
@@ -262,7 +267,7 @@ GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
         } else if (cliente.tipo_servicio === 'winback') {
             formato = `PLANTILLA PARA WIN-BACK (ALTA INTERNET RECUPERADO)
-NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
+${promotorLine}
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
@@ -301,7 +306,7 @@ GASTOS DE INSTALACION
 
             const descripcionServicio = esSoloInternet ? 'SOLO INTERNET' : 'INTERNET Y TELEFONÍA';
 
-            formato = `NOMBRE DE PROMOTOR: AILTON MISAEL AGUILAR ROBLES
+            formato = `${promotorLine}
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
