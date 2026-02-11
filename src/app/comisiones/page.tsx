@@ -300,7 +300,12 @@ export default function ComisionesPage() {
                                                     {dias >= 2 && <span className="ml-2 text-xs text-red-600 font-bold">({dias}d)</span>}
                                                 </td>
                                                 <td className="py-2 px-4 align-top">
-                                                    <div className="font-mono text-gray-900">{cliente.folio_siac}</div>
+                                                    <div
+                                                        className="font-mono text-gray-900 w-fit cursor-text"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        {cliente.folio_siac}
+                                                    </div>
                                                     {cliente.orden_servicio && (
                                                         <div className="text-xs text-blue-600 font-semibold mt-0.5">
                                                             OS: {cliente.orden_servicio}
@@ -321,7 +326,7 @@ export default function ComisionesPage() {
                                                                 </div>
                                                                 <div className="text-gray-600 flex flex-col">
                                                                     <span className="font-mono font-semibold text-blue-600">{detalles.usuario}</span>
-                                                                    <span className="opacity-80 text-[10px] uppercase truncate max-w-[150px]" title={detalles.nombre}>{detalles.nombre}</span>
+                                                                    <span className="opacity-80 text-[10px] uppercase" title={detalles.nombre}>{detalles.nombre}</span>
                                                                 </div>
                                                             </div>
                                                         ) : (
