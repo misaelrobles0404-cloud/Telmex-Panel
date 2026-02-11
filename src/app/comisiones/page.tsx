@@ -312,7 +312,10 @@ export default function ComisionesPage() {
                                                     {cliente.usuario_portal_asignado && (() => {
                                                         const detalles = getDetallesClave(cliente.usuario_portal_asignado);
                                                         return detalles ? (
-                                                            <div className="mt-1 text-xs bg-gray-50 border border-gray-200 rounded p-1.5 w-fit">
+                                                            <div
+                                                                className="mt-1 text-xs bg-gray-50 border border-gray-200 rounded p-1.5 w-fit cursor-default"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
                                                                 <div className="font-bold text-gray-700 border-b border-gray-200 pb-0.5 mb-0.5">
                                                                     {detalles.tienda}
                                                                 </div>
@@ -322,7 +325,10 @@ export default function ComisionesPage() {
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full w-fit mt-1 flex items-center gap-1">
+                                                            <div
+                                                                className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full w-fit mt-1 flex items-center gap-1 cursor-default"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
                                                                 <span className="font-normal opacity-70">Clave:</span>
                                                                 <span className="font-mono font-medium">{cliente.usuario_portal_asignado}</span>
                                                             </div>
