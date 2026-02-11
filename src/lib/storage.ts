@@ -122,6 +122,18 @@ export async function eliminarCliente(id: string): Promise<void> {
     }
 }
 
+export async function eliminarClientesMasivos(ids: string[]): Promise<void> {
+    const { error } = await supabase
+        .from('clientes')
+        .delete()
+        .in('id', ids);
+
+    if (error) {
+        console.error('Error al eliminar clientes masivos en Supabase:', error);
+        throw error;
+    }
+}
+
 // ============================================
 // PUBLICACIONES / CAMPAÑAS (SUPABASE)
 // ============================================

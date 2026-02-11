@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/Input';
 import { Cliente } from '@/types';
 import { obtenerClientes } from '@/lib/storage';
 import { formatearMoneda, formatearFecha } from '@/lib/utils';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, Trash2, AlertTriangle } from 'lucide-react';
+import { eliminarClientesMasivos } from '@/lib/storage';
 
 export default function ClientesPage() {
     const router = useRouter();
@@ -21,6 +22,49 @@ export default function ClientesPage() {
     });
     const [filtroEstado, setFiltroEstado] = useState<string>('todos');
     const [loading, setLoading] = useState(true);
+
+    // ... existing useEffect ...
+
+    const handleLimpieza = async () => {
+        const unMesAtras = new Date();
+        unMesAtras.setMonth(unMesAtras.getMonth() - 1);
+
+        const clientesAntiguos = clientes.filter(c => {
+            const fechaCreacion = new Date(c.creado_en);
+            return fechaCreacion < unMesAtras;
+        });
+
+        if (clientesAntiguos.length === 0) {
+            alert('No hay clientes con más de 1 mes de antigüedad para eliminar.');
+            return;
+        }
+
+        const confirmacion = confirm(
+            `⚠️ ATENCIÓN: ESTÁS A PUNTO DE ELIMINAR DATOS ⚠️\n\n` +
+            `Se encontraron ${clientesAntiguos.length} clientes registrados hace más de 1 mes.\n` +
+            `Estos datos se borrarán permanentemente y liberarás espacio en la base de datos.\n\n` +
+            `¿Estás seguro de querer continuar?`
+        );
+
+        if (confirmacion) {
+            const segundaConfirmacion = confirm(`¿De verdad? Esta acción NO SE PUEDE DESHACER.`);
+
+            if (segundaConfirmacion) {
+                setLoading(true);
+                try {
+                    const ids = clientesAntiguos.map(c => c.id);
+                    await eliminarClientesMasivos(ids);
+                    alert(`✅ Se han eliminado ${ids.length} clientes correctamente.`);
+                    // Recargar página para actualizar lista
+                    window.location.reload();
+                } catch (error) {
+                    console.error(error);
+                    alert('❌ Ocurrió un error al intentar eliminar los clientes.');
+                    setLoading(false);
+                }
+            }
+        }
+    };
 
     useEffect(() => {
         const cargarClientes = async () => {
@@ -94,14 +138,26 @@ export default function ClientesPage() {
                     </p>
                 </div>
 
-                <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={() => router.push('/clientes/nuevo')}
-                >
-                    <Plus size={20} />
-                    Nuevo Cliente
-                </Button>
+                <div className="flex gap-3">
+                    <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={handleLimpieza}
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                        title="Eliminar clientes antiguos (> 1 mes)"
+                    >
+                        <Trash2 size={20} className="mr-2" />
+                        Limpieza
+                    </Button>
+                    <Button
+                        variant="primary"
+                        size="lg"
+                        onClick={() => router.push('/clientes/nuevo')}
+                    >
+                        <Plus size={20} />
+                        Nuevo Cliente
+                    </Button>
+                </div>
             </div>
 
             {/* Tarjetas de Estadísticas */}
