@@ -18,11 +18,28 @@ import {
 
 import * as XLSX from 'xlsx';
 
+// Interfaz para los resultados de la auditoría
+interface ResultadoAuditoria {
+    folio_buscado: string;
+    encontrado: boolean;
+    cliente: any | null; // Cliente de BD
+
+    // Datos del Excel
+    promotor_excel?: string;
+    estatus_excel?: string;
+    tipo_servicio_excel?: string;
+
+    // Datos para edición/guardado
+    nueva_os: string;
+    nuevo_estado: string; // Estado final a guardar (auditoría)
+}
+
 export default function AuditoriaPage() {
     const [user, setUser] = useState<any>(null);
-    const [foliosInput, setFoliosInput] = useState('');
+    const [foliosInput, setFoliosInput] = useState(''); // Mantiene compatibilidad con pegado manual
+    const [datosExcel, setDatosExcel] = useState<any[]>([]); // Almacena datos crudos del Excel
     const [procesando, setProcesando] = useState(false);
-    const [resultados, setResultados] = useState<any[]>([]);
+    const [resultados, setResultados] = useState<ResultadoAuditoria[]>([]);
 
     // Verificar sesión
     useState(() => {
@@ -52,25 +69,66 @@ export default function AuditoriaPage() {
                 const wb = XLSX.read(bstr, { type: 'binary' });
                 const wsname = wb.SheetNames[0];
                 const ws = wb.Sheets[wsname];
-                // Leer como array de arrays para flexibilidad
+
+                // Leer como matriz para detectar columnas
                 const data: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
-                // Extraer primera columna de cada fila (asumiendo que ahí están los folios)
-                // Filtrar celdas vacías
-                const folios = data
-                    .flat() // Aplanar si hay múltiples columnas por error, o simplificar mapeo
-                    .map(cell => String(cell).trim())
-                    .filter(cell => cell.length > 0 && cell.toLowerCase() !== 'folio' && cell.toLowerCase() !== 'folios'); // Ignorar encabezados comunes
+                if (data.length === 0) {
+                    alert("El archivo está vacío.");
+                    return;
+                }
 
-                if (folios.length > 0) {
-                    setFoliosInput(prev => {
-                        const existing = prev ? prev + '\n' : '';
-                        return existing + folios.join('\n');
-                    });
-                    alert(`✅ Se cargaron ${folios.length} folios del archivo.`);
+                // 1. Detectar dinámicamente la fila de encabezados
+                let headerRowIdx = -1;
+                for (let i = 0; i < Math.min(data.length, 10); i++) { // Buscar en las primeras 10 filas
+                    const rowStr = data[i].map(c => String(c).toUpperCase()).join(' ');
+                    if (rowStr.includes('FOLIO') || rowStr.includes('SIAC')) {
+                        headerRowIdx = i;
+                        break;
+                    }
+                }
+
+                // Si no se encuentra cabecera, usar fila 0
+                if (headerRowIdx === -1) headerRowIdx = 0;
+
+                const headers = data[headerRowIdx].map((h: string) => String(h).toUpperCase().trim());
+
+                // 2. Buscar índices de columnas
+                let idxFolio = headers.findIndex((h) => h.includes('FOLIO') || h.includes('SIAC'));
+                let idxPromotor = headers.findIndex((h) => h.includes('PROMOTOR') || h.includes('VENDEDOR') || h.includes('USUARIO') || h.includes('EMPLEADO'));
+                let idxEstatus = headers.findIndex((h) => h.includes('ESTATUS') || h.includes('ESTADO') || h.includes('RESULTADO'));
+                let idxTipo = headers.findIndex((h) => h.includes('TIPO') || h.includes('SERVICIO'));
+
+                // Fallbacks si no hay cabeceras claras
+                if (idxFolio === -1) idxFolio = 0; // Asumir primera columna es folio
+                if (idxPromotor === -1 && data[headerRowIdx].length > 1) idxPromotor = 1;
+                if (idxEstatus === -1 && data[headerRowIdx].length > 2) idxEstatus = 2;
+                if (idxTipo === -1 && data[headerRowIdx].length > 3) idxTipo = 3;
+
+                // 3. Extraer datos
+                const extractedData = data.slice(headerRowIdx + 1).map(row => {
+                    const folioRaw = row[idxFolio];
+                    if (!folioRaw) return null;
+
+                    return {
+                        folio: String(folioRaw).trim(),
+                        promotor: idxPromotor !== -1 ? String(row[idxPromotor] || '').trim() : '',
+                        estatus: idxEstatus !== -1 ? String(row[idxEstatus] || '').trim() : '',
+                        tipo: idxTipo !== -1 ? String(row[idxTipo] || '').trim() : ''
+                    };
+                }).filter(r => r !== null && r.folio.length > 0 && r.folio !== 'FOLIO'); // Filtrar vacíos
+
+                if (extractedData.length > 0) {
+                    // Actualizar estado y procesar automátiamente
+                    setDatosExcel(extractedData);
+                    setFoliosInput(extractedData.map(d => d!.folio).join('\n')); // Solo visual
+
+                    // PROCESAR DIRECTAMENTE
+                    procesarDatos(extractedData);
                 } else {
                     alert("⚠️ No se encontraron datos válidos en el archivo.");
                 }
+
             } catch (error) {
                 console.error("Error leyendo archivo:", error);
                 alert("❌ Error al procesar el archivo. Asegúrate que sea un Excel o CSV válido.");
@@ -79,25 +137,22 @@ export default function AuditoriaPage() {
         reader.readAsBinaryString(file);
     };
 
-    const procesarFolios = async () => {
+    const procesarDatos = async (datosOrigen: any[]) => {
         setProcesando(true);
         setResultados([]);
 
-        // 1. Limpiar y procesar entrada
-        const listaFolios = foliosInput
-            .split(/[\n,]+/) // Separar por saltos de línea o comas
-            .map(f => f.trim())
-            .filter(f => f.length > 0);
+        // Preparar lista de folios y mapa
+        const listaFolios = datosOrigen.map(d => d.folio);
+        const mapaExcel: Record<string, any> = {};
+        datosOrigen.forEach(d => { mapaExcel[d.folio] = d; });
 
         if (listaFolios.length === 0) {
-            alert("Ingresa al menos un folio.");
             setProcesando(false);
             return;
         }
 
         try {
-            // 2. Buscar en Supabase (Solo Lectura de Clientes)
-            // Nota: .in() tiene un límite, para 200 folios está bien, pero para miles habría que paginar.
+            // Buscar en Supabase
             const { data: clientesEncontrados, error } = await supabase
                 .from('clientes')
                 .select('*')
@@ -105,33 +160,57 @@ export default function AuditoriaPage() {
 
             if (error) throw error;
 
-            // 3. Cruzar resultados
-            const procesados = listaFolios.map(folio => {
+            // Cruzar resultados
+            const procesados: ResultadoAuditoria[] = listaFolios.map(folio => {
                 const cliente = clientesEncontrados?.find((c: any) => c.folio_siac === folio);
+                const datoExcel = mapaExcel[folio] || {};
+
+                // Normalizar Estatus
+                let estadoSugerido = cliente?.estado_pipeline || 'vendido';
+                if (datoExcel.estatus) {
+                    const statusLower = datoExcel.estatus.toLowerCase();
+                    if (statusLower.includes('instalad') || statusLower.includes('liquid')) estadoSugerido = 'vendido';
+                    else if (statusLower.includes('cancel') || statusLower.includes('rechaz') || statusLower.includes('baja') || statusLower.includes('dev')) estadoSugerido = 'sin_cobertura';
+                }
+
                 return {
                     folio_buscado: folio,
                     encontrado: !!cliente,
                     cliente: cliente || null,
-                    // Campos para edición (Valores por defecto del cliente si existe)
+
+                    promotor_excel: datoExcel.promotor,
+                    estatus_excel: datoExcel.estatus,
+                    tipo_servicio_excel: datoExcel.tipo,
+
                     nueva_os: cliente?.orden_servicio || '',
-                    nuevo_estado: cliente?.estado_pipeline || 'vendido',
-                    modificado: true // Marcar todos para guardar en el snapshot
+                    nuevo_estado: estadoSugerido
                 };
             });
 
             setResultados(procesados);
 
         } catch (error) {
-            console.error("Error al buscar folios:", error);
-            alert("Error al procesar los folios. Revisa la consola.");
+            console.error("Error al procesar:", error);
+            alert("Error consultando la base de datos.");
         } finally {
             setProcesando(false);
         }
     };
 
-    const actualizarFila = (index: number, campo: 'nueva_os' | 'nuevo_estado', valor: string) => {
+    const procesarDesdeInputManual = () => {
+        const rawFolios = foliosInput.split(/[\n,]+/).map(f => f.trim()).filter(f => f.length > 0);
+        if (rawFolios.length === 0) {
+            alert("Ingresa folios manualmente o carga un archivo.");
+            return;
+        }
+        // Convertir a estructura estandar
+        const datos = rawFolios.map(f => ({ folio: f, promotor: '', estatus: '', tipo: '' }));
+        procesarDatos(datos);
+    };
+
+    const actualizarFila = (index: number, campo: keyof ResultadoAuditoria, valor: string) => {
         const nuevosResultados = [...resultados];
-        nuevosResultados[index][campo] = valor;
+        (nuevosResultados[index] as any)[campo] = valor;
         setResultados(nuevosResultados);
     };
 
@@ -166,7 +245,10 @@ export default function AuditoriaPage() {
                 estado_auditado: item.nuevo_estado,
                 cliente_referencia_id: item.cliente?.id || null, // Link si existe
                 vendedor_nombre: item.cliente?.user_id || 'No asignado',
-                comision_calculada: item.cliente?.comision || 0
+                comision_calculada: item.cliente?.comision || 0,
+                // Nuevos campos
+                promotor: item.promotor_excel || null,
+                tipo_servicio: item.tipo_servicio_excel || null
             }));
 
             const { error: errorDetalles } = await supabase
@@ -187,12 +269,15 @@ export default function AuditoriaPage() {
 
     const generarReporte = () => {
         // Generar CSV
-        const headers = ["Folio SIAC", "Orden Servicio", "Cliente", "Vendedor", "Estado Auditado", "Comisión Est."];
+        const headers = ["Folio SIAC", "Orden Servicio", "Cliente", "Vendedor", "Promotor Excel", "Tipo Servicio", "Estatus Excel", "Estado Auditado", "Comisión Est."];
         const rows = resultados.map(r => [
             r.folio_buscado,
             r.nueva_os,
             r.encontrado ? `${r.cliente.nombre} ${r.cliente.apellidos}` : 'NO ENCONTRADO',
             r.encontrado ? (r.cliente.user_id || 'Sin Asignar') : '-',
+            r.promotor_excel || '-',
+            r.tipo_servicio_excel || '-',
+            r.estatus_excel || '-',
             r.nuevo_estado,
             r.encontrado ? (r.cliente.comision || 0) : 0
         ]);
@@ -258,7 +343,7 @@ export default function AuditoriaPage() {
                         <Button
                             variant="primary"
                             className="w-full justify-center"
-                            onClick={procesarFolios}
+                            onClick={procesarDesdeInputManual}
                             disabled={procesando || !foliosInput.trim()}
                         >
                             {procesando ? 'Procesando...' : 'Analizar Folios'}
@@ -298,6 +383,7 @@ export default function AuditoriaPage() {
                                     <thead className="bg-gray-50 text-gray-600 font-medium border-b">
                                         <tr>
                                             <th className="px-3 py-2">Folio SIAC</th>
+                                            <th className="px-3 py-2">Info Excel</th>
                                             <th className="px-3 py-2">Cliente en BD</th>
                                             <th className="px-3 py-2">Orden Servicio (OS)</th>
                                             <th className="px-3 py-2">Estatus</th>
@@ -307,25 +393,59 @@ export default function AuditoriaPage() {
                                     <tbody className="divide-y divide-gray-100">
                                         {resultados.map((item, idx) => (
                                             <tr key={idx} className={!item.encontrado ? 'bg-red-50' : 'hover:bg-gray-50'}>
-                                                <td className="px-3 py-2 font-mono">
-                                                    {item.folio_buscado}
+                                                <td className="px-3 py-2 font-mono align-top text-xs">
+                                                    <div className="font-bold text-gray-700">{item.folio_buscado}</div>
                                                     {!item.encontrado && (
-                                                        <span className="block text-xs text-red-500">No existe</span>
+                                                        <span className="text-red-500 font-semibold text-[10px]">No existe en BD</span>
                                                     )}
                                                 </td>
 
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 align-top">
+                                                    <div className="flex flex-col gap-1 text-xs">
+                                                        {item.promotor_excel && (
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="font-semibold text-gray-500">Prom:</span>
+                                                                <span className="text-gray-800">{item.promotor_excel}</span>
+                                                            </div>
+                                                        )}
+                                                        {item.tipo_servicio_excel && (
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="font-semibold text-gray-500">Tipo:</span>
+                                                                <span className="text-blue-600 truncate max-w-[100px]" title={item.tipo_servicio_excel}>{item.tipo_servicio_excel}</span>
+                                                            </div>
+                                                        )}
+                                                        {item.estatus_excel && (
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="font-semibold text-gray-500">Estado:</span>
+                                                                <span className={`px-1 rounded ${item.estatus_excel.toLowerCase().includes('instalad') ? 'bg-green-100 text-green-700' :
+                                                                    item.estatus_excel.toLowerCase().includes('cancel') ? 'bg-red-100 text-red-700' : 'bg-gray-100'
+                                                                    }`}>
+                                                                    {item.estatus_excel}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        {!item.promotor_excel && !item.tipo_servicio_excel && !item.estatus_excel && (
+                                                            <span className="text-gray-400 italic">- Sin datos extra -</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-3 py-2 align-top">
                                                     {item.encontrado ? (
-                                                        <div>
-                                                            <div className="font-medium text-gray-900">{item.cliente.nombre} {item.cliente.apellidos}</div>
-                                                            <div className="text-xs text-gray-500">{item.cliente.estado_pipeline}</div>
+                                                        <div className="text-xs">
+                                                            <div className="font-bold text-gray-900">{item.cliente.nombre} {item.cliente.apellidos}</div>
+                                                            <div className="text-gray-500">{item.cliente.user_id || 'Sin Vendedor'}</div>
+                                                            <div className={`mt-1 inline-block px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold border ${item.cliente.estado_pipeline === 'vendido' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-600 border-gray-200'
+                                                                }`}>
+                                                                {item.cliente.estado_pipeline}
+                                                            </div>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-gray-400">-</span>
+                                                        <span className="text-gray-400 text-xs">-</span>
                                                     )}
                                                 </td>
 
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 align-top">
                                                     <input
                                                         type="text"
                                                         className="w-full px-2 py-1 border rounded text-xs focus:ring-1 focus:ring-telmex-blue border-gray-300"
@@ -335,7 +455,7 @@ export default function AuditoriaPage() {
                                                     />
                                                 </td>
 
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 align-top">
                                                     <select
                                                         className="w-full px-2 py-1 border rounded text-xs focus:ring-1 focus:ring-telmex-blue border-gray-300 bg-white"
                                                         value={item.nuevo_estado}
@@ -347,16 +467,17 @@ export default function AuditoriaPage() {
                                                         <option value="vendido">Vendido/Instalado</option>
                                                         <option value="sin_cobertura">Sin Cobertura</option>
                                                         <option value="perdido">Cancelado/Perdido</option>
+                                                        <option value="cobertura_cobre">Cobertura Cobre</option>
                                                     </select>
                                                 </td>
 
-                                                <td className="px-3 py-2">
-                                                    <div className="flex gap-1">
+                                                <td className="px-3 py-2 align-top">
+                                                    <div className="flex gap-1 justify-end">
                                                         <a
                                                             href="https://siac-interac.telmex.com/siac_interactivo"
                                                             target="_blank"
                                                             rel="noreferrer"
-                                                            className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                                                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded border border-blue-200"
                                                             title="SIAC"
                                                         >
                                                             <ExternalLink size={14} />
@@ -365,7 +486,7 @@ export default function AuditoriaPage() {
                                                             href="https://portalwcex-2.telmex.com:4200/login"
                                                             target="_blank"
                                                             rel="noreferrer"
-                                                            className="p-1 text-purple-600 hover:bg-purple-50 rounded"
+                                                            className="p-1.5 text-purple-600 hover:bg-purple-50 rounded border border-purple-200"
                                                             title="WCEX"
                                                         >
                                                             <ExternalLink size={14} />
@@ -391,3 +512,4 @@ export default function AuditoriaPage() {
         </div>
     );
 }
+
