@@ -4,7 +4,7 @@
 
 export type TipoServicio = 'linea_nueva' | 'portabilidad' | 'winback';
 export type TipoCliente = 'residencial' | 'pyme';
-export type EstadoPipeline = 'contactado' | 'interesado' | 'cierre_programado' | 'vendido' | 'sin_cobertura' | 'cobertura_cobre';
+export type EstadoPipeline = 'contactado' | 'interesado' | 'cierre_programado' | 'vendido' | 'sin_cobertura' | 'cobertura_cobre' | 'cancelado';
 export type Proveedor = 'totalplay' | 'izzi' | 'megacable' | 'axtel' | 'dish' | 'otro';
 
 // ============================================
