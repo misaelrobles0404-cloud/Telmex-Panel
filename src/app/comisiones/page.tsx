@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Cliente, EstadoPipeline } from '@/types';
 import { obtenerClientes, guardarCliente } from '@/lib/storage';
 import { formatearFecha, formatearMoneda, generarId } from '@/lib/utils';
+import { CLAVES_PORTAL } from '@/data/claves';
 import { CheckCircle, XCircle, Search, Calendar, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { useRouter } from 'next/navigation';
@@ -207,6 +208,20 @@ export default function ComisionesPage() {
         return dias;
     };
 
+    const getDetallesClave = (usuarioId: string) => {
+        for (const clave of CLAVES_PORTAL) {
+            const usuarioEncontrado = clave.usuarios.find(u => u.usuario === usuarioId);
+            if (usuarioEncontrado) {
+                return {
+                    tienda: clave.identificador,
+                    nombre: usuarioEncontrado.nombre,
+                    usuario: usuarioEncontrado.usuario
+                };
+            }
+        }
+        return null;
+    };
+
     if (loading) return <div className="p-6">Cargando verificación...</div>;
 
     return (
@@ -294,12 +309,25 @@ export default function ComisionesPage() {
                                                 </td>
                                                 <td className="py-2 px-4 align-top">
                                                     <div className="font-medium text-gray-900">{cliente.nombre}</div>
-                                                    {cliente.usuario_portal_asignado && (
-                                                        <div className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full w-fit mt-1 flex items-center gap-1">
-                                                            <span className="font-normal opacity-70">Clave:</span>
-                                                            <span className="font-mono font-medium">{cliente.usuario_portal_asignado}</span>
-                                                        </div>
-                                                    )}
+                                                    {cliente.usuario_portal_asignado && (() => {
+                                                        const detalles = getDetallesClave(cliente.usuario_portal_asignado);
+                                                        return detalles ? (
+                                                            <div className="mt-1 text-xs bg-gray-50 border border-gray-200 rounded p-1.5 w-fit">
+                                                                <div className="font-bold text-gray-700 border-b border-gray-200 pb-0.5 mb-0.5">
+                                                                    {detalles.tienda}
+                                                                </div>
+                                                                <div className="text-gray-600 flex flex-col">
+                                                                    <span className="font-mono font-semibold text-blue-600">{detalles.usuario}</span>
+                                                                    <span className="opacity-80 text-[10px] uppercase truncate max-w-[150px]" title={detalles.nombre}>{detalles.nombre}</span>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full w-fit mt-1 flex items-center gap-1">
+                                                                <span className="font-normal opacity-70">Clave:</span>
+                                                                <span className="font-mono font-medium">{cliente.usuario_portal_asignado}</span>
+                                                            </div>
+                                                        );
+                                                    })()}
                                                 </td>
                                                 <td className="py-2 px-4 text-green-600 font-medium align-top">{formatearMoneda(cliente.comision)}</td>
                                                 <td className="py-2 px-4 text-right align-top">
