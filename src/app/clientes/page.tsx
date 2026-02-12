@@ -83,13 +83,16 @@ export default function ClientesPage() {
                 const data = await obtenerClientes();
 
                 // Lógica de Filtrado: 
-                // Misael (SuperAdmin) ve todo.
-                // Ruiz (Boss) y Promotores ven solo lo SUYO en esta pestaña personal.
-                const esSuperAdmin = user?.email === 'misaelrobles0404@gmail.com';
+                // Ruiz (Boss) ve todo para gestión.
+                // Todos los demás (incluyendo Misael) ven solo lo SUYO.
+                const esBoss = user?.email === 'ruizmosinfinitum2025@gmail.com';
 
                 let clientesFiltradosData = data;
-                if (!esSuperAdmin && user?.email) {
-                    clientesFiltradosData = data.filter(c => c.usuario === user.email);
+                if (!esBoss && user?.email) {
+                    clientesFiltradosData = data.filter(c =>
+                        c.usuario === user.email ||
+                        c.user_id === user.id
+                    );
                 }
 
                 setClientes(clientesFiltradosData);
