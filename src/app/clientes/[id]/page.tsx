@@ -24,6 +24,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const [modalSeguimientoOpen, setModalSeguimientoOpen] = useState(false);
     const [folioSiacInput, setFolioSiacInput] = useState('');
     const [ordenServicioInput, setOrdenServicioInput] = useState('');
+    const [perfilUsuario, setPerfilUsuario] = useState<{ nombre_completo: string } | null>(null);
 
     useEffect(() => {
         const cargarCliente = async () => {
@@ -41,6 +42,16 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                     setCliente(data);
                     setFolioSiacInput(data.folio_siac || '');
                     setOrdenServicioInput(data.orden_servicio || '');
+                }
+
+                // Cargar perfil del usuario actual para los formatos
+                if (user) {
+                    const { data: perfil } = await supabase
+                        .from('perfiles')
+                        .select('nombre_completo')
+                        .eq('id', user.id)
+                        .maybeSingle();
+                    if (perfil) setPerfilUsuario(perfil);
                 }
             } catch (error) {
                 console.error("Error al cargar cliente:", error);
@@ -194,9 +205,9 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
 
         let formato = '';
 
-        const nombrePromotor = prompt("Ingresa el Nombre Completo del Promotor:", "AILTON MISAEL AGUILAR ROBLES");
-        if (!nombrePromotor) return;
-
+        // Automatización: Usar el nombre del perfil del usuario logueado
+        // Si no se encuentra (caso raro), usar el nombre del cliente o un placeholder
+        const nombrePromotor = perfilUsuario?.nombre_completo || "PROMOTOR NO REGISTRADO";
         const promotorLine = `NOMBRE DE PROMOTOR: ${nombrePromotor.toUpperCase()}`;
 
         if (cliente.tipo_cliente === 'pyme') {

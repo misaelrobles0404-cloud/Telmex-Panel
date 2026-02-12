@@ -12,28 +12,8 @@ interface BossDashboardViewProps {
 }
 
 export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps) {
-    // Agrupar clientes por usuario (email)
-    const clientesPorPromotor = clientes.reduce((acc, cliente) => {
-        // Intentar usar campo usuario (email), si no, intentar buscar email por user_id
-        let promotorEmail = cliente.usuario;
-
-        if (!promotorEmail && cliente.user_id) {
-            const perfil = perfiles.find(p => p.id === cliente.user_id);
-            if (perfil) promotorEmail = perfil.email;
-        }
-
-        const key = promotorEmail || 'Sin Asignar';
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(cliente);
-        return acc;
-    }, {} as Record<string, Cliente[]>);
-
-    // Mapeo de emails a nombres completos
-    const nombrePromotor = (email: string) => {
-        if (email === 'Sin Asignar') return 'Sin Asignar';
-        const perfil = perfiles.find(p => p.email === email);
-        return perfil ? perfil.nombre_completo : email.split('@')[0];
-    };
+    // Obtener lista de emails únicos de perfiles para asegurar que todos aparezcan
+    const todosLosEmails = Array.from(new Set(perfiles.map(p => p.email)));
 
     return (
         <div className="space-y-8">
@@ -42,11 +22,19 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                 <h2 className="text-2xl font-bold text-gray-800">Control por Promotor</h2>
             </div>
 
-            {Object.entries(clientesPorPromotor).map(([email, clientesVendedor]) => {
+            {todosLosEmails.map((email) => {
+                const clientesVendedor = clientes.filter(c =>
+                    c.usuario === email ||
+                    (c.user_id && perfiles.find(p => p.id === c.user_id)?.email === email)
+                );
+
                 const ventasProgramadas = clientesVendedor.filter(c =>
                     c.estado_pipeline === 'cierre_programado' || c.estado_pipeline === 'interesado'
                 );
                 const ventasInstaladas = clientesVendedor.filter(c => c.estado_pipeline === 'vendido');
+
+                const perfilVendedor = perfiles.find(p => p.email === email);
+                const nombreMostrar = perfilVendedor ? perfilVendedor.nombre_completo : email.split('@')[0];
 
                 return (
                     <Card key={email} className="border-l-4 border-l-telmex-blue shadow-md hover:shadow-lg transition-shadow">
@@ -54,10 +42,10 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-12 h-12 bg-telmex-blue text-white rounded-full flex items-center justify-center font-bold text-xl uppercase shadow-inner">
-                                        {nombrePromotor(email).charAt(0)}
+                                        {nombreMostrar.charAt(0)}
                                     </div>
                                     <div>
-                                        <CardTitle className="text-xl text-gray-900">{nombrePromotor(email)}</CardTitle>
+                                        <CardTitle className="text-xl text-gray-900">{nombreMostrar}</CardTitle>
                                         <p className="text-sm text-gray-500 font-medium">{email}</p>
                                     </div>
                                 </div>
