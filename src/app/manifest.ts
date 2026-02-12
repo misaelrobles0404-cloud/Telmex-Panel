@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: 'RUIZ TELMEX',
         description: 'Panel de ventas y gestión para agentes TELMEX',
         start_url: '/',
-        display: 'standalone',
+        display: 'browser',
         background_color: '#F9FAFB',
         theme_color: '#0033A0',
         icons: [
