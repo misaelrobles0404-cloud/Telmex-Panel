@@ -114,23 +114,35 @@ export function calcularMetricas(clientesInput?: Cliente[], perfiles?: any[]): M
     const ventasPorPromotor: Record<string, number> = {};
     clientes.filter(c => {
         if (c.estado_pipeline !== 'vendido') return false;
-        return isAfter(new Date(c.fecha_instalacion || c.actualizado_en), inicioMes);
+        const fechaVenta = new Date(c.fecha_instalacion || c.actualizado_en);
+        return isAfter(fechaVenta, inicioMes);
     }).forEach(c => {
-        const key = c.usuario || 'Desconocido';
+        let key = c.usuario;
+
+        // Si no hay usuario (email), intentar sacarlo del user_id usando perfiles
+        if (!key && c.user_id && perfiles) {
+            const pf = perfiles.find(p => p.id === c.user_id);
+            if (pf) key = pf.email;
+        }
+
+        if (!key) key = 'Desconocido';
         ventasPorPromotor[key] = (ventasPorPromotor[key] || 0) + 1;
     });
 
     let topEmail = '';
     let maxVentas = 0;
     Object.entries(ventasPorPromotor).forEach(([email, total]) => {
+        // Ignorar 'Desconocido' para el Top si hay otros candidatos
+        if (email === 'Desconocido' && Object.keys(ventasPorPromotor).length > 1) return;
+
         if (total > maxVentas) {
             maxVentas = total;
             topEmail = email;
         }
     });
 
-    let nombrePromotorTop = topEmail.split('@')[0];
-    if (perfiles && topEmail) {
+    let nombrePromotorTop = topEmail === 'Desconocido' ? 'Desconocido' : topEmail.split('@')[0];
+    if (perfiles && topEmail && topEmail !== 'Desconocido') {
         const pf = perfiles.find(p => p.email === topEmail);
         if (pf) nombrePromotorTop = pf.nombre_completo;
     }
