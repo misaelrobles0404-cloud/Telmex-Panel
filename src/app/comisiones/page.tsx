@@ -57,7 +57,7 @@ export default function ComisionesPage() {
             setClientesCancelados(cancelados);
 
             // 2. Pagados/Vendidos: Estado 'vendido'
-            // Agrupar por semana de corte (Miércoles)
+            // Agrupar por semana de corte (Lunes)
             const vendidos = todos.filter(c => c.estado_pipeline === 'vendido');
             const agrupados: Record<string, { clientes: Cliente[], total: number }> = {};
 
@@ -90,17 +90,17 @@ export default function ComisionesPage() {
         }
     };
 
-    // Función para obtener el próximo miércoles (o hoy si es miércoles)
+    // Función para obtener el próximo lunes (o hoy si es lunes)
     const getFechaCorte = (fechaStr: string) => {
         const fecha = new Date(fechaStr);
-        const diaSemana = fecha.getDay(); // 0 = Domingo, 1 = Lunes, ..., 3 = Miércoles
+        const diaSemana = fecha.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
 
-        const diasParaMiercoles = (3 - diaSemana + 7) % 7;
-        // Si hoy es miércoles (diasParaMiercoles es 0), el corte es hoy.
-        // Si no, sumamos los días necesarios.
+        // Queremos que el corte sea el Lunes (1)
+        // Días restantes para el próximo lunes: (1 - diaSemana + 7) % 7
+        const diasParaLunes = (1 - diaSemana + 7) % 7;
 
         const fechaCorte = new Date(fecha);
-        fechaCorte.setDate(fecha.getDate() + diasParaMiercoles);
+        fechaCorte.setDate(fecha.getDate() + diasParaLunes);
 
         return fechaCorte.toISOString().split('T')[0]; // YYYY-MM-DD
     };
@@ -229,7 +229,7 @@ export default function ComisionesPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Gestión de Comisiones</h1>
-                    <p className="text-gray-600 mt-1">Cortes semanales los Miércoles.</p>
+                    <p className="text-gray-600 mt-1">Cortes semanales los Lunes.</p>
                 </div>
             </div>
 
@@ -474,7 +474,7 @@ export default function ComisionesPage() {
             <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <Calendar className="text-telmex-blue" />
-                    Historial de Cortes (Miércoles)
+                    Historial de Cortes (Lunes)
                 </h2>
 
                 {Object.entries(clientesPagados).length === 0 ? (
@@ -487,7 +487,7 @@ export default function ComisionesPage() {
                             <div className="bg-green-50 p-4 flex justify-between items-center border-b border-green-100">
                                 <div>
                                     <p className="text-sm text-green-700 font-medium uppercase tracking-wide">Corte Semana</p>
-                                    <p className="text-lg font-bold text-green-900">{formatearFecha(fechaCorte)} (Miércoles)</p>
+                                    <p className="text-lg font-bold text-green-900">{formatearFecha(fechaCorte)} (Lunes)</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-sm text-green-700 font-medium">Total a Pagar</p>

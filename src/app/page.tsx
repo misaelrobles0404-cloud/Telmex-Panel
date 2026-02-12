@@ -12,6 +12,9 @@ import {
     Phone,
     Plus,
     Calendar,
+    AlertCircle,
+    Star,
+    Trophy
 } from 'lucide-react';
 import { obtenerClientes } from '@/lib/storage';
 import { calcularMetricas, formatearMoneda } from '@/lib/utils';
@@ -47,6 +50,32 @@ export default function DashboardPage() {
 
                 setClientes(clientesFiltrados);
                 setMetricas(calcularMetricas(clientesFiltrados));
+
+                // Si es Admin, calcular Super Vendedores (>7 instalaciones por semana)
+                if (esAdmin) {
+                    const hoy = new Date();
+                    const inicioSemana = new Date(hoy);
+                    const diaSemana = hoy.getDay() || 7;
+                    inicioSemana.setHours(0, 0, 0, 0);
+                    inicioSemana.setDate(inicioSemana.getDate() - diaSemana + 1);
+
+                    const ventasPorUsuario: Record<string, number> = {};
+                    clientesData.forEach(c => {
+                        if (c.estado_pipeline === 'vendido' && c.fecha_instalacion) {
+                            const fechaInst = new Date(c.fecha_instalacion);
+                            if (fechaInst >= inicioSemana && c.usuario) {
+                                ventasPorUsuario[c.usuario] = (ventasPorUsuario[c.usuario] || 0) + 1;
+                            }
+                        }
+                    });
+
+                    const superVendedores = Object.entries(ventasPorUsuario)
+                        .filter(([_, total]) => total > 7)
+                        .map(([email, total]) => ({ email, total }));
+
+                    (window as any).superVendedores = superVendedores; // Temporal para pasar al render o usar un state
+                    setSuperVendedores(superVendedores);
+                }
             } catch (error) {
                 console.error("Error al cargar dashboard:", error);
             } finally {
@@ -55,6 +84,8 @@ export default function DashboardPage() {
         };
         cargarDatos();
     }, []);
+
+    const [superVendedores, setSuperVendedores] = useState<{ email: string, total: number }[]>([]);
 
     if (loading || !metricas) {
         return (
@@ -84,6 +115,31 @@ export default function DashboardPage() {
                     Nuevo Cliente
                 </Button>
             </div>
+
+            {/* Alerta de Productividad (Solo Boss) */}
+            {superVendedores.length > 0 && (
+                <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                    {superVendedores.map((v) => (
+                        <Card key={v.email} className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 overflow-hidden relative">
+                            <div className="absolute -right-4 -top-4 text-yellow-200/50 rotate-12">
+                                <Trophy size={100} />
+                            </div>
+                            <CardContent className="p-5 flex items-center gap-4 relative z-10">
+                                <div className="p-3 bg-yellow-400 text-white rounded-full shadow-lg animate-bounce">
+                                    <Star size={24} fill="currentColor" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-yellow-800">¡Alerta de Meta Superada! 🏆</h3>
+                                    <p className="text-yellow-700">
+                                        El empleado <span className="font-bold underline">{v.email.split('@')[0]}</span> ha realizado <span className="text-2xl font-black">{v.total}</span> instalaciones esta semana.
+                                    </p>
+                                    <p className="text-xs text-yellow-600 mt-1 uppercase tracking-wider font-semibold">Excelente rendimiento detectado</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
 
             {/* Bloque de Tiempo Actual */}
             {bloqueActual && (
