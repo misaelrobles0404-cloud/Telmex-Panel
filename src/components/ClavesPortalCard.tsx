@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Copy, Key, User, Lock, ExternalLink } from 'lucide-react';
+import { Copy, Key, User, Lock } from 'lucide-react';
 import { CLAVES_PORTAL, ClavePortal, obtenerClavePorCiudad } from '@/data/claves';
 import { Toast } from '@/components/ui/Toast';
 
@@ -81,9 +81,14 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                 {clavesFiltradas.map((clave) => (
                     <div key={clave.ciudad} className="bg-white p-3 rounded-md shadow-sm border border-gray-100 text-sm">
                         <div className="flex justify-between items-start mb-2 border-b pb-1">
-                            <span className="font-bold text-gray-800">{clave.ciudad}</span>
-                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            <span className="font-bold text-gray-800 uppercase tracking-tighter">{clave.ciudad}</span>
+                            <span
+                                className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-black border border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors flex items-center gap-1"
+                                onClick={(e) => copiarAlPortapapeles(e, clave.identificador, 'Usuario')}
+                                title="Click para copiar Usuario"
+                            >
                                 {clave.identificador}
+                                <Copy size={10} className="opacity-50" />
                             </span>
                         </div>
                         <div className="space-y-2">
@@ -101,59 +106,47 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex flex-wrap gap-1 mb-1.5">
-                                            {(() => {
-                                                const d = dividirNombre(u.nombre);
-                                                return (
-                                                    <>
-                                                        <span
-                                                            className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-black border border-gray-100 uppercase tracking-tight"
-                                                            onClick={(e) => copiarAlPortapapeles(e, d.nombres, 'Nombre')}
-                                                            title="Clic para copiar Nombre"
-                                                        >
-                                                            {d.nombres}
-                                                        </span>
-                                                        <span
-                                                            className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-black border border-gray-100 uppercase tracking-tight"
-                                                            onClick={(e) => copiarAlPortapapeles(e, d.apellido1, '1er Apellido')}
-                                                            title="Clic para copiar 1er Apellido"
-                                                        >
-                                                            {d.apellido1}
-                                                        </span>
-                                                        {d.apellido2 && (
+                                        <div className="flex items-center justify-between gap-2">
+                                            <div className="flex flex-wrap gap-1">
+                                                {(() => {
+                                                    const d = dividirNombre(u.nombre);
+                                                    return (
+                                                        <>
                                                             <span
-                                                                className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-black border border-gray-100 uppercase tracking-tight"
-                                                                onClick={(e) => copiarAlPortapapeles(e, d.apellido2, '2do Apellido')}
-                                                                title="Clic para copiar 2do Apellido"
+                                                                className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-bold border border-gray-100 uppercase tracking-tight"
+                                                                onClick={(e) => copiarAlPortapapeles(e, d.nombres, 'Nombre')}
+                                                                title="Clic para copiar Nombre"
                                                             >
-                                                                {d.apellido2}
+                                                                {d.nombres}
                                                             </span>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={(e) => copiarAlPortapapeles(e, clave.identificador, 'Usuario')}
-                                                className="flex-1 flex items-center justify-between px-2.5 py-2 bg-blue-50 text-blue-700 rounded-lg border-2 border-blue-100 hover:border-blue-300 transition-all text-[11px] group/btn shadow-sm"
-                                                title="Copiar Usuario"
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <User size={12} className="text-blue-500" />
-                                                    <span className="font-mono font-black truncate">{clave.identificador}</span>
-                                                </div>
-                                                <Copy size={10} className="opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-                                            </button>
+                                                            <span
+                                                                className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-bold border border-gray-100 uppercase tracking-tight"
+                                                                onClick={(e) => copiarAlPortapapeles(e, d.apellido1, '1er Apellido')}
+                                                                title="Clic para copiar 1er Apellido"
+                                                            >
+                                                                {d.apellido1}
+                                                            </span>
+                                                            {d.apellido2 && (
+                                                                <span
+                                                                    className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-bold border border-gray-100 uppercase tracking-tight"
+                                                                    onClick={(e) => copiarAlPortapapeles(e, d.apellido2, '2do Apellido')}
+                                                                    title="Clic para copiar 2do Apellido"
+                                                                >
+                                                                    {d.apellido2}
+                                                                </span>
+                                                            )}
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+
                                             <button
                                                 onClick={(e) => copiarAlPortapapeles(e, u.usuario, 'Contraseña')}
-                                                className="flex-1 flex items-center justify-between px-2.5 py-2 bg-orange-50 text-orange-700 rounded-lg border-2 border-orange-100 hover:border-orange-300 transition-all text-[11px] group/btn shadow-sm"
+                                                className="flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-700 rounded-lg border border-orange-200 hover:bg-orange-100 transition-all text-[11px] font-black group/btn shadow-sm"
                                                 title="Copiar Contraseña"
                                             >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <Lock size={12} className="text-orange-500" />
-                                                    <span className="font-mono font-black truncate">{u.usuario}</span>
-                                                </div>
+                                                <Lock size={12} className="text-orange-500" />
+                                                <span className="font-mono">{u.usuario}</span>
                                                 <Copy size={10} className="opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                                             </button>
                                         </div>
