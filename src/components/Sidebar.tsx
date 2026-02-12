@@ -89,7 +89,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     {/* Logo & Close button */}
                     <div className="flex items-center justify-between h-16 flex-shrink-0 px-6 bg-telmex-blue text-white">
                         <h1 className="text-2xl font-bold">
-                            TELMEX Panel
+                            RUIZ TELMEX
                         </h1>
                         <button onClick={onClose} className="lg:hidden p-1 hover:bg-white/10 rounded-lg">
                             <X size={24} />

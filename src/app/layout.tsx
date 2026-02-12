@@ -13,13 +13,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    title: 'TELMEX Panel Pro',
+    title: 'RUIZ TELMEX',
     description: 'Sistema de gestión de ventas TELMEX',
     manifest: '/manifest.webmanifest',
     appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
-        title: 'TELMEX Pro',
+        title: 'RUIZ TELMEX',
     },
 };
 

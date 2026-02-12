@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'TELMEX Panel Pro',
-        short_name: 'TELMEX Pro',
+        name: 'RUIZ TELMEX',
+        short_name: 'RUIZ TELMEX',
         description: 'Panel de ventas y gestión para agentes TELMEX',
         start_url: '/',
         display: 'standalone',
