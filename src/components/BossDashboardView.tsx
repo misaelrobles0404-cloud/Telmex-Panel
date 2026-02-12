@@ -133,7 +133,14 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="text-lg font-black text-gray-900">
-                                                    {cliente.estado_pipeline === 'cancelado' ? formatearMoneda(0) : formatearMoneda(cliente.comision)}
+                                                    {cliente.estado_pipeline === 'vendido'
+                                                        ? formatearMoneda(
+                                                            (cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback')
+                                                                ? 300
+                                                                : 250
+                                                        )
+                                                        : formatearMoneda(0)
+                                                    }
                                                 </span>
                                             </td>
                                         </tr>
