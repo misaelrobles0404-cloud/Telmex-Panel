@@ -46,7 +46,7 @@ export default function AuditoriaPage() {
         supabase.auth.getUser().then(({ data }) => setUser(data.user));
     });
 
-    const isAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'ruizmosinfinitum2025@gmail.com';
+    const isAdmin = user?.email === 'ruizmosinfinitum2025@gmail.com';
 
     if (user && !isAdmin) {
         return (
@@ -463,13 +463,12 @@ export default function AuditoriaPage() {
                                                         value={item.nuevo_estado}
                                                         onChange={(e) => actualizarFila(idx, 'nuevo_estado', e.target.value)}
                                                     >
-                                                        <option value="contactado">Contactado</option>
+                                                        <option value="contactado">Prospectos</option>
                                                         <option value="interesado">Interesado</option>
                                                         <option value="cierre_programado">Cierre Programado</option>
                                                         <option value="vendido">Vendido/Instalado</option>
                                                         <option value="sin_cobertura">Sin Cobertura</option>
                                                         <option value="perdido">Cancelado/Perdido</option>
-                                                        <option value="cobertura_cobre">Cobertura Cobre</option>
                                                     </select>
                                                 </td>
 

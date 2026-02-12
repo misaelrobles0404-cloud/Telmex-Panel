@@ -44,9 +44,10 @@ export default function DashboardPage() {
 
                 const clientesData = await obtenerClientes();
 
-                // Lógica de Perfiles: Solo para el Súper Boss
+                // Lógica de Perfiles: Solo para el Súper Boss (Ruiz)
                 const esBoss = user?.email === 'ruizmosinfinitum2025@gmail.com';
-                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || esBoss;
+                // Misael quiere ver alertas de productividad pero ser tratado como empleado en su panel
+                const esAdmin = esBoss || user?.email === 'misaelrobles0404@gmail.com';
 
                 if (esBoss) {
                     const { data: perfilesData, error: pfError } = await supabase.from('perfiles').select('*');
@@ -65,7 +66,10 @@ export default function DashboardPage() {
                 }
 
                 let clientesFiltrados = clientesData;
-                if (!esAdmin && user?.email) {
+                // Si es Misael, aunque tenga rango de admin para ver alertas, su panel muestra solo sus clientes
+                if (user?.email === 'misaelrobles0404@gmail.com') {
+                    clientesFiltrados = clientesData.filter(c => c.usuario === user.email);
+                } else if (!esAdmin && user?.email) {
                     clientesFiltrados = clientesData.filter(c => c.usuario === user.email);
                 }
 
@@ -152,7 +156,7 @@ export default function DashboardPage() {
                                 <div>
                                     <h3 className="text-xl font-bold text-yellow-800">¡Alerta de Meta Superada! 🏆</h3>
                                     <p className="text-yellow-700">
-                                        El empleado <span className="font-bold underline">{v.email.split('@')[0]}</span> ha realizado <span className="text-2xl font-black">{v.total}</span> instalaciones esta semana.
+                                        El empleado <span className="font-bold underline">{perfiles.find(p => p.email === v.email)?.nombre_completo || v.email.split('@')[0]}</span> ha realizado <span className="text-2xl font-black">{v.total}</span> instalaciones esta semana.
                                     </p>
                                     <p className="text-xs text-yellow-600 mt-1 uppercase tracking-wider font-semibold">Excelente rendimiento detectado</p>
                                 </div>
