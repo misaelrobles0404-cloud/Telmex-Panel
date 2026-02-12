@@ -23,7 +23,13 @@ export default function ClientesPage() {
     const [filtroEstado, setFiltroEstado] = useState<string>('todos');
     const [loading, setLoading] = useState(true);
 
-    // ... existing useEffect ...
+    const [showModal, setShowModal] = useState(false);
+    const [modalConfig, setModalConfig] = useState<{
+        title: string;
+        message: string;
+        type: 'info' | 'confirm';
+        onConfirm?: () => void;
+    }>({ title: '', message: '', type: 'info' });
 
     const handleLimpieza = async () => {
         const unMesAtras = new Date();
@@ -35,27 +41,25 @@ export default function ClientesPage() {
         });
 
         if (clientesAntiguos.length === 0) {
-            alert('No hay clientes con más de 1 mes de antigüedad para eliminar.');
+            setModalConfig({
+                title: 'Limpieza de Datos',
+                message: 'No hay clientes con más de 1 mes de antigüedad para eliminar.',
+                type: 'info'
+            });
+            setShowModal(true);
             return;
         }
 
-        const confirmacion = confirm(
-            `⚠️ ATENCIÓN: ESTÁS A PUNTO DE ELIMINAR DATOS ⚠️\n\n` +
-            `Se encontraron ${clientesAntiguos.length} clientes registrados hace más de 1 mes.\n` +
-            `Estos datos se borrarán permanentemente y liberarás espacio en la base de datos.\n\n` +
-            `¿Estás seguro de querer continuar?`
-        );
-
-        if (confirmacion) {
-            const segundaConfirmacion = confirm(`¿De verdad? Esta acción NO SE PUEDE DESHACER.`);
-
-            if (segundaConfirmacion) {
+        setModalConfig({
+            title: '⚠️ Eliminar Clientes Antiguos',
+            message: `Se encontraron ${clientesAntiguos.length} clientes registrados hace más de 1 mes.\n\nEstos datos se borrarán permanentemente y liberarás espacio en la base de datos.\n\n¿Estás seguro de querer continuar?`,
+            type: 'confirm',
+            onConfirm: async () => {
+                setShowModal(false);
                 setLoading(true);
                 try {
                     const ids = clientesAntiguos.map(c => c.id);
                     await eliminarClientesMasivos(ids);
-                    alert(`✅ Se han eliminado ${ids.length} clientes correctamente.`);
-                    // Recargar página para actualizar lista
                     window.location.reload();
                 } catch (error) {
                     console.error(error);
@@ -63,7 +67,8 @@ export default function ClientesPage() {
                     setLoading(false);
                 }
             }
-        }
+        });
+        setShowModal(true);
     };
 
     useEffect(() => {
