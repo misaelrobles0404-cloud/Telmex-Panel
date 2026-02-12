@@ -34,6 +34,7 @@ export default function DashboardPage() {
 
     const [user, setUser] = useState<any>(null);
     const [perfiles, setPerfiles] = useState<PerfilUsuario[]>([]);
+    const [perfilActual, setPerfilActual] = useState<PerfilUsuario | null>(null);
 
     useEffect(() => {
         const cargarDatos = async () => {
@@ -51,6 +52,16 @@ export default function DashboardPage() {
                     const { data: perfilesData, error: pfError } = await supabase.from('perfiles').select('*');
                     if (pfError) console.error("Error cargando perfiles:", pfError);
                     setPerfiles(perfilesData || []);
+                }
+
+                // Cargar perfil del usuario actual para el saludo
+                if (user?.id) {
+                    const { data: miPerfil } = await supabase
+                        .from('perfiles')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single();
+                    if (miPerfil) setPerfilActual(miPerfil);
                 }
 
                 let clientesFiltrados = clientesData;
@@ -112,7 +123,7 @@ export default function DashboardPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
                     <p className="text-gray-600 mt-1">
-                        Bienvenido a RUIZ TELMEX
+                        Bienvenido, <span className="font-semibold text-telmex-blue">{perfilActual?.nombre_completo || user?.email?.split('@')[0] || 'Usuario'}</span>
                     </p>
                 </div>
 
