@@ -701,6 +701,14 @@ export default function NuevoClientePage() {
                                     required
                                 />
                                 {loadingPaquetes && <p className="text-xs text-telmex-blue animate-pulse mt-1">Cargando paquetes...</p>}
+                                {!loadingPaquetes && formData.paqueteId && (
+                                    <div className="mt-2 p-2 bg-blue-50 rounded-lg animate-in fade-in duration-300">
+                                        <p className="text-[10px] text-blue-700 font-bold uppercase tracking-wider mb-1">Beneficios del Paquete:</p>
+                                        <p className="text-xs text-blue-900 font-medium whitespace-pre-wrap">
+                                            {paquetesDynamicos.find(p => p.id === formData.paqueteId)?.beneficios || 'Sin beneficios adicionales registrados.'}
+                                        </p>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 

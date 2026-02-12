@@ -29,6 +29,7 @@ interface Paquete {
     categoria: 'residencial' | 'pyme';
     netflix: boolean;
     llamadasIlimitadas: boolean;
+    beneficios?: string;
 }
 
 export default function AdminCatalogoPage() {
@@ -37,6 +38,7 @@ export default function AdminCatalogoPage() {
     const [saving, setSaving] = useState(false);
     const [paquetes, setPaquetes] = useState<Paquete[]>([]);
     const [filtro, setFiltro] = useState('');
+    const [filtroCategoria, setFiltroCategoria] = useState<'todos' | 'residencial' | 'pyme'>('todos');
 
     useEffect(() => {
         const checkAdmin = async () => {
@@ -68,7 +70,8 @@ export default function AdminCatalogoPage() {
                     activo: true,
                     categoria: 'residencial' as any,
                     netflix: p.netflix,
-                    llamadasIlimitadas: p.llamadasIlimitadas
+                    llamadasIlimitadas: p.llamadasIlimitadas,
+                    beneficios: ''
                 })),
                 ...PAQUETES_PYME.map(p => ({
                     id: p.id,
@@ -78,7 +81,8 @@ export default function AdminCatalogoPage() {
                     activo: true,
                     categoria: 'pyme' as any,
                     netflix: p.netflix,
-                    llamadasIlimitadas: p.llamadasIlimitadas
+                    llamadasIlimitadas: p.llamadasIlimitadas,
+                    beneficios: ''
                 }))
             ];
             setPaquetes(initialPaquetes);
@@ -107,7 +111,8 @@ export default function AdminCatalogoPage() {
             activo: true,
             categoria: 'residencial',
             netflix: false,
-            llamadasIlimitadas: true
+            llamadasIlimitadas: true,
+            beneficios: ''
         };
         setPaquetes([nuevo, ...paquetes]);
     };
@@ -122,10 +127,12 @@ export default function AdminCatalogoPage() {
         setPaquetes(paquetes.map(p => p.id === id ? { ...p, [campo]: valor } : p));
     };
 
-    const paquetesFiltrados = paquetes.filter(p =>
-        p.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
-        p.id.toLowerCase().includes(filtro.toLowerCase())
-    );
+    const paquetesFiltrados = paquetes.filter(p => {
+        const matchesBusqueda = p.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
+            p.id.toLowerCase().includes(filtro.toLowerCase());
+        const matchesCategoria = filtroCategoria === 'todos' || p.categoria === filtroCategoria;
+        return matchesBusqueda && matchesCategoria;
+    });
 
     if (loading) {
         return (
@@ -136,7 +143,7 @@ export default function AdminCatalogoPage() {
     }
 
     return (
-        <div className="p-6 max-w-5xl mx-auto">
+        <div className="p-6 max-w-7xl mx-auto">
             <div className="mb-6 flex items-center justify-between">
                 <div>
                     <Button variant="ghost" onClick={() => router.back()} className="mb-2">
@@ -155,22 +162,45 @@ export default function AdminCatalogoPage() {
                 </div>
             </div>
 
-            <Card className="mb-6">
-                <CardContent className="p-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input
-                            type="text"
-                            placeholder="Buscar paquete por nombre..."
-                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-telmex-blue outline-none"
-                            value={filtro}
-                            onChange={(e) => setFiltro(e.target.value)}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <Card className="flex-1">
+                    <CardContent className="p-4">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Buscar paquete por nombre..."
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-telmex-blue outline-none"
+                                value={filtro}
+                                onChange={(e) => setFiltro(e.target.value)}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex bg-gray-100 p-1 rounded-xl h-fit self-center">
+                    <button
+                        onClick={() => setFiltroCategoria('todos')}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filtroCategoria === 'todos' ? 'bg-white text-telmex-blue shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        Todos
+                    </button>
+                    <button
+                        onClick={() => setFiltroCategoria('residencial')}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filtroCategoria === 'residencial' ? 'bg-white text-telmex-blue shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        Residencial
+                    </button>
+                    <button
+                        onClick={() => setFiltroCategoria('pyme')}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filtroCategoria === 'pyme' ? 'bg-white text-telmex-blue shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        PYME
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paquetesFiltrados.map((p) => (
                     <Card key={p.id} className={`${!p.activo ? 'opacity-60 bg-gray-50' : ''}`}>
                         <CardContent className="p-4 space-y-4">
@@ -213,7 +243,7 @@ export default function AdminCatalogoPage() {
                                                 onChange={(e) => actualizarPaquete(p.id, 'llamadasIlimitadas', e.target.checked)}
                                                 className="rounded text-telmex-blue w-4 h-4"
                                             />
-                                            <span className="text-xs font-medium text-gray-700">Incluye Telefonía</span>
+                                            <span className="text-[10px] font-bold text-gray-700 uppercase">Telefonía</span>
                                         </label>
                                         <label className="flex items-center gap-2 cursor-pointer">
                                             <input
@@ -222,8 +252,18 @@ export default function AdminCatalogoPage() {
                                                 onChange={(e) => actualizarPaquete(p.id, 'netflix', e.target.checked)}
                                                 className="rounded text-telmex-blue w-4 h-4"
                                             />
-                                            <span className="text-xs font-medium text-gray-700">Incluye Netflix</span>
+                                            <span className="text-[10px] font-bold text-gray-700 uppercase">Netflix</span>
                                         </label>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Beneficios extra</label>
+                                        <textarea
+                                            value={p.beneficios || ''}
+                                            onChange={(e) => actualizarPaquete(p.id, 'beneficios', e.target.value)}
+                                            placeholder="Ej: WiFi 6, Claro Video, etc."
+                                            className="w-full p-2 border rounded-lg text-sm min-h-[60px] focus:ring-2 focus:ring-telmex-blue outline-none resize-none"
+                                        />
                                     </div>
                                 </div>
                             </div>

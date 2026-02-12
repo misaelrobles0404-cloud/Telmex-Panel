@@ -428,6 +428,14 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 }))} required
                         />
                         {loadingPaquetes && <p className="text-xs text-telmex-blue animate-pulse mt-1">Cargando catálogo...</p>}
+                        {!loadingPaquetes && formData.paqueteId && (
+                            <div className="mt-2 p-2 bg-blue-50 rounded-lg">
+                                <p className="text-[10px] text-blue-700 font-bold uppercase tracking-wider mb-1">Beneficios del Paquete:</p>
+                                <p className="text-xs text-blue-900 font-medium whitespace-pre-wrap">
+                                    {paquetesDynamicos.find(p => p.id === formData.paqueteId)?.beneficios || 'Sin beneficios adicionales registrados.'}
+                                </p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
