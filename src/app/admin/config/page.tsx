@@ -16,6 +16,7 @@ import {
     Save,
     Plus,
     Trash2,
+    Megaphone,
     Key,
     AlertCircle,
     Loader2,
