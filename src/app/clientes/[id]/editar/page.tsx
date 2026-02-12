@@ -9,8 +9,8 @@ import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types
 import { guardarCliente, obtenerCliente } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 import { calcularComision } from '@/lib/utils';
-import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
 import { ArrowLeft, Save, Building2, Home as HomeIcon } from 'lucide-react';
+import { obtenerConfiguracion } from '@/lib/admin';
 
 export default function EditarClientePage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -75,6 +75,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
     const [estadoPipeline, setEstadoPipeline] = useState('');
     const [archivoActividades, setArchivoActividades] = useState<any[]>([]);
     const [archivoDocumentos, setArchivoDocumentos] = useState<any[]>([]);
+    const [paquetesDynamicos, setPaquetesDynamicos] = useState<any[]>([]);
+    const [loadingPaquetes, setLoadingPaquetes] = useState(true);
 
     useEffect(() => {
         const fetchCliente = async () => {
@@ -131,6 +133,20 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     folioSiac: cliente.folio_siac || '',
                 });
             }
+
+            // Cargar paquetes dinámicos
+            const pqData = await obtenerConfiguracion<any[]>('catalogo_paquetes');
+            if (pqData && pqData.length > 0) {
+                setPaquetesDynamicos(pqData);
+            } else {
+                const { PAQUETES_RESIDENCIALES, PAQUETES_PYME } = await import('@/data/paquetes');
+                const initial = [
+                    ...PAQUETES_RESIDENCIALES.map(p => ({ ...p, categoria: 'residencial', nombre: `${p.velocidad} Mbps- $${p.precioPromo}/mes` })),
+                    ...PAQUETES_PYME.map(p => ({ ...p, categoria: 'pyme', nombre: `PYME ${p.velocidad} Mbps` }))
+                ];
+                setPaquetesDynamicos(initial);
+            }
+            setLoadingPaquetes(false);
             setLoading(false);
         };
         fetchCliente();
@@ -161,8 +177,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
         // Usar el ID del usuario actual si el cliente no tiene uno asignado
         const finalUserId = userId || user?.id;
 
-        const paquetesDisponibles = obtenerPaquetesPorTipo(formData.tipoCliente);
-        const paqueteSeleccionado = paquetesDisponibles.find(p => p.id === formData.paqueteId);
+        const paqueteSeleccionado = paquetesDynamicos.find(p => p.id === formData.paqueteId);
 
         if (!paqueteSeleccionado) {
             alert('Por favor selecciona un paquete');
@@ -191,10 +206,10 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             usuario: formData.usuario,
             tipo_servicio: tipoServicio,
             tipo_cliente: formData.tipoCliente,
-            paquete: `${paqueteSeleccionado.velocidad} Mbps`,
+            paquete: paqueteSeleccionado.nombre || `${paqueteSeleccionado.velocidad} Mbps`,
             clave_paquete: paqueteSeleccionado.id,
             velocidad: paqueteSeleccionado.velocidad,
-            precio_mensual: paqueteSeleccionado.precioPromo,
+            precio_mensual: paqueteSeleccionado.precio || paqueteSeleccionado.precioPromo,
             tiene_internet: formData.tieneInternet,
             tiene_telefono_fijo: formData.tieneTelefonoFijo,
             proveedor_actual: (formData.proveedorActual as any) || undefined,
@@ -404,12 +419,15 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                 <Card>
                     <CardHeader><CardTitle>Paquete</CardTitle></CardHeader>
                     <CardContent>
-                        <Select label="Seleccionar Paquete" value={formData.paqueteId} onChange={(e) => setFormData({ ...formData, paqueteId: e.target.value })}
-                            options={obtenerPaquetesPorTipo(formData.tipoCliente).map(p => ({
-                                value: p.id,
-                                label: `${p.velocidad} Mbps - $${p.precioPromo}/mes`
-                            }))} required
+                        <Select label="Seleccionar Paquete" value={formData.paqueteId} disabled={loadingPaquetes} onChange={(e) => setFormData({ ...formData, paqueteId: e.target.value })}
+                            options={paquetesDynamicos
+                                .filter(p => p.activo !== false && (p.categoria === formData.tipoCliente || (formData.tipoCliente === 'residencial' && p.categoria === 'solo_internet')))
+                                .map(p => ({
+                                    value: p.id,
+                                    label: p.nombre || `${p.velocidad} Mbps - $${p.precio}/mes`
+                                }))} required
                         />
+                        {loadingPaquetes && <p className="text-xs text-telmex-blue animate-pulse mt-1">Cargando catálogo...</p>}
                     </CardContent>
                 </Card>
 

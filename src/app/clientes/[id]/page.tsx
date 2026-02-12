@@ -311,10 +311,8 @@ GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
         } else {
             // Formato para Línea Nueva
-            // Determinamos si es paquete Solo Internet basado en la clave o el nombre
-            const esSoloInternet = (cliente.clave_paquete && cliente.clave_paquete.includes('-net')) ||
-                (cliente.paquete && cliente.paquete.toUpperCase().includes('SOLO INTERNET'));
-
+            // Usamos el campo dinámico incluye_telefono
+            const esSoloInternet = !cliente.incluye_telefono;
             const descripcionServicio = esSoloInternet ? 'SOLO INTERNET' : 'INTERNET Y TELEFONÍA';
 
             formato = `${promotorLine}

@@ -12,6 +12,7 @@ import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@
 import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { ClavesPortalCard } from '@/components/ClavesPortalCard';
+import { obtenerConfiguracion } from '@/lib/admin';
 
 export default function NuevoClientePage() {
     const router = useRouter();
@@ -63,6 +64,8 @@ export default function NuevoClientePage() {
     });
 
     const [loading, setLoading] = useState(false);
+    const [loadingPaquetes, setLoadingPaquetes] = useState(true);
+    const [paquetesDynamicos, setPaquetesDynamicos] = useState<any[]>([]);
     const [tipoServicio, setTipoServicio] = useState<TipoServicio>('linea_nueva');
 
     // Manejar cambio manual de tipo de servicio
@@ -83,11 +86,27 @@ export default function NuevoClientePage() {
 
     useEffect(() => {
         const cargarDatos = async () => {
+            setLoadingPaquetes(true);
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
             if (user?.email) {
                 setFormData(prev => ({ ...prev, usuario: user.email || '' }));
             }
+
+            // Cargar paquetes dinámicos
+            const pqData = await obtenerConfiguracion<any[]>('catalogo_paquetes');
+            if (pqData && pqData.length > 0) {
+                setPaquetesDynamicos(pqData);
+            } else {
+                // Fallback a estáticos si no hay en DB
+                const { PAQUETES_RESIDENCIALES, PAQUETES_PYME } = await import('@/data/paquetes');
+                const initial = [
+                    ...PAQUETES_RESIDENCIALES.map(p => ({ ...p, categoria: p.llamadasIlimitadas ? 'residencial' : 'solo_internet', nombre: `${p.velocidad} Mbps- $${p.precioPromo}/mes` })),
+                    ...PAQUETES_PYME.map(p => ({ ...p, categoria: 'pyme', nombre: `PYME ${p.velocidad} Mbps` }))
+                ];
+                setPaquetesDynamicos(initial);
+            }
+            setLoadingPaquetes(false);
         };
         cargarDatos();
 
@@ -218,8 +237,7 @@ export default function NuevoClientePage() {
             return;
         }
 
-        const paquetesDisponibles = obtenerPaquetesPorTipo(formData.tipoCliente);
-        const paqueteSeleccionado = paquetesDisponibles.find(p => p.id === formData.paqueteId);
+        const paqueteSeleccionado = paquetesDynamicos.find(p => p.id === formData.paqueteId);
 
         if (!paqueteSeleccionado) {
             alert('Por favor selecciona un paquete');
@@ -249,10 +267,10 @@ export default function NuevoClientePage() {
             usuario: formData.usuario || user.email || '',
             tipo_servicio: tipoServicio,
             tipo_cliente: formData.tipoCliente,
-            paquete: `${paqueteSeleccionado.velocidad} Mbps`,
+            paquete: paqueteSeleccionado.nombre || `${paqueteSeleccionado.velocidad} Mbps`,
             clave_paquete: paqueteSeleccionado.id,
             velocidad: paqueteSeleccionado.velocidad,
-            precio_mensual: paqueteSeleccionado.precioPromo,
+            precio_mensual: paqueteSeleccionado.precio || paqueteSeleccionado.precioPromo,
             incluye_telefono: paqueteSeleccionado.llamadasIlimitadas,
             tiene_internet: formData.tieneInternet,
             tiene_telefono_fijo: formData.tieneTelefonoFijo,
@@ -672,13 +690,17 @@ export default function NuevoClientePage() {
                                 <Select
                                     label="Seleccionar Paquete"
                                     value={formData.paqueteId}
+                                    disabled={loadingPaquetes}
                                     onChange={(e) => setFormData({ ...formData, paqueteId: e.target.value })}
-                                    options={obtenerPaquetesPorTipo(formData.tipoCliente).map(p => ({
-                                        value: p.id,
-                                        label: `${p.velocidad} Mbps - $${p.precioPromo}/mes ${p.netflix ? '(Netflix)' : ''} ${!p.llamadasIlimitadas ? '(Solo Internet)' : ''}`
-                                    }))}
+                                    options={paquetesDynamicos
+                                        .filter(p => p.activo !== false && (p.categoria === formData.tipoCliente || (formData.tipoCliente === 'residencial' && p.categoria === 'solo_internet')))
+                                        .map(p => ({
+                                            value: p.id,
+                                            label: p.nombre || `${p.velocidad} Mbps - $${p.precio}/mes`
+                                        }))}
                                     required
                                 />
+                                {loadingPaquetes && <p className="text-xs text-telmex-blue animate-pulse mt-1">Cargando paquetes...</p>}
                             </CardContent>
                         </Card>
 

@@ -26,7 +26,9 @@ interface Paquete {
     precio: number;
     velocidad: number;
     activo: boolean;
-    categoria: 'residencial' | 'pyme' | 'solo_internet';
+    categoria: 'residencial' | 'pyme';
+    netflix: boolean;
+    llamadasIlimitadas: boolean;
 }
 
 export default function AdminCatalogoPage() {
@@ -51,14 +53,35 @@ export default function AdminCatalogoPage() {
     const cargarPaquetes = async () => {
         setLoading(true);
         const data = await obtenerConfiguracion<Paquete[]>('catalogo_paquetes');
-        if (data) {
+        if (data && data.length > 0) {
             setPaquetes(data);
         } else {
-            // Inicializar con algunos datos si está vacío
-            setPaquetes([
-                { id: 'res_60', nombre: '60 Megas + Telefonía', precio: 389, velocidad: 60, activo: true, categoria: 'residencial' },
-                { id: 'res_100', nombre: '100 Megas + Telefonía', precio: 499, velocidad: 100, activo: true, categoria: 'residencial' },
-            ]);
+            // Migración: Inicializar con los paquetes reales del archivo estático
+            const { PAQUETES_RESIDENCIALES, PAQUETES_PYME } = await import('@/data/paquetes');
+
+            const initialPaquetes: Paquete[] = [
+                ...PAQUETES_RESIDENCIALES.map(p => ({
+                    id: p.id,
+                    nombre: `${p.velocidad} Megas ${p.llamadasIlimitadas ? '+ Telefonía' : 'Solo Internet'}${p.netflix ? ' + Netflix' : ''}`,
+                    precio: p.precioPromo,
+                    velocidad: p.velocidad,
+                    activo: true,
+                    categoria: 'residencial' as any,
+                    netflix: p.netflix,
+                    llamadasIlimitadas: p.llamadasIlimitadas
+                })),
+                ...PAQUETES_PYME.map(p => ({
+                    id: p.id,
+                    nombre: `PYME ${p.velocidad} Megas ${p.llamadasIlimitadas ? '+ Telefonía' : 'Solo Internet'}`,
+                    precio: p.precioPromo,
+                    velocidad: p.velocidad,
+                    activo: true,
+                    categoria: 'pyme' as any,
+                    netflix: p.netflix,
+                    llamadasIlimitadas: p.llamadasIlimitadas
+                }))
+            ];
+            setPaquetes(initialPaquetes);
         }
         setLoading(false);
     };
@@ -82,7 +105,9 @@ export default function AdminCatalogoPage() {
             precio: 0,
             velocidad: 0,
             activo: true,
-            categoria: 'residencial'
+            categoria: 'residencial',
+            netflix: false,
+            llamadasIlimitadas: true
         };
         setPaquetes([nuevo, ...paquetes]);
     };
@@ -177,10 +202,29 @@ export default function AdminCatalogoPage() {
                                         onChange={(e) => actualizarPaquete(p.id, 'categoria', e.target.value)}
                                         options={[
                                             { value: 'residencial', label: 'Residencial' },
-                                            { value: 'pyme', label: 'PYME' },
-                                            { value: 'solo_internet', label: 'Solo Internet' }
+                                            { value: 'pyme', label: 'PYME' }
                                         ]}
                                     />
+                                    <div className="flex gap-4 p-2 bg-blue-50/50 rounded-lg">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={p.llamadasIlimitadas}
+                                                onChange={(e) => actualizarPaquete(p.id, 'llamadasIlimitadas', e.target.checked)}
+                                                className="rounded text-telmex-blue w-4 h-4"
+                                            />
+                                            <span className="text-xs font-medium text-gray-700">Incluye Telefonía</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={p.netflix}
+                                                onChange={(e) => actualizarPaquete(p.id, 'netflix', e.target.checked)}
+                                                className="rounded text-telmex-blue w-4 h-4"
+                                            />
+                                            <span className="text-xs font-medium text-gray-700">Incluye Netflix</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex items-center justify-between pt-2 border-t">
