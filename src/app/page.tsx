@@ -68,10 +68,17 @@ export default function DashboardPage() {
                 let clientesFiltrados = clientesData;
                 // Si es Misael, aunque tenga rango de admin para ver alertas, su panel muestra solo sus clientes
                 if (esMisael) {
-                    clientesFiltrados = clientesData.filter(c => c.usuario === user.email);
+                    clientesFiltrados = clientesData.filter(c =>
+                        c.usuario === user.email ||
+                        c.user_id === user.id
+                    );
                 } else if (!esAdmin && user?.email) {
-                    clientesFiltrados = clientesData.filter(c => c.usuario === user.email);
+                    clientesFiltrados = clientesData.filter(c =>
+                        c.usuario === user.email ||
+                        c.user_id === user.id
+                    );
                 }
+
 
                 setClientes(clientesFiltrados);
                 setMetricas(calcularMetricas(clientesFiltrados));
