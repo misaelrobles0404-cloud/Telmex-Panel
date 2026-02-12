@@ -15,7 +15,6 @@ const navigation = [
     { name: 'Campañas', href: '/campanas', icon: Megaphone },
     { name: 'Auditoría', href: '/auditoria', icon: ClipboardCheck },
     { name: 'Calculadora', href: '/calculadora', icon: Calculator },
-    { name: 'Cobertura', href: '/cobertura', icon: MapPin },
     { name: 'Reportes', href: '/reportes', icon: BarChart3 },
 ];
 
@@ -36,6 +35,33 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         };
         getSession();
     }, []);
+
+    const [deferredPrompt, setDeferredPrompt] = React.useState<any>(null);
+    const [isInstallable, setIsInstallable] = React.useState(false);
+
+    React.useEffect(() => {
+        const handleBeforeInstallPrompt = (e: any) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+            setIsInstallable(true);
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
+    }, []);
+
+    const handleInstallClick = async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            setIsInstallable(false);
+        }
+        setDeferredPrompt(null);
+    };
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -100,6 +126,19 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             );
                         })}
                     </nav>
+
+                    {/* Install App Button */}
+                    {isInstallable && (
+                        <div className="px-3 pb-2">
+                            <button
+                                onClick={handleInstallClick}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white bg-telmex-blue hover:bg-telmex-blue/80 transition-all duration-200 shadow-lg"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Instalar App
+                            </button>
+                        </div>
+                    )}
 
                     {/* Footer */}
                     <div className="flex-shrink-0 p-4 border-t border-telmex-blue/30 bg-telmex-darkblue">
