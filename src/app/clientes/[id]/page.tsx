@@ -359,11 +359,17 @@ GASTOS DE INSTALACION
         });
     };
 
+    const copiarAlPortapapeles = (texto: string, label: string) => {
+        navigator.clipboard.writeText(texto).then(() => {
+            alert(`${label} copiado al portapapeles.`);
+        }).catch(err => {
+            console.error('Error al copiar:', err);
+        });
+    };
+
     const copiarTelefono = () => {
         if (!cliente) return;
-        navigator.clipboard.writeText(cliente.no_tt).then(() => {
-            alert('Teléfono copiado. Búscalo en WhatsApp.');
-        });
+        copiarAlPortapapeles(cliente.no_tt, 'Teléfono');
     };
 
     const copiarMensajeReferidos = () => {
@@ -575,18 +581,32 @@ Solo necesito que me confirmes para agendar.
                             <CardTitle>Datos de Contacto</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                            <div className="flex items-center gap-3">
-                                <Phone className="text-gray-400" size={18} />
-                                <div>
+                            <div
+                                className="flex items-center gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors group"
+                                onClick={() => copiarAlPortapapeles(cliente.no_tt, 'Teléfono')}
+                                title="Click para copiar"
+                            >
+                                <Phone className="text-gray-400 group-hover:text-telmex-blue transition-colors" size={18} />
+                                <div className="flex-1">
                                     <p className="text-sm text-gray-500">Teléfono (TT)</p>
-                                    <p className="font-medium">{cliente.no_tt}</p>
+                                    <p className="font-medium flex items-center gap-2">
+                                        {cliente.no_tt}
+                                        <Copy size={12} className="text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <Mail className="text-gray-400" size={18} />
-                                <div>
+                            <div
+                                className="flex items-center gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors group"
+                                onClick={() => copiarAlPortapapeles(cliente.correo, 'Correo')}
+                                title="Click para copiar"
+                            >
+                                <Mail className="text-gray-400 group-hover:text-telmex-blue transition-colors" size={18} />
+                                <div className="flex-1">
                                     <p className="text-sm text-gray-500">Correo</p>
-                                    <p className="font-medium">{cliente.correo}</p>
+                                    <p className="font-medium flex items-center gap-2">
+                                        {cliente.correo}
+                                        <Copy size={12} className="text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
@@ -681,10 +701,17 @@ Solo necesito que me confirmes para agendar.
                                     <span className="text-error text-xs">Pendiente</span>
                                 )}
                             </div>
-                            <div className="flex items-center justify-between p-2 rounded bg-gray-50">
+                            <div
+                                className="flex items-center justify-between p-2 rounded bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors group"
+                                onClick={() => cliente.curp && copiarAlPortapapeles(cliente.curp, 'CURP')}
+                                title="Click para copiar CURP"
+                            >
                                 <span className="text-sm font-medium">CURP</span>
                                 {cliente.curp ? (
-                                    <span className="text-success text-xs flex items-center gap-1"><CheckCircle size={12} /> {cliente.curp}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-success text-xs font-bold leading-none">{cliente.curp}</span>
+                                        <Copy size={12} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
                                 ) : (
                                     <span className="text-error text-xs">Pendiente</span>
                                 )}
@@ -729,19 +756,28 @@ Solo necesito que me confirmes para agendar.
 
                             <div className="pt-4 border-t border-gray-100">
                                 <label className="text-gray-500 mb-1 block">Folio SIAC</label>
-                                <div className="flex flex-wrap md:flex-nowrap gap-2">
+                                <div className="relative flex-1 min-w-[120px]">
                                     <input
                                         type="text"
                                         value={folioSiacInput}
                                         onChange={(e) => setFolioSiacInput(e.target.value)}
                                         placeholder="Ingresa Folio SIAC"
-                                        className="flex-1 min-w-[120px] px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
+                                        className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
                                     />
-                                    <Button variant="primary" size="sm" onClick={guardarFolioSiac} disabled={folioSiacInput === (cliente.folio_siac || '')} className="w-full md:w-auto">
-                                        <Save size={14} className="mr-1 md:mr-0" />
-                                        <span className="md:hidden">Guardar Folio</span>
-                                    </Button>
+                                    {folioSiacInput && (
+                                        <button
+                                            onClick={() => copiarAlPortapapeles(folioSiacInput, 'Folio SIAC')}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-telmex-blue transition-colors"
+                                            title="Copiar Folio"
+                                        >
+                                            <Copy size={14} />
+                                        </button>
+                                    )}
                                 </div>
+                                <Button variant="primary" size="sm" onClick={guardarFolioSiac} disabled={folioSiacInput === (cliente.folio_siac || '')} className="w-full md:w-auto">
+                                    <Save size={14} className="mr-1 md:mr-0" />
+                                    <span className="md:hidden">Guardar Folio</span>
+                                </Button>
 
                                 <div className="mt-2 text-sm">
                                     <a
@@ -756,13 +792,24 @@ Solo necesito que me confirmes para agendar.
 
                                 <label className="text-gray-500 mb-1 block mt-4">Orden de Servicio (OS)</label>
                                 <div className="flex flex-wrap md:flex-nowrap gap-2">
-                                    <input
-                                        type="text"
-                                        value={ordenServicioInput}
-                                        onChange={(e) => setOrdenServicioInput(e.target.value)}
-                                        placeholder="Orden de Servicio"
-                                        className="flex-1 min-w-[120px] px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
-                                    />
+                                    <div className="relative flex-1 min-w-[120px]">
+                                        <input
+                                            type="text"
+                                            value={ordenServicioInput}
+                                            onChange={(e) => setOrdenServicioInput(e.target.value)}
+                                            placeholder="Orden de Servicio"
+                                            className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
+                                        />
+                                        {ordenServicioInput && (
+                                            <button
+                                                onClick={() => copiarAlPortapapeles(ordenServicioInput, 'OS')}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-telmex-blue transition-colors"
+                                                title="Copiar OS"
+                                            >
+                                                <Copy size={14} />
+                                            </button>
+                                        )}
+                                    </div>
                                     <Button variant="primary" size="sm" onClick={guardarOrdenServicio} disabled={ordenServicioInput === (cliente.orden_servicio || '')} className="w-full md:w-auto">
                                         <Save size={14} className="mr-1 md:mr-0" />
                                         <span className="md:hidden">Guardar OS</span>
