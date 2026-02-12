@@ -18,6 +18,7 @@ import { calcularMetricas, formatearMoneda } from '@/lib/utils';
 import { Cliente } from '@/types';
 import { BLOQUES_TIEMPO, obtenerBloqueActual } from '@/data/agenda';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -26,12 +27,26 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const bloqueActual = obtenerBloqueActual();
 
+    const [user, setUser] = useState<any>(null);
+
     useEffect(() => {
         const cargarDatos = async () => {
             try {
+                const { data: { user } } = await supabase.auth.getUser();
+                setUser(user);
+
                 const clientesData = await obtenerClientes();
-                setClientes(clientesData);
-                setMetricas(calcularMetricas(clientesData));
+
+                // Lógica de Filtrado: Si no es Admin (Misael o Ruiz Boss), filtrar por su propio correo
+                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'ruizmosinfinitum2025@gmail.com';
+
+                let clientesFiltrados = clientesData;
+                if (!esAdmin && user?.email) {
+                    clientesFiltrados = clientesData.filter(c => c.usuario === user.email);
+                }
+
+                setClientes(clientesFiltrados);
+                setMetricas(calcularMetricas(clientesFiltrados));
             } catch (error) {
                 console.error("Error al cargar dashboard:", error);
             } finally {

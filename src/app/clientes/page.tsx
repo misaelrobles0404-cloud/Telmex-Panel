@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -71,24 +72,38 @@ export default function ClientesPage() {
         setShowModal(true);
     };
 
+    const [user, setUser] = useState<any>(null);
+
     useEffect(() => {
         const cargarClientes = async () => {
             try {
-                const data = await obtenerClientes();
-                setClientes(data);
+                const { data: { user } } = await supabase.auth.getUser();
+                setUser(user);
 
-                // Calcular estadísticas
+                const data = await obtenerClientes();
+
+                // Lógica de Filtrado: Si no es Admin (Misael o Ruiz Boss), filtrar por su propio correo
+                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'ruizmosinfinitum2025@gmail.com';
+
+                let clientesFiltradosData = data;
+                if (!esAdmin && user?.email) {
+                    clientesFiltradosData = data.filter(c => c.usuario === user.email);
+                }
+
+                setClientes(clientesFiltradosData);
+
+                // Calcular estadísticas sobre los datos filtrados
                 const hoy = new Date();
                 const inicioDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
 
                 const primerDiaSemana = new Date(hoy);
-                const diaSemana = hoy.getDay() || 7; // Hacer que lunes sea 1 y domingo 7
+                const diaSemana = hoy.getDay() || 7;
                 primerDiaSemana.setHours(0, 0, 0, 0);
                 primerDiaSemana.setDate(primerDiaSemana.getDate() - diaSemana + 1);
 
                 const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
 
-                const statsCalculated = data.reduce((acc, cliente) => {
+                const statsCalculated = clientesFiltradosData.reduce((acc, cliente) => {
                     const fechaCreacion = new Date(cliente.creado_en);
 
                     if (fechaCreacion >= inicioDia) acc.hoy++;
