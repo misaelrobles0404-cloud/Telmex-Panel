@@ -232,48 +232,50 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                                 })()}
                                             </div>
 
-                                            <div className="flex items-center gap-1.5">
-                                                {(() => {
-                                                    const keyId = `${clave.identificador}-${u.usuario}`;
-                                                    const keyUsage = usage[keyId];
+                                            {claveSeleccionada === u.usuario && (
+                                                <div className="flex items-center gap-1.5">
+                                                    {(() => {
+                                                        const keyId = `${clave.identificador}-${u.usuario}`;
+                                                        const keyUsage = usage[keyId];
 
-                                                    const getStatusStyles = (tipo: 'siac' | 'portal') => {
-                                                        const userId = tipo === 'siac' ? keyUsage?.siac_user_id : keyUsage?.portal_user_id;
-                                                        if (!userId) return 'bg-gray-50 text-gray-400 border-gray-100 hover:border-gray-300';
-                                                        if (userId === currentUser?.id) return 'bg-green-100 text-green-700 border-green-200 animate-pulse';
-                                                        return 'bg-red-100 text-red-700 border-red-200';
-                                                    };
+                                                        const getStatusStyles = (tipo: 'siac' | 'portal') => {
+                                                            const userId = tipo === 'siac' ? keyUsage?.siac_user_id : keyUsage?.portal_user_id;
+                                                            if (!userId) return 'bg-gray-50 text-gray-400 border-gray-100 hover:border-gray-300';
+                                                            if (userId === currentUser?.id) return 'bg-green-100 text-green-700 border-green-200 animate-pulse';
+                                                            return 'bg-red-100 text-red-700 border-red-200';
+                                                        };
 
-                                                    const getUserName = (tipo: 'siac' | 'portal') => {
-                                                        const userId = tipo === 'siac' ? keyUsage?.siac_user_id : keyUsage?.portal_user_id;
-                                                        if (!userId) return null;
-                                                        if (userId === currentUser?.id) return 'TÚ';
-                                                        const p = allProfiles.find(p => p.id === userId);
-                                                        return p ? p.nombre_completo.split(' ')[0].toUpperCase() : 'OTRO';
-                                                    };
+                                                        const getUserName = (tipo: 'siac' | 'portal') => {
+                                                            const userId = tipo === 'siac' ? keyUsage?.siac_user_id : keyUsage?.portal_user_id;
+                                                            if (!userId) return null;
+                                                            if (userId === currentUser?.id) return 'TÚ';
+                                                            const p = allProfiles.find(p => p.id === userId);
+                                                            return p ? p.nombre_completo.split(' ')[0].toUpperCase() : 'OTRO';
+                                                        };
 
-                                                    return (
-                                                        <>
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'siac'); }}
-                                                                className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-black transition-all ${getStatusStyles('siac')}`}
-                                                                title={getUserName('siac') ? `Ocupado por ${getUserName('siac')}` : "Marcar como EN USO en SIAC"}
-                                                            >
-                                                                <Monitor size={10} />
-                                                                {getUserName('siac') ? `SIAC: ${getUserName('siac')}` : 'USO SIAC'}
-                                                            </button>
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'portal'); }}
-                                                                className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-black transition-all ${getStatusStyles('portal')}`}
-                                                                title={getUserName('portal') ? `Ocupado por ${getUserName('portal')}` : "Marcar como EN USO en PORTAL"}
-                                                            >
-                                                                <Globe size={10} />
-                                                                {getUserName('portal') ? `PTAL: ${getUserName('portal')}` : 'USO PTAL'}
-                                                            </button>
-                                                        </>
-                                                    );
-                                                })()}
-                                            </div>
+                                                        return (
+                                                            <>
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'siac'); }}
+                                                                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-black transition-all ${getStatusStyles('siac')}`}
+                                                                    title={getUserName('siac') ? `Ocupado por ${getUserName('siac')}` : "Marcar como EN USO en SIAC"}
+                                                                >
+                                                                    <Monitor size={10} />
+                                                                    {getUserName('siac') ? `SIAC: ${getUserName('siac')}` : 'USO SIAC'}
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'portal'); }}
+                                                                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-black transition-all ${getStatusStyles('portal')}`}
+                                                                    title={getUserName('portal') ? `Ocupado por ${getUserName('portal')}` : "Marcar como EN USO en PORTAL"}
+                                                                >
+                                                                    <Globe size={10} />
+                                                                    {getUserName('portal') ? `PTAL: ${getUserName('portal')}` : 'USO PTAL'}
+                                                                </button>
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="flex items-center justify-end gap-2">
