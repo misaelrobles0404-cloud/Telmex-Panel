@@ -744,10 +744,9 @@ export default function NuevoClientePage() {
                                         {tipoServicio === 'portabilidad' && (
                                             <>
                                                 <Input
-                                                    label="NIP Portabilidad (marcar 051)"
+                                                    label="NIP Portabilidad (051) - Opcional"
                                                     value={formData.nipPortabilidad}
                                                     onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })}
-                                                    required
                                                 />
 
                                                 <Input

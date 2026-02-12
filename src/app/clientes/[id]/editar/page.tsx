@@ -460,7 +460,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 <Input label="Número a Portar" value={formData.numeroAPortar} onChange={(e) => setFormData({ ...formData, numeroAPortar: e.target.value })} required />
                                 {tipoServicio === 'portabilidad' && (
                                     <>
-                                        <Input label="NIP Portabilidad" value={formData.nipPortabilidad} onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })} required />
+                                        <Input label="NIP Portabilidad (Opcional)" value={formData.nipPortabilidad} onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })} />
                                         <Input label="Fecha Vigencia" type="date" value={formData.fechaVigencia} onChange={(e) => setFormData({ ...formData, fechaVigencia: e.target.value })} />
                                         <label className="flex items-center gap-2 cursor-pointer">
                                             <input type="checkbox" checked={formData.formatoPortabilidad} onChange={(e) => setFormData({ ...formData, formatoPortabilidad: e.target.checked })} className="w-4 h-4" />
