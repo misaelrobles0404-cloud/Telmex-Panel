@@ -291,7 +291,7 @@ export default function NominasPage() {
                                                 {cliente.paquete} ({cliente.velocidad} Megas)
                                             </div>
                                             <div className="text-[9px] text-telmex-blue font-black uppercase mt-0.5">
-                                                {cliente.tiene_telefono_fijo ? 'Internet + Telefonía' : 'Solo Internet'}
+                                                {cliente.incluye_telefono ? 'Internet + Telefonía' : 'Solo Internet'}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">

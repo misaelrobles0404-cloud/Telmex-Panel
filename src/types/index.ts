@@ -48,6 +48,7 @@ export interface Cliente {
     clave_paquete: string;
     velocidad: number; // Mbps
     precio_mensual: number;
+    incluye_telefono?: boolean; // Si el paquete contratado tiene telefonía
 
     // Información de competencia (para portabilidad)
     tiene_internet: boolean;

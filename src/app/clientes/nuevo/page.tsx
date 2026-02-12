@@ -241,6 +241,7 @@ export default function NuevoClientePage() {
             clave_paquete: paqueteSeleccionado.id,
             velocidad: paqueteSeleccionado.velocidad,
             precio_mensual: paqueteSeleccionado.precioPromo,
+            incluye_telefono: paqueteSeleccionado.llamadasIlimitadas,
             tiene_internet: formData.tieneInternet,
             tiene_telefono_fijo: formData.tieneTelefonoFijo,
             proveedor_actual: formData.proveedorActual as any,

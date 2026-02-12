@@ -212,7 +212,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                                 {cliente.paquete} ({cliente.velocidad} Megas)
                                                             </div>
                                                             <div className="text-[9px] text-telmex-blue font-black uppercase mt-0.5">
-                                                                {cliente.tiene_telefono_fijo ? 'Intermet + Telefonía' : 'Solo Internet'}
+                                                                {cliente.incluye_telefono ? 'Internet + Telefonía' : 'Solo Internet'}
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
