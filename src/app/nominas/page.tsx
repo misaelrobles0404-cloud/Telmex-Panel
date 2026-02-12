@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 
 interface Nomina {
     id: string;
+    nombre: string;
     periodo_inicio: string;
     periodo_fin: string;
     total_comisiones: number;
@@ -40,7 +41,7 @@ export default function NominasPage() {
     const getPeriodoSemanaPasada = () => {
         const hoy = new Date();
         const lunes = new Date(hoy);
-        const diaSemana = hoy.getDay() || 7; // Lunes=1, ..., Domingo=7
+        const diaSemana = hoy.getDay() || 7;
 
         // Ir al lunes de la semana pasada
         lunes.setDate(hoy.getDate() - diaSemana - 6);
@@ -50,7 +51,16 @@ export default function NominasPage() {
         domingo.setDate(lunes.getDate() + 6);
         domingo.setHours(23, 59, 59, 999);
 
-        return { inicio: lunes, fin: domingo };
+        // Calcular número de semana (Semana 1 empieza el 2 de Feb 2026)
+        const fechaReferencia = new Date('2026-02-02');
+        const diffDias = Math.floor((lunes.getTime() - fechaReferencia.getTime()) / (1000 * 60 * 60 * 24));
+        const numSemana = Math.floor(diffDias / 7) + 1;
+
+        return {
+            inicio: lunes,
+            fin: domingo,
+            nombre: `NOMINA SEMANA ${numSemana}`
+        };
     };
 
     const periodoActual = getPeriodoSemanaPasada();
@@ -109,6 +119,7 @@ export default function NominasPage() {
             const { data: nuevaNomina, error: nError } = await supabase
                 .from('nominas')
                 .insert({
+                    nombre: periodoActual.nombre,
                     periodo_inicio: periodoActual.inicio.toISOString().split('T')[0],
                     periodo_fin: periodoActual.fin.toISOString().split('T')[0],
                     total_comisiones: total,
@@ -183,13 +194,13 @@ export default function NominasPage() {
                         <DollarSign size={120} />
                     </div>
                     <CardContent className="p-8 pt-10">
-                        <p className="text-blue-100 font-bold uppercase tracking-widest text-xs mb-2">Total Pendiente</p>
+                        <p className="text-blue-100 font-bold uppercase tracking-widest text-xs mb-2">{periodoActual.nombre}</p>
                         <h2 className="text-5xl font-black">
                             {formatearMoneda(clientesPendientes.reduce((acc, c) => acc + calcularComision(c.tipo_servicio), 0))}
                         </h2>
                         <div className="mt-6 flex items-center gap-2 text-sm bg-white/10 w-fit px-3 py-1.5 rounded-full font-bold">
                             <Calendar size={14} />
-                            Semana: {periodoActual.inicio.toLocaleDateString()} - {periodoActual.fin.toLocaleDateString()}
+                            Periodo: {periodoActual.inicio.toLocaleDateString()} - {periodoActual.fin.toLocaleDateString()}
                         </div>
                     </CardContent>
                 </Card>
@@ -324,8 +335,8 @@ export default function NominasPage() {
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
-                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest leading-none">Periodo Semanal</p>
-                                            <span className="badge badge-blue text-[9px] uppercase font-black">Cerrada</span>
+                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest leading-none">{n.nombre || 'Nómina Cerrada'}</p>
+                                            <span className="badge badge-blue text-[9px] uppercase font-black">Finalizada</span>
                                         </div>
                                         <h3 className="text-lg font-black text-gray-900">
                                             {new Date(n.periodo_inicio).toLocaleDateString()} - {new Date(n.periodo_fin).toLocaleDateString()}
