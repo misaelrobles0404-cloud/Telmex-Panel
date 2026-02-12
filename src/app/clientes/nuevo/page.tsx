@@ -704,9 +704,21 @@ export default function NuevoClientePage() {
                                 {!loadingPaquetes && formData.paqueteId && (
                                     <div className="mt-2 p-2 bg-blue-50 rounded-lg animate-in fade-in duration-300">
                                         <p className="text-[10px] text-blue-700 font-bold uppercase tracking-wider mb-1">Beneficios del Paquete:</p>
-                                        <p className="text-xs text-blue-900 font-medium whitespace-pre-wrap">
-                                            {paquetesDynamicos.find(p => p.id === formData.paqueteId)?.beneficios || 'Sin beneficios adicionales registrados.'}
-                                        </p>
+                                        <div className="space-y-1">
+                                            {(() => {
+                                                const pq = paquetesDynamicos.find(p => p.id === formData.paqueteId);
+                                                const b = pq?.beneficios;
+                                                if (Array.isArray(b) && b.length > 0) {
+                                                    return b.filter(item => item.trim() !== '').map((item, i) => (
+                                                        <div key={i} className="flex items-start gap-1 text-xs text-blue-900 font-medium leading-tight">
+                                                            <span className="text-blue-500">•</span>
+                                                            <span>{item}</span>
+                                                        </div>
+                                                    ));
+                                                }
+                                                return <p className="text-xs text-blue-600 italic">Sin beneficios adicionales registrados.</p>;
+                                            })()}
+                                        </div>
                                     </div>
                                 )}
                             </CardContent>

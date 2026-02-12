@@ -28,7 +28,7 @@ interface Paquete {
     activo: boolean;
     categoria: 'residencial' | 'pyme';
     llamadasIlimitadas: boolean;
-    beneficios?: string;
+    beneficios?: string[];
 }
 
 export default function AdminCatalogoPage() {
@@ -69,7 +69,8 @@ export default function AdminCatalogoPage() {
                     activo: true,
                     categoria: 'residencial' as any,
                     llamadasIlimitadas: p.llamadasIlimitadas,
-                    beneficios: p.netflix ? 'Incluye Netflix' : ''
+                    netflix: p.netflix, // Added netflix
+                    beneficios: p.netflix ? ['Incluye Netflix'] : [] // Changed to array
                 })),
                 ...PAQUETES_PYME.map(p => ({
                     id: p.id,
@@ -79,7 +80,8 @@ export default function AdminCatalogoPage() {
                     activo: true,
                     categoria: 'pyme' as any,
                     llamadasIlimitadas: p.llamadasIlimitadas,
-                    beneficios: p.netflix ? 'Incluye Netflix' : ''
+                    netflix: p.netflix, // Added netflix
+                    beneficios: p.netflix ? ['Incluye Netflix'] : [] // Changed to array
                 }))
             ];
             setPaquetes(initialPaquetes);
@@ -108,7 +110,7 @@ export default function AdminCatalogoPage() {
             activo: true,
             categoria: 'residencial',
             llamadasIlimitadas: true,
-            beneficios: ''
+            beneficios: []
         };
         setPaquetes([nuevo, ...paquetes]);
     };
@@ -243,14 +245,47 @@ export default function AdminCatalogoPage() {
                                         </label>
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Beneficios extra</label>
-                                        <textarea
-                                            value={p.beneficios || ''}
-                                            onChange={(e) => actualizarPaquete(p.id, 'beneficios', e.target.value)}
-                                            placeholder="Ej: WiFi 6, Claro Video, etc."
-                                            className="w-full p-2 border rounded-lg text-sm min-h-[60px] focus:ring-2 focus:ring-telmex-blue outline-none resize-none"
-                                        />
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Beneficios Extra</label>
+                                            <button
+                                                onClick={() => {
+                                                    const nuevosBeneficios = [...(p.beneficios || []), ''];
+                                                    actualizarPaquete(p.id, 'beneficios', nuevosBeneficios);
+                                                }}
+                                                className="text-[10px] font-bold text-telmex-blue hover:underline flex items-center gap-1"
+                                            >
+                                                <Plus size={10} /> Añadir
+                                            </button>
+                                        </div>
+                                        <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
+                                            {(p.beneficios || []).map((beneficio, idx) => (
+                                                <div key={idx} className="flex gap-2 group/item">
+                                                    <input
+                                                        value={beneficio}
+                                                        onChange={(e) => {
+                                                            const nuevos = [...(p.beneficios || [])];
+                                                            nuevos[idx] = e.target.value;
+                                                            actualizarPaquete(p.id, 'beneficios', nuevos);
+                                                        }}
+                                                        placeholder="Ej: WiFi 6"
+                                                        className="flex-1 p-2 bg-gray-50 border border-gray-100 rounded-lg text-xs focus:ring-1 focus:ring-telmex-blue outline-none transition-all"
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const nuevos = (p.beneficios || []).filter((_, i) => i !== idx);
+                                                            actualizarPaquete(p.id, 'beneficios', nuevos);
+                                                        }}
+                                                        className="text-gray-300 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            {(p.beneficios || []).length === 0 && (
+                                                <p className="text-[10px] text-gray-400 italic text-center py-2">Sin beneficios extra</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
