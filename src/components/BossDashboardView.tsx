@@ -211,7 +211,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                                 {cliente.tipo_servicio.replace('_', ' ')}
                                                             </div>
                                                             <div className="text-[10px] text-gray-500 font-medium">
-                                                                {cliente Paquete: .paquete} ({cliente Paolo: .velocidad}MB)
+                                                                {cliente.paquete} ({cliente.velocidad}MB)
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
