@@ -137,41 +137,26 @@ export function calcularMetricas(clientesInput?: Cliente[]): Metricas {
         cierresProgramados,
         vendidos,
         sin_cobertura,
-        presupuestoGastadoHoy: 20, // Placeholder
-        presupuestoGastadoMes: 0, // Placeholder
-        roi: 0, // Placeholder
     };
 }
 
 // ============================================
-// ESTADÍSTICAS DE CAMPAÑAS
-// ============================================
+const presupuestoSeguro = Number(campana.presupuesto) || 0;
+const factorRendimiento = presupuestoSeguro > 0 ? presupuestoSeguro / 35 : 0;
+const diasActiva = campana.activa ? 1 : 0.5;
 
-export function calcularEstadisticasCampana(campanasInput: any[], clientesInput: Cliente[]) {
-    const campanas = campanasInput || [];
-    const clientes = clientesInput || [];
-    return campanas.map(campana => {
-        // Leads reales vinculados
-        const leads = clientes.filter(c => c.campana_id === campana.id).length;
+// Validar que el factor sea un número finito
+const factorFinal = isFinite(factorRendimiento) ? factorRendimiento : 0;
 
-        // Simulación de Alcance y Clicks basada en el presupuesto diario y días activa
-        // Manejo defensivo: asegurar que el presupuesto sea un número y no 0 para el factor
-        const presupuestoSeguro = Number(campana.presupuesto) || 0;
-        const factorRendimiento = presupuestoSeguro > 0 ? presupuestoSeguro / 35 : 0;
-        const diasActiva = campana.activa ? 1 : 0.5;
+const alcanceSimulado = Math.floor(1200 * factorFinal * (leads > 0 ? leads : 1) * (Math.random() * 0.5 + 0.8));
+const clicksSimulados = Math.floor(40 * factorFinal * (leads > 0 ? leads : 1) * (Math.random() * 0.4 + 0.7));
 
-        // Validar que el factor sea un número finito
-        const factorFinal = isFinite(factorRendimiento) ? factorRendimiento : 0;
-
-        const alcanceSimulado = Math.floor(1200 * factorFinal * (leads > 0 ? leads : 1) * (Math.random() * 0.5 + 0.8));
-        const clicksSimulados = Math.floor(40 * factorFinal * (leads > 0 ? leads : 1) * (Math.random() * 0.4 + 0.7));
-
-        return {
-            ...campana,
-            alcance: isNaN(alcanceSimulado) ? 0 : alcanceSimulado,
-            interacciones: isNaN(clicksSimulados) ? 0 : clicksSimulados,
-            leads_generados: leads
-        };
+return {
+    ...campana,
+    alcance: isNaN(alcanceSimulado) ? 0 : alcanceSimulado,
+    interacciones: isNaN(clicksSimulados) ? 0 : clicksSimulados,
+    leads_generados: leads
+};
     });
 }
 
