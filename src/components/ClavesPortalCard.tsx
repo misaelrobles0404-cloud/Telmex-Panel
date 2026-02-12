@@ -1,8 +1,9 @@
 
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Key } from 'lucide-react';
+import { Copy, Key, Zap } from 'lucide-react';
 import { CLAVES_PORTAL, ClavePortal, obtenerClavePorCiudad } from '@/data/claves';
+import { Toast } from '@/components/ui/Toast';
 
 interface ClavesPortalCardProps {
     ciudad?: string; // Si se proporciona, filtra automáticamente
@@ -18,6 +19,20 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
     onSeleccionar
 }) => {
     const [filtro, setFiltro] = useState('');
+    const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+
+    const mostrarToast = (message: string) => {
+        setToast({ message, isVisible: true });
+    };
+
+    const copiarDual = (e: React.MouseEvent, identificador: string, usuario: string) => {
+        e.stopPropagation();
+        // El carácter \t (Tab) hace que al pegar el navegador pase al siguiente campo automáticamente
+        const texto = `${identificador}\t${usuario}`;
+        navigator.clipboard.writeText(texto).then(() => {
+            mostrarToast('Acceso dual copiado (Usuario + Pass)');
+        });
+    };
 
     const clavesFiltradas = useMemo(() => {
         if (ciudad) {
@@ -73,11 +88,19 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                             {claveSeleccionada === u.usuario && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                                         </div>
                                     )}
-                                    <div className="flex flex-col text-xs">
+                                    <div className="flex flex-1 flex-col text-xs">
                                         <span className={`font-mono font-semibold ${claveSeleccionada === u.usuario ? 'text-telmex-blue' : 'text-gray-700'
                                             }`}>{u.usuario}</span>
                                         <span className="text-gray-600 truncate">{u.nombre}</span>
                                     </div>
+                                    <button
+                                        onClick={(e) => copiarDual(e, clave.identificador, u.usuario)}
+                                        className="p-1.5 text-orange-500 hover:bg-orange-50 rounded-md transition-colors border border-orange-100 flex items-center gap-1"
+                                        title="Copiar Usuario + Contraseña"
+                                    >
+                                        <Zap size={14} fill="currentColor" />
+                                        <span className="text-[10px] font-bold">PEGADO RÁPIDO</span>
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -90,6 +113,11 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                     </p>
                 )}
             </CardContent>
+            <Toast
+                message={toast.message}
+                isVisible={toast.isVisible}
+                onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+            />
         </Card>
     );
 };
