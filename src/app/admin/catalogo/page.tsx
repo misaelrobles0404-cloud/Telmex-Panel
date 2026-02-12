@@ -68,9 +68,13 @@ export default function AdminCatalogoPage() {
                     velocidad: p.velocidad,
                     activo: true,
                     categoria: 'residencial' as any,
-                    llamadasIlimitadas: p.llamadasIlimitadas,
                     netflix: p.netflix, // Added netflix
-                    beneficios: p.netflix ? ['Incluye Netflix'] : [] // Changed to array
+                    llamadasIlimitadas: p.llamadasIlimitadas,
+                    beneficios: [
+                        'Netflix gratis por 6 meses',
+                        'Claro Sports y Universal Plus',
+                        'PlimPlim canal infantil'
+                    ]
                 })),
                 ...PAQUETES_PYME.map(p => ({
                     id: p.id,
@@ -79,9 +83,13 @@ export default function AdminCatalogoPage() {
                     velocidad: p.velocidad,
                     activo: true,
                     categoria: 'pyme' as any,
-                    llamadasIlimitadas: p.llamadasIlimitadas,
                     netflix: p.netflix, // Added netflix
-                    beneficios: p.netflix ? ['Incluye Netflix'] : [] // Changed to array
+                    llamadasIlimitadas: p.llamadasIlimitadas,
+                    beneficios: [
+                        'Netflix gratis por 6 meses',
+                        'Claro Sports y Universal Plus',
+                        'PlimPlim canal infantil'
+                    ]
                 }))
             ];
             setPaquetes(initialPaquetes);
