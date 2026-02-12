@@ -139,8 +139,8 @@ export default function ClientesPage() {
 
         let matchEstado = false;
         if (filtroEstado === 'todos') {
-            // Excluir sin_cobertura y cobertura_cobre de la vista general por defecto
-            matchEstado = cliente.estado_pipeline !== 'sin_cobertura' && cliente.estado_pipeline !== 'cobertura_cobre';
+            // Excluir sin_cobertura de la vista general por defecto
+            matchEstado = cliente.estado_pipeline !== 'sin_cobertura';
         } else {
             matchEstado = cliente.estado_pipeline === filtroEstado;
         }
@@ -238,12 +238,11 @@ export default function ClientesPage() {
                     className="input"
                 >
                     <option value="todos">Todos los prospectos activos</option>
-                    <option value="contactado">Contactado</option>
+                    <option value="contactado">Prospectos</option>
                     <option value="interesado">Interesado</option>
                     <option value="cierre_programado">Cierre Programado</option>
                     <option value="vendido">Vendido</option>
                     <option value="sin_cobertura">Sin Cobertura</option>
-                    <option value="cobertura_cobre">Cobertura Cobre</option>
                 </select>
             </div>
 
@@ -264,15 +263,13 @@ export default function ClientesPage() {
                                             cliente.estado_pipeline === 'cierre_programado' ? 'badge-purple' :
                                                 cliente.estado_pipeline === 'interesado' ? 'badge-blue' :
                                                     cliente.estado_pipeline === 'sin_cobertura' ? 'bg-red-100 text-red-700' :
-                                                        cliente.estado_pipeline === 'cobertura_cobre' ? 'bg-orange-100 text-orange-700' :
-                                                            'bg-gray-100 text-gray-800'
+                                                        'bg-gray-100 text-gray-800'
                                             }`}>
                                             {cliente.estado_pipeline === 'vendido' && 'Vendido'}
                                             {cliente.estado_pipeline === 'cierre_programado' && 'Cierre Programado'}
                                             {cliente.estado_pipeline === 'interesado' && 'Interesado'}
-                                            {cliente.estado_pipeline === 'contactado' && 'Contactado'}
+                                            {cliente.estado_pipeline === 'contactado' && 'Prospecto'}
                                             {cliente.estado_pipeline === 'sin_cobertura' && 'Sin Cobertura'}
-                                            {cliente.estado_pipeline === 'cobertura_cobre' && 'Cobertura Cobre'}
                                         </span>
                                         <span className={`badge ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
                                             cliente.tipo_servicio === 'portabilidad' ? 'badge-purple' :

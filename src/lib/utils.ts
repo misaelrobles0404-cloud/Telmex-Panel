@@ -116,7 +116,6 @@ export function calcularMetricas(clientesInput?: Cliente[]): Metricas {
     const cierresProgramados = clientes.filter(c => c.estado_pipeline === 'cierre_programado').length;
     const vendidos = clientes.filter(c => c.estado_pipeline === 'vendido').length;
     const sin_cobertura = clientes.filter(c => c.estado_pipeline === 'sin_cobertura').length;
-    const cobertura_cobre = clientes.filter(c => c.estado_pipeline === 'cobertura_cobre').length;
 
     // Tasa de conversión
     const totalLeads = clientes.length;
@@ -138,7 +137,6 @@ export function calcularMetricas(clientesInput?: Cliente[]): Metricas {
         cierresProgramados,
         vendidos,
         sin_cobertura,
-        cobertura_cobre,
         presupuestoGastadoHoy: 20, // Placeholder
         presupuestoGastadoMes: 0, // Placeholder
         roi: 0, // Placeholder
