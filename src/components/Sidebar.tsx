@@ -10,7 +10,6 @@ const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Clientes', href: '/clientes', icon: Users },
     { name: 'Agenda', href: '/agenda', icon: Calendar },
-    { name: 'Plantillas WhatsApp', href: '/plantillas', icon: MessageSquare },
     { name: 'Verificar Comisiones', href: '/comisiones', icon: CheckCircle }, // Nuevo módulo
     { name: 'Campañas', href: '/campanas', icon: Megaphone },
     { name: 'Auditoría', href: '/auditoria', icon: ClipboardCheck },

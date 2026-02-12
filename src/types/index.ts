@@ -136,19 +136,6 @@ export interface PaqueteTelmex {
 }
 
 // ============================================
-// PLANTILLA WHATSAPP
-// ============================================
-
-export interface PlantillaWhatsApp {
-    id: string;
-    nombre: string;
-    categoria: 'prospeccion' | 'seguimiento' | 'cotizacion' | 'cierre' | 'postventa';
-    tipoServicio?: TipoServicio;
-    contenido: string;
-    variables: string[]; // {nombre}, {proveedor}, {ahorro}, etc.
-}
-
-// ============================================
 // PUBLICACIÓN
 // ============================================
 
