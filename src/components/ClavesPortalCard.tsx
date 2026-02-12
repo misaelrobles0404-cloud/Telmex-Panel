@@ -26,13 +26,15 @@ interface ClavesPortalCardProps {
     modo?: 'sidebar' | 'detalle'; // Ajusta el estilo
     claveSeleccionada?: string; // ID del usuario seleccionado
     onSeleccionar?: (usuarioId: string) => void; // Callback al seleccionar
+    bloqueado?: boolean; // Bloquea el cambio de clave si ya hay Folio SIAC
 }
 
 export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
     ciudad,
     modo = 'sidebar',
     claveSeleccionada,
-    onSeleccionar
+    onSeleccionar,
+    bloqueado = false
 }) => {
     const [filtro, setFiltro] = useState('');
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
@@ -119,16 +121,26 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
     };
 
     const clavesFiltradas = useMemo(() => {
+        let listado = CLAVES_PORTAL;
+
         if (ciudad) {
             const match = obtenerClavePorCiudad(ciudad);
-            return match ? [match] : []; // Si hay ciudad, solo muestra esa o nada
+            listado = match ? [match] : [];
+        } else if (filtro) {
+            const term = filtro.toUpperCase();
+            listado = CLAVES_PORTAL.filter(c => c.ciudad.includes(term));
         }
 
-        if (!filtro) return CLAVES_PORTAL;
+        // Si está bloqueado y hay una clave seleccionada, solo mostrar esa clave
+        if (bloqueado && claveSeleccionada) {
+            return listado.map(c => ({
+                ...c,
+                usuarios: c.usuarios.filter(u => u.usuario === claveSeleccionada)
+            })).filter(c => c.usuarios.length > 0);
+        }
 
-        const term = filtro.toUpperCase();
-        return CLAVES_PORTAL.filter(c => c.ciudad.includes(term));
-    }, [ciudad, filtro]);
+        return listado;
+    }, [ciudad, filtro, bloqueado, claveSeleccionada]);
 
     if (ciudad && clavesFiltradas.length === 0) return null; // No mostrar nada si no hay match en detalle
 
@@ -147,6 +159,12 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                         value={filtro}
                         onChange={(e) => setFiltro(e.target.value)}
                     />
+                )}
+                {bloqueado && (
+                    <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100">
+                        <Lock size={12} />
+                        Clave vinculada al Folio SIAC
+                    </div>
                 )}
             </CardHeader>
             <CardContent className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
@@ -167,14 +185,16 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                             {clave.usuarios.map((u, idx) => (
                                 <div
                                     key={idx}
-                                    className={`flex items-start gap-2 p-2 rounded-md transition-colors ${onSeleccionar ? 'cursor-pointer hover:bg-blue-50' : ''
-                                        } ${claveSeleccionada === u.usuario ? 'bg-blue-100 border border-blue-200' : ''}`}
-                                    onClick={() => onSeleccionar && onSeleccionar(u.usuario)}
+                                    className={`flex items-start gap-2 p-2 rounded-md transition-colors ${onSeleccionar && !bloqueado ? 'cursor-pointer hover:bg-blue-50' : ''
+                                        } ${claveSeleccionada === u.usuario ? 'bg-blue-100 border border-blue-200' : ''} ${bloqueado && claveSeleccionada !== u.usuario ? 'opacity-50 grayscale' : ''}`}
+                                    onClick={() => onSeleccionar && !bloqueado && onSeleccionar(u.usuario)}
                                 >
                                     {onSeleccionar && (
                                         <div className={`mt-0.5 w-4 h-4 rounded-full border flex items-center justify-center ${claveSeleccionada === u.usuario ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
                                             }`}>
-                                            {claveSeleccionada === u.usuario && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                            {claveSeleccionada === u.usuario && (
+                                                bloqueado ? <Lock size={8} className="text-white" /> : <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                            )}
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0">
@@ -269,8 +289,8 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                                         onClick={(e) => !isLocked && copiarAlPortapapeles(e, u.usuario, 'Contraseña')}
                                                         disabled={!!isLocked}
                                                         className={`flex items-center gap-2 px-3 py-1 rounded-lg border transition-all text-[11px] font-black group/btn shadow-sm ${isLocked
-                                                                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                                                                : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100'
+                                                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                                            : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100'
                                                             }`}
                                                         title={isLocked ? "Clave bloqueada por otro usuario" : "Copiar Contraseña"}
                                                     >

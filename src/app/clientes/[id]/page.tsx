@@ -879,6 +879,7 @@ Solo necesito que me confirmes para agendar.
                     ciudad={cliente.cd}
                     modo="detalle"
                     claveSeleccionada={cliente.usuario_portal_asignado}
+                    bloqueado={!!cliente.folio_siac}
                     onSeleccionar={async (usuarioId) => {
                         if (!cliente) return;
 
