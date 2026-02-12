@@ -396,7 +396,7 @@ export default function ComisionesPage() {
                                             <td className="py-2 px-4 font-medium">{cliente.nombre}</td>
                                             <td className="py-2 px-4">
                                                 <span className="px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
-                                                    {cliente.estado_pipeline === 'cobertura_cobre' ? 'COBERTURA COBRE' : 'SIN COBERTURA'}
+                                                    SIN COBERTURA
                                                 </span>
                                             </td>
                                             <td className="py-2 px-4 text-right">
