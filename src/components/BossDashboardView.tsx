@@ -85,66 +85,69 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {clientesVendedor.sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime()).map((cliente) => (
-                                        <tr key={cliente.id} className="hover:bg-gray-50/80 transition-colors group">
-                                            <td className="px-6 py-4">
-                                                <div className="font-bold text-gray-900 group-hover:text-telmex-blue transition-colors">
-                                                    {cliente.nombre}
-                                                </div>
-                                                <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                                                    <Phone size={12} />
-                                                    {cliente.no_tt}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="space-y-1.5">
-                                                    <div className="flex items-center gap-2 text-xs">
-                                                        <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1">
-                                                            <Hash size={10} /> SIAC: {cliente.folio_siac || '---'}
-                                                        </span>
+                                    {clientesVendedor
+                                        .filter(c => c.estado_pipeline === 'vendido' || c.estado_pipeline === 'cierre_programado')
+                                        .sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime())
+                                        .map((cliente) => (
+                                            <tr key={cliente.id} className="hover:bg-gray-50/80 transition-colors group">
+                                                <td className="px-6 py-4">
+                                                    <div className="font-bold text-gray-900 group-hover:text-telmex-blue transition-colors">
+                                                        {cliente.nombre}
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-xs">
-                                                        <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1">
-                                                            <Key size={10} /> CLAVE: {cliente.usuario_portal_asignado || '---'}
-                                                        </span>
+                                                    <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
+                                                        <Phone size={12} />
+                                                        {cliente.no_tt}
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-sm font-semibold text-gray-800 uppercase">
-                                                    {cliente.tipo_servicio.replace('_', ' ')}
-                                                </div>
-                                                <div className="text-xs text-gray-500 font-medium">
-                                                    {cliente.paquete} ({cliente.velocidad}MB)
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border-2 ${cliente.estado_pipeline === 'vendido'
-                                                    ? 'bg-green-100 text-green-700 border-green-200'
-                                                    : cliente.estado_pipeline === 'cierre_programado'
-                                                        ? 'bg-purple-100 text-purple-700 border-purple-200'
-                                                        : 'bg-yellow-100 text-yellow-700 border-yellow-200'
-                                                    }`}>
-                                                    {cliente.estado_pipeline === 'vendido' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
-                                                    {cliente.estado_pipeline === 'vendido' ? 'INSTALADO' :
-                                                        cliente.estado_pipeline === 'cancelado' ? 'CANCELADO' :
-                                                            cliente.estado_pipeline.replace(/_/g, ' ').toUpperCase()}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-lg font-black text-gray-900">
-                                                    {cliente.estado_pipeline === 'vendido'
-                                                        ? formatearMoneda(
-                                                            (cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback')
-                                                                ? 300
-                                                                : 250
-                                                        )
-                                                        : formatearMoneda(0)
-                                                    }
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="space-y-1.5">
+                                                        <div className="flex items-center gap-2 text-xs">
+                                                            <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1">
+                                                                <Hash size={10} /> SIAC: {cliente.folio_siac || '---'}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-xs">
+                                                            <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1">
+                                                                <Key size={10} /> CLAVE: {cliente.usuario_portal_asignado || '---'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="text-sm font-semibold text-gray-800 uppercase">
+                                                        {cliente.tipo_servicio.replace('_', ' ')}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 font-medium">
+                                                        {cliente.paquete} ({cliente.velocidad}MB)
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border-2 ${cliente.estado_pipeline === 'vendido'
+                                                        ? 'bg-green-100 text-green-700 border-green-200'
+                                                        : cliente.estado_pipeline === 'cierre_programado'
+                                                            ? 'bg-purple-100 text-purple-700 border-purple-200'
+                                                            : 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                                                        }`}>
+                                                        {cliente.estado_pipeline === 'vendido' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
+                                                        {cliente.estado_pipeline === 'vendido' ? 'INSTALADO' :
+                                                            cliente.estado_pipeline === 'cancelado' ? 'CANCELADO' :
+                                                                cliente.estado_pipeline.replace(/_/g, ' ').toUpperCase()}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-lg font-black text-gray-900">
+                                                        {cliente.estado_pipeline === 'vendido'
+                                                            ? formatearMoneda(
+                                                                (cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback')
+                                                                    ? 300
+                                                                    : 250
+                                                            )
+                                                            : formatearMoneda(0)
+                                                        }
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
                                 </tbody>
                             </table>
                         </CardContent>
