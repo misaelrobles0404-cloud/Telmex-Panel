@@ -1,9 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Copy, Key, User, Lock } from 'lucide-react';
+import { Copy, Key, User, Lock, Monitor, Globe } from 'lucide-react';
 import { CLAVES_PORTAL, ClavePortal, obtenerClavePorCiudad } from '@/data/claves';
 import { Toast } from '@/components/ui/Toast';
+import { supabase } from '@/lib/supabase';
+import { PortalKeyUsage, PerfilUsuario } from '@/types';
 
 // Función para dividir nombres según formato mexicano estándar
 const dividirNombre = (nombreCompleto: string) => {
@@ -34,9 +36,79 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
 }) => {
     const [filtro, setFiltro] = useState('');
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+    const [usage, setUsage] = useState<Record<string, PortalKeyUsage>>({});
+    const [currentUser, setCurrentUser] = useState<PerfilUsuario | null>(null);
+    const [allProfiles, setAllProfiles] = useState<PerfilUsuario[]>([]);
+
+    useEffect(() => {
+        // 1. Obtener usuario actual y perfiles
+        const init = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase.from('perfiles').select('*').eq('id', user.id).single();
+                setCurrentUser(profile);
+            }
+
+            const { data: profiles } = await supabase.from('perfiles').select('*');
+            if (profiles) setAllProfiles(profiles);
+
+            // 2. Cargar estado inicial de uso
+            const { data: usageData } = await supabase.from('portal_keys_usage').select('*');
+            if (usageData) {
+                const usageMap = usageData.reduce((acc, curr) => ({ ...acc, [curr.key_id]: curr }), {});
+                setUsage(usageMap);
+            }
+        };
+
+        init();
+
+        // 3. Suscribirse a cambios Realtime
+        const channel = supabase
+            .channel('portal_keys_usage_changes')
+            .on('postgres_changes', { event: '*', table: 'portal_keys_usage', schema: 'public' }, (payload) => {
+                if (payload.new) {
+                    const newUsage = payload.new as PortalKeyUsage;
+                    setUsage(prev => ({ ...prev, [newUsage.key_id]: newUsage }));
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
 
     const mostrarToast = (message: string) => {
         setToast({ message, isVisible: true });
+    };
+
+    const toggleUso = async (keyId: string, tipo: 'siac' | 'portal') => {
+        if (!currentUser) return;
+
+        const currentUsage = usage[keyId];
+        const fieldName = tipo === 'siac' ? 'siac_user_id' : 'portal_user_id';
+        const isOccupiedByMe = currentUsage?.[fieldName] === currentUser.id;
+        const isOccupiedByOther = currentUsage?.[fieldName] && currentUsage?.[fieldName] !== currentUser.id;
+
+        if (isOccupiedByOther) {
+            mostrarToast('Esta clave ya está ocupada por un compañero');
+            return;
+        }
+
+        const newValue = isOccupiedByMe ? null : currentUser.id;
+        const updateData = {
+            key_id: keyId,
+            [fieldName]: newValue,
+            [`${tipo}_updated_at`]: new Date().toISOString()
+        };
+
+        const { error } = await supabase.from('portal_keys_usage').upsert(updateData);
+        if (error) {
+            console.error('Error updating key usage:', error);
+            mostrarToast('Error al actualizar estado');
+        } else {
+            mostrarToast(newValue ? `Marcada como USO EN ${tipo.toUpperCase()}` : `Clave liberada en ${tipo.toUpperCase()}`);
+        }
     };
 
     const copiarAlPortapapeles = (e: React.MouseEvent, texto: string, label: string) => {
@@ -106,7 +178,7 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between gap-2">
+                                        <div className="flex items-center justify-between gap-2 mb-2">
                                             <div className="flex flex-wrap gap-1">
                                                 {(() => {
                                                     const d = dividirNombre(u.nombre);
@@ -140,15 +212,74 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                                 })()}
                                             </div>
 
-                                            <button
-                                                onClick={(e) => copiarAlPortapapeles(e, u.usuario, 'Contraseña')}
-                                                className="flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-700 rounded-lg border border-orange-200 hover:bg-orange-100 transition-all text-[11px] font-black group/btn shadow-sm"
-                                                title="Copiar Contraseña"
-                                            >
-                                                <Lock size={12} className="text-orange-500" />
-                                                <span className="font-mono">{u.usuario}</span>
-                                                <Copy size={10} className="opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-                                            </button>
+                                            <div className="flex items-center gap-1.5">
+                                                {(() => {
+                                                    const keyId = `${clave.identificador}-${u.usuario}`;
+                                                    const keyUsage = usage[keyId];
+
+                                                    const getStatusStyles = (tipo: 'siac' | 'portal') => {
+                                                        const userId = tipo === 'siac' ? keyUsage?.siac_user_id : keyUsage?.portal_user_id;
+                                                        if (!userId) return 'bg-gray-50 text-gray-400 border-gray-100 hover:border-gray-300';
+                                                        if (userId === currentUser?.id) return 'bg-green-100 text-green-700 border-green-200 animate-pulse';
+                                                        return 'bg-red-100 text-red-700 border-red-200';
+                                                    };
+
+                                                    const getUserName = (tipo: 'siac' | 'portal') => {
+                                                        const userId = tipo === 'siac' ? keyUsage?.siac_user_id : keyUsage?.portal_user_id;
+                                                        if (!userId) return null;
+                                                        if (userId === currentUser?.id) return 'TÚ';
+                                                        const p = allProfiles.find(p => p.id === userId);
+                                                        return p ? p.nombre_completo.split(' ')[0].toUpperCase() : 'OTRO';
+                                                    };
+
+                                                    return (
+                                                        <>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'siac'); }}
+                                                                className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-black transition-all ${getStatusStyles('siac')}`}
+                                                                title={getUserName('siac') ? `Ocupado por ${getUserName('siac')}` : "Marcar como EN USO en SIAC"}
+                                                            >
+                                                                <Monitor size={10} />
+                                                                {getUserName('siac') ? `SIAC: ${getUserName('siac')}` : 'USO SIAC'}
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'portal'); }}
+                                                                className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-black transition-all ${getStatusStyles('portal')}`}
+                                                                title={getUserName('portal') ? `Ocupado por ${getUserName('portal')}` : "Marcar como EN USO en PORTAL"}
+                                                            >
+                                                                <Globe size={10} />
+                                                                {getUserName('portal') ? `PTAL: ${getUserName('portal')}` : 'USO PTAL'}
+                                                            </button>
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-end gap-2">
+                                            {(() => {
+                                                const keyId = `${clave.identificador}-${u.usuario}`;
+                                                const keyUsage = usage[keyId];
+                                                const isSiacLocked = keyUsage?.siac_user_id && keyUsage?.siac_user_id !== currentUser?.id;
+                                                const isPortalLocked = keyUsage?.portal_user_id && keyUsage?.portal_user_id !== currentUser?.id;
+                                                const isLocked = isSiacLocked || isPortalLocked;
+
+                                                return (
+                                                    <button
+                                                        onClick={(e) => !isLocked && copiarAlPortapapeles(e, u.usuario, 'Contraseña')}
+                                                        disabled={!!isLocked}
+                                                        className={`flex items-center gap-2 px-3 py-1 rounded-lg border transition-all text-[11px] font-black group/btn shadow-sm ${isLocked
+                                                                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                                                : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100'
+                                                            }`}
+                                                        title={isLocked ? "Clave bloqueada por otro usuario" : "Copiar Contraseña"}
+                                                    >
+                                                        <Lock size={12} className={isLocked ? "text-gray-400" : "text-orange-500"} />
+                                                        <span className="font-mono">{isLocked ? '(BLOQUEADA)' : u.usuario}</span>
+                                                        {!isLocked && <Copy size={10} className="opacity-0 group-hover/btn:opacity-100 transition-opacity" />}
+                                                    </button>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 </div>

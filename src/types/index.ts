@@ -207,6 +207,18 @@ export interface PerfilUsuario {
 }
 
 // ============================================
+// USO DE CLAVES DE PORTAL
+// ============================================
+
+export interface PortalKeyUsage {
+    key_id: string; // 'identificador-username'
+    siac_user_id: string | null;
+    portal_user_id: string | null;
+    siac_updated_at: string;
+    portal_updated_at: string;
+}
+
+// ============================================
 // REQUISITOS POR TIPO DE SERVICIO
 // ============================================
 
