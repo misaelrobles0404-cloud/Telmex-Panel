@@ -232,22 +232,22 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                             })()}
                                         </div>
 
-                                        <div className="flex flex-col items-center gap-2 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100/50 mt-1">
+                                        <div className="flex flex-col items-center gap-2 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100/50 mt-1 w-full">
                                             {claveSeleccionada === u.usuario && (
-                                                <div className="flex items-center gap-2 w-full justify-center">
+                                                <div className="flex items-center w-full justify-center">
                                                     {(() => {
                                                         const keyId = `${clave.identificador}-${u.usuario}`;
                                                         const keyUsage = usage[keyId];
 
-                                                        const getStatusStyles = (tipo: 'siac' | 'portal') => {
-                                                            const userId = tipo === 'siac' ? keyUsage?.siac_user_id : keyUsage?.portal_user_id;
+                                                        const getStatusStyles = () => {
+                                                            const userId = keyUsage?.portal_user_id;
                                                             if (!userId) return 'bg-white text-gray-500 border-gray-200 hover:border-telmex-blue hover:shadow-md shadow-sm';
                                                             if (userId === currentUser?.id) return 'bg-green-600 text-white border-green-700 shadow-sm shadow-green-200 ring-2 ring-green-100';
                                                             return 'bg-red-600 text-white border-red-700 shadow-sm shadow-red-200 ring-2 ring-red-100';
                                                         };
 
-                                                        const getUserName = (tipo: 'siac' | 'portal') => {
-                                                            const userId = tipo === 'siac' ? keyUsage?.siac_user_id : keyUsage?.portal_user_id;
+                                                        const getUserName = () => {
+                                                            const userId = keyUsage?.portal_user_id;
                                                             if (!userId) return null;
                                                             if (userId === currentUser?.id) return 'TÚ';
                                                             const p = allProfiles.find(p => p.id === userId);
@@ -255,24 +255,14 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                                         };
 
                                                         return (
-                                                            <>
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'siac'); }}
-                                                                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-black transition-all ${getStatusStyles('siac')}`}
-                                                                    title={getUserName('siac') ? `Ocupado por ${getUserName('siac')}` : "Marcar como EN USO en SIAC"}
-                                                                >
-                                                                    <Monitor size={12} />
-                                                                    {getUserName('siac') ? `SIAC: ${getUserName('siac')}` : 'USO SIAC'}
-                                                                </button>
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'portal'); }}
-                                                                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-black transition-all ${getStatusStyles('portal')}`}
-                                                                    title={getUserName('portal') ? `Ocupado por ${getUserName('portal')}` : "Marcar como EN USO en PORTAL"}
-                                                                >
-                                                                    <Globe size={12} />
-                                                                    {getUserName('portal') ? `PTAL: ${getUserName('portal')}` : 'USO PTAL'}
-                                                                </button>
-                                                            </>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'portal'); }}
+                                                                className={`w-full max-w-[220px] flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border text-[11px] font-black transition-all ${getStatusStyles()}`}
+                                                                title={getUserName() ? `Ocupado por ${getUserName()}` : "Marcar como EN USO en PORTAL"}
+                                                            >
+                                                                <Globe size={14} />
+                                                                {getUserName() ? `PORTAL EN USO: ${getUserName()}` : 'MARCAR USO PORTAL'}
+                                                            </button>
                                                         );
                                                     })()}
                                                 </div>
@@ -281,15 +271,13 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                             {(() => {
                                                 const keyId = `${clave.identificador}-${u.usuario}`;
                                                 const keyUsage = usage[keyId];
-                                                const isSiacLocked = keyUsage?.siac_user_id && keyUsage?.siac_user_id !== currentUser?.id;
-                                                const isPortalLocked = keyUsage?.portal_user_id && keyUsage?.portal_user_id !== currentUser?.id;
-                                                const isLocked = isSiacLocked || isPortalLocked;
+                                                const isLocked = keyUsage?.portal_user_id && keyUsage?.portal_user_id !== currentUser?.id;
 
                                                 return (
                                                     <button
                                                         onClick={(e) => !isLocked && copiarAlPortapapeles(e, u.usuario, 'Contraseña')}
                                                         disabled={!!isLocked}
-                                                        className={`flex items-center justify-center gap-2 px-6 py-2 rounded-xl border transition-all text-[14px] font-black group/btn shadow-md w-full max-w-[180px] ${isLocked
+                                                        className={`flex items-center justify-center gap-2 px-6 py-2 rounded-xl border transition-all text-[14px] font-black group/btn shadow-md w-full max-w-[220px] ${isLocked
                                                             ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                                                             : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 hover:scale-105 active:scale-95'
                                                             }`}
