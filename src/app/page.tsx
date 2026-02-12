@@ -228,8 +228,8 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* Bloque de Tiempo Actual */}
-            {bloqueActual && (
+            {/* Bloque de Tiempo Actual (Oculto para Boss) */}
+            {bloqueActual && user?.email !== 'ruizmosinfinitum2025@gmail.com' && (
                 <Card className="bg-gradient-to-r from-telmex-blue to-telmex-lightblue text-white">
                     <CardContent className="p-6">
                         <div className="flex items-center gap-4">
