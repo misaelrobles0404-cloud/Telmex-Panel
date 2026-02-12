@@ -494,15 +494,14 @@ Solo necesito que me confirmes para agendar.
                         <CardContent className="p-6">
                             <label className="label mb-2">Estado del Pipeline</label>
                             <div className="flex flex-wrap gap-2">
-                                {['contactado', 'interesado', 'cierre_programado', 'vendido', 'sin_cobertura', 'cobertura_cobre'].map((estado) => (
+                                {['contactado', 'interesado', 'cierre_programado', 'vendido', 'sin_cobertura'].map((estado) => (
                                     <button
                                         key={estado}
                                         onClick={() => actualizarEstado(estado as EstadoPipeline)}
                                         className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${cliente.estado_pipeline === estado
                                             ? 'bg-telmex-blue text-white border-telmex-blue'
                                             : estado === 'sin_cobertura' ? 'bg-red-50 text-red-600 border-red-200 hover:border-red-400' :
-                                                estado === 'cobertura_cobre' ? 'bg-orange-50 text-orange-600 border-orange-200 hover:border-orange-400' :
-                                                    'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
+                                                'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
                                             }`}
                                     >
                                         {estado.replace(/_/g, ' ').toUpperCase()}
