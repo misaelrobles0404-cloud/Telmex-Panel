@@ -288,7 +288,10 @@ export default function NominasPage() {
                                                 {cliente.tipo_servicio.replace('_', ' ')}
                                             </div>
                                             <div className="text-[10px] text-gray-500 font-black mt-1 uppercase">
-                                                {cliente.paquete}
+                                                {cliente.paquete} ({cliente.velocidad} Megas)
+                                            </div>
+                                            <div className="text-[9px] text-telmex-blue font-black uppercase mt-0.5">
+                                                {cliente.tiene_telefono_fijo ? 'Internet + Telefonía' : 'Solo Internet'}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
