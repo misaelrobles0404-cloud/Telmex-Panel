@@ -91,7 +91,7 @@ export default function NuevoClientePage() {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
             if (user?.email) {
-                setFormData(prev => ({ ...prev, usuario: user.email }));
+                setFormData(prev => ({ ...prev, usuario: user.email || '' }));
             }
             const pubs = await obtenerPublicaciones();
             setCampanas(pubs);
