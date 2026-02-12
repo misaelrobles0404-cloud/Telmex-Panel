@@ -126,12 +126,14 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                         : 'bg-yellow-100 text-yellow-700 border-yellow-200'
                                                     }`}>
                                                     {cliente.estado_pipeline === 'vendido' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
-                                                    {cliente.estado_pipeline.replace('_', ' ')}
+                                                    {cliente.estado_pipeline === 'vendido' ? 'INSTALADO' :
+                                                        cliente.estado_pipeline === 'cancelado' ? 'CANCELADO' :
+                                                            cliente.estado_pipeline.replace(/_/g, ' ').toUpperCase()}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="text-lg font-black text-gray-900">
-                                                    {formatearMoneda(cliente.comision)}
+                                                    {cliente.estado_pipeline === 'cancelado' ? formatearMoneda(0) : formatearMoneda(cliente.comision)}
                                                 </span>
                                             </td>
                                         </tr>

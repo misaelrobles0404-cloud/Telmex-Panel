@@ -304,20 +304,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Acciones Rápidas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card
-                    className="cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => router.push('/plantillas')}
-                >
-                    <CardContent className="p-6 text-center">
-                        <div className="text-4xl mb-3">💬</div>
-                        <h3 className="font-semibold text-gray-900">Plantillas WhatsApp</h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                            Mensajes predefinidos para prospectar
-                        </p>
-                    </CardContent>
-                </Card>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card
                     className="cursor-pointer hover:shadow-lg transition-shadow"
                     onClick={() => router.push('/calculadora')}
@@ -344,6 +331,6 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </div >
     );
 }
