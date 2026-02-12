@@ -307,62 +307,60 @@ export default function ClientesPage() {
                     </Card>
                 )}
             </div>
-        </div>
-            {/* Modal Personalizado */ }
-    {
-        showModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-                    <div className={`p-6 ${modalConfig.type === 'confirm' ? 'bg-red-50' : 'bg-blue-50'}`}>
-                        <div className="flex items-center gap-3 mb-2">
-                            {modalConfig.type === 'confirm' ? (
-                                <AlertTriangle className="text-red-600 w-8 h-8" />
-                            ) : (
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">i</div>
-                            )}
-                            <h3 className={`text-xl font-bold ${modalConfig.type === 'confirm' ? 'text-red-900' : 'text-blue-900'}`}>
-                                {modalConfig.title}
-                            </h3>
+
+            {/* Modal Personalizado */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className={`p-6 ${modalConfig.type === 'confirm' ? 'bg-red-50' : 'bg-blue-50'}`}>
+                            <div className="flex items-center gap-3 mb-2">
+                                {modalConfig.type === 'confirm' ? (
+                                    <AlertTriangle className="text-red-600 w-8 h-8" />
+                                ) : (
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">i</div>
+                                )}
+                                <h3 className={`text-xl font-bold ${modalConfig.type === 'confirm' ? 'text-red-900' : 'text-blue-900'}`}>
+                                    {modalConfig.title}
+                                </h3>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="p-6">
-                        <p className="text-gray-600 whitespace-pre-line text-lg mb-8">
-                            {modalConfig.message}
-                        </p>
+                        <div className="p-6">
+                            <p className="text-gray-600 whitespace-pre-line text-lg mb-8">
+                                {modalConfig.message}
+                            </p>
 
-                        <div className="flex justify-end gap-3">
-                            {modalConfig.type === 'confirm' ? (
-                                <>
+                            <div className="flex justify-end gap-3">
+                                {modalConfig.type === 'confirm' ? (
+                                    <>
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => setShowModal(false)}
+                                            className="text-gray-500 hover:text-gray-700 font-medium"
+                                        >
+                                            Cancelar
+                                        </Button>
+                                        <Button
+                                            onClick={() => modalConfig.onConfirm && modalConfig.onConfirm()}
+                                            className="bg-red-600 hover:bg-red-700 text-white font-bold px-6"
+                                        >
+                                            Sí, Eliminar
+                                        </Button>
+                                    </>
+                                ) : (
                                     <Button
-                                        variant="ghost"
+                                        variant="primary"
                                         onClick={() => setShowModal(false)}
-                                        className="text-gray-500 hover:text-gray-700 font-medium"
+                                        className="w-full"
                                     >
-                                        Cancelar
+                                        Aceptar
                                     </Button>
-                                    <Button
-                                        onClick={() => modalConfig.onConfirm && modalConfig.onConfirm()}
-                                        className="bg-red-600 hover:bg-red-700 text-white font-bold px-6"
-                                    >
-                                        Sí, Eliminar
-                                    </Button>
-                                </>
-                            ) : (
-                                <Button
-                                    variant="primary"
-                                    onClick={() => setShowModal(false)}
-                                    className="w-full"
-                                >
-                                    Aceptar
-                                </Button>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        )
-    }
-        </div >
+            )}
+        </div>
     );
 }
