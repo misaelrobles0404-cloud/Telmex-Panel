@@ -43,10 +43,11 @@ export default function DashboardPage() {
 
                 const clientesData = await obtenerClientes();
 
-                // Lógica de Filtrado: Si no es Admin (Misael o Ruiz Boss), filtrar por su propio correo
-                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'ruizmosinfinitum2025@gmail.com';
+                // Lógica de Perfiles: Solo para el Súper Boss
+                const esBoss = user?.email === 'ruizmosinfinitum2025@gmail.com';
+                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || esBoss;
 
-                if (esAdmin) {
+                if (esBoss) {
                     const { data: perfilesData } = await supabase.from('perfiles').select('*');
                     setPerfiles(perfilesData || []);
                 }
@@ -206,9 +207,9 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Admin */}
+            {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Súper Boss */}
             <div>
-                {user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'ruizmosinfinitum2025@gmail.com' ? (
+                {user?.email === 'ruizmosinfinitum2025@gmail.com' ? (
                     <BossDashboardView
                         clientes={clientes}
                         perfiles={perfiles}
