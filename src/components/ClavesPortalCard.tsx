@@ -173,10 +173,11 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                         <div className="flex justify-between items-start mb-2 border-b pb-1">
                             <span className="font-bold text-gray-800 uppercase tracking-tighter">{clave.ciudad}</span>
                             <span
-                                className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-black border border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors flex items-center gap-1"
+                                className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-black border border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors flex items-center gap-1 shadow-sm"
                                 onClick={(e) => copiarAlPortapapeles(e, clave.identificador, 'Usuario')}
                                 title="Click para copiar Usuario"
                             >
+                                <User size={10} className="text-blue-500" />
                                 {clave.identificador}
                                 <Copy size={10} className="opacity-50" />
                             </span>
@@ -190,7 +191,7 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                     onClick={() => onSeleccionar && !bloqueado && onSeleccionar(u.usuario)}
                                 >
                                     {onSeleccionar && (
-                                        <div className={`mt-0.5 w-4 h-4 rounded-full border flex items-center justify-center ${claveSeleccionada === u.usuario ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
+                                        <div className={`mt-1 w-4 h-4 rounded-full border flex items-center justify-center ${claveSeleccionada === u.usuario ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
                                             }`}>
                                             {claveSeleccionada === u.usuario && (
                                                 bloqueado ? <Lock size={8} className="text-white" /> : <div className="w-1.5 h-1.5 rounded-full bg-white" />
@@ -198,51 +199,51 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between gap-2 mb-2">
-                                            <div className="flex flex-wrap gap-1">
-                                                {(() => {
-                                                    const d = dividirNombre(u.nombre);
-                                                    return (
-                                                        <>
+                                        <div className="flex flex-wrap gap-1 mb-2">
+                                            {(() => {
+                                                const d = dividirNombre(u.nombre);
+                                                return (
+                                                    <>
+                                                        <span
+                                                            className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-bold border border-gray-100 uppercase tracking-tight"
+                                                            onClick={(e) => copiarAlPortapapeles(e, d.nombres, 'Nombre')}
+                                                            title="Clic para copiar Nombre"
+                                                        >
+                                                            {d.nombres}
+                                                        </span>
+                                                        <span
+                                                            className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-bold border border-gray-100 uppercase tracking-tight"
+                                                            onClick={(e) => copiarAlPortapapeles(e, d.apellido1, '1er Apellido')}
+                                                            title="Clic para copiar 1er Apellido"
+                                                        >
+                                                            {d.apellido1}
+                                                        </span>
+                                                        {d.apellido2 && (
                                                             <span
                                                                 className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-bold border border-gray-100 uppercase tracking-tight"
-                                                                onClick={(e) => copiarAlPortapapeles(e, d.nombres, 'Nombre')}
-                                                                title="Clic para copiar Nombre"
+                                                                onClick={(e) => copiarAlPortapapeles(e, d.apellido2, '2do Apellido')}
+                                                                title="Clic para copiar 2do Apellido"
                                                             >
-                                                                {d.nombres}
+                                                                {d.apellido2}
                                                             </span>
-                                                            <span
-                                                                className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-bold border border-gray-100 uppercase tracking-tight"
-                                                                onClick={(e) => copiarAlPortapapeles(e, d.apellido1, '1er Apellido')}
-                                                                title="Clic para copiar 1er Apellido"
-                                                            >
-                                                                {d.apellido1}
-                                                            </span>
-                                                            {d.apellido2 && (
-                                                                <span
-                                                                    className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-bold border border-gray-100 uppercase tracking-tight"
-                                                                    onClick={(e) => copiarAlPortapapeles(e, d.apellido2, '2do Apellido')}
-                                                                    title="Clic para copiar 2do Apellido"
-                                                                >
-                                                                    {d.apellido2}
-                                                                </span>
-                                                            )}
-                                                        </>
-                                                    );
-                                                })()}
-                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
 
+                                        <div className="flex flex-col items-center gap-2 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100/50 mt-1">
                                             {claveSeleccionada === u.usuario && (
-                                                <div className="flex items-center gap-1.5">
+                                                <div className="flex items-center gap-2 w-full justify-center">
                                                     {(() => {
                                                         const keyId = `${clave.identificador}-${u.usuario}`;
                                                         const keyUsage = usage[keyId];
 
                                                         const getStatusStyles = (tipo: 'siac' | 'portal') => {
                                                             const userId = tipo === 'siac' ? keyUsage?.siac_user_id : keyUsage?.portal_user_id;
-                                                            if (!userId) return 'bg-gray-50 text-gray-400 border-gray-100 hover:border-gray-300';
-                                                            if (userId === currentUser?.id) return 'bg-green-100 text-green-700 border-green-200 animate-pulse';
-                                                            return 'bg-red-100 text-red-700 border-red-200';
+                                                            if (!userId) return 'bg-white text-gray-500 border-gray-200 hover:border-telmex-blue hover:shadow-md shadow-sm';
+                                                            if (userId === currentUser?.id) return 'bg-green-600 text-white border-green-700 shadow-sm shadow-green-200 ring-2 ring-green-100';
+                                                            return 'bg-red-600 text-white border-red-700 shadow-sm shadow-red-200 ring-2 ring-red-100';
                                                         };
 
                                                         const getUserName = (tipo: 'siac' | 'portal') => {
@@ -257,18 +258,18 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                                             <>
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'siac'); }}
-                                                                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-black transition-all ${getStatusStyles('siac')}`}
+                                                                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-black transition-all ${getStatusStyles('siac')}`}
                                                                     title={getUserName('siac') ? `Ocupado por ${getUserName('siac')}` : "Marcar como EN USO en SIAC"}
                                                                 >
-                                                                    <Monitor size={10} />
+                                                                    <Monitor size={12} />
                                                                     {getUserName('siac') ? `SIAC: ${getUserName('siac')}` : 'USO SIAC'}
                                                                 </button>
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'portal'); }}
-                                                                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-black transition-all ${getStatusStyles('portal')}`}
+                                                                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-black transition-all ${getStatusStyles('portal')}`}
                                                                     title={getUserName('portal') ? `Ocupado por ${getUserName('portal')}` : "Marcar como EN USO en PORTAL"}
                                                                 >
-                                                                    <Globe size={10} />
+                                                                    <Globe size={12} />
                                                                     {getUserName('portal') ? `PTAL: ${getUserName('portal')}` : 'USO PTAL'}
                                                                 </button>
                                                             </>
@@ -276,9 +277,7 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                                     })()}
                                                 </div>
                                             )}
-                                        </div>
 
-                                        <div className="flex items-center justify-end gap-2">
                                             {(() => {
                                                 const keyId = `${clave.identificador}-${u.usuario}`;
                                                 const keyUsage = usage[keyId];
@@ -290,15 +289,15 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                                     <button
                                                         onClick={(e) => !isLocked && copiarAlPortapapeles(e, u.usuario, 'Contraseña')}
                                                         disabled={!!isLocked}
-                                                        className={`flex items-center gap-2 px-3 py-1 rounded-lg border transition-all text-[11px] font-black group/btn shadow-sm ${isLocked
+                                                        className={`flex items-center justify-center gap-2 px-6 py-2 rounded-xl border transition-all text-[14px] font-black group/btn shadow-md w-full max-w-[180px] ${isLocked
                                                             ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                                                            : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100'
+                                                            : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 hover:scale-105 active:scale-95'
                                                             }`}
                                                         title={isLocked ? "Clave bloqueada por otro usuario" : "Copiar Contraseña"}
                                                     >
-                                                        <Lock size={12} className={isLocked ? "text-gray-400" : "text-orange-500"} />
-                                                        <span className="font-mono">{isLocked ? '(BLOQUEADA)' : u.usuario}</span>
-                                                        {!isLocked && <Copy size={10} className="opacity-0 group-hover/btn:opacity-100 transition-opacity" />}
+                                                        {isLocked ? <Lock size={14} className="text-gray-400" /> : <Lock size={14} className="text-orange-500" />}
+                                                        <span className="font-mono tracking-widest">{isLocked ? '(BLOQUEADA)' : u.usuario}</span>
+                                                        {!isLocked && <Copy size={12} className="opacity-0 group-hover/btn:opacity-100 transition-opacity" />}
                                                     </button>
                                                 );
                                             })()}
