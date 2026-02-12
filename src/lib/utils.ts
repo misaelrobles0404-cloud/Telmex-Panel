@@ -141,26 +141,6 @@ export function calcularMetricas(clientesInput?: Cliente[]): Metricas {
 }
 
 // ============================================
-const presupuestoSeguro = Number(campana.presupuesto) || 0;
-const factorRendimiento = presupuestoSeguro > 0 ? presupuestoSeguro / 35 : 0;
-const diasActiva = campana.activa ? 1 : 0.5;
-
-// Validar que el factor sea un número finito
-const factorFinal = isFinite(factorRendimiento) ? factorRendimiento : 0;
-
-const alcanceSimulado = Math.floor(1200 * factorFinal * (leads > 0 ? leads : 1) * (Math.random() * 0.5 + 0.8));
-const clicksSimulados = Math.floor(40 * factorFinal * (leads > 0 ? leads : 1) * (Math.random() * 0.4 + 0.7));
-
-return {
-    ...campana,
-    alcance: isNaN(alcanceSimulado) ? 0 : alcanceSimulado,
-    interacciones: isNaN(clicksSimulados) ? 0 : clicksSimulados,
-    leads_generados: leads
-};
-    });
-}
-
-// ============================================
 // VALIDACIÓN DE REQUISITOS
 // ============================================
 
