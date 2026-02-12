@@ -1,9 +1,23 @@
 
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Copy, Key, Zap } from 'lucide-react';
+import { Copy, Key, User, Lock, ExternalLink } from 'lucide-react';
 import { CLAVES_PORTAL, ClavePortal, obtenerClavePorCiudad } from '@/data/claves';
 import { Toast } from '@/components/ui/Toast';
+
+// Función para dividir nombres según formato mexicano estándar
+const dividirNombre = (nombreCompleto: string) => {
+    const partes = nombreCompleto.trim().split(/\s+/);
+    if (partes.length === 0) return { nombres: '', apellido1: '', apellido2: '' };
+    if (partes.length === 1) return { nombres: partes[0], apellido1: '', apellido2: '' };
+    if (partes.length === 2) return { nombres: partes[0], apellido1: partes[1], apellido2: '' };
+
+    const apellido2 = partes.pop() || '';
+    const apellido1 = partes.pop() || '';
+    const nombres = partes.join(' ');
+
+    return { nombres, apellido1, apellido2 };
+};
 
 interface ClavesPortalCardProps {
     ciudad?: string; // Si se proporciona, filtra automáticamente
@@ -25,12 +39,10 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
         setToast({ message, isVisible: true });
     };
 
-    const copiarDual = (e: React.MouseEvent, identificador: string, usuario: string) => {
+    const copiarAlPortapapeles = (e: React.MouseEvent, texto: string, label: string) => {
         e.stopPropagation();
-        // El carácter \t (Tab) hace que al pegar el navegador pase al siguiente campo automáticamente
-        const texto = `${identificador}\t${usuario}`;
         navigator.clipboard.writeText(texto).then(() => {
-            mostrarToast('Acceso dual copiado (Usuario + Pass)');
+            mostrarToast(`${label} copiado`);
         });
     };
 
@@ -88,19 +100,64 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                             {claveSeleccionada === u.usuario && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                                         </div>
                                     )}
-                                    <div className="flex flex-1 flex-col text-xs">
-                                        <span className={`font-mono font-semibold ${claveSeleccionada === u.usuario ? 'text-telmex-blue' : 'text-gray-700'
-                                            }`}>{u.usuario}</span>
-                                        <span className="text-gray-600 truncate">{u.nombre}</span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex flex-wrap gap-1 mb-1.5">
+                                            {(() => {
+                                                const d = dividirNombre(u.nombre);
+                                                return (
+                                                    <>
+                                                        <span
+                                                            className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-black border border-gray-100 uppercase tracking-tight"
+                                                            onClick={(e) => copiarAlPortapapeles(e, d.nombres, 'Nombre')}
+                                                            title="Clic para copiar Nombre"
+                                                        >
+                                                            {d.nombres}
+                                                        </span>
+                                                        <span
+                                                            className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-black border border-gray-100 uppercase tracking-tight"
+                                                            onClick={(e) => copiarAlPortapapeles(e, d.apellido1, '1er Apellido')}
+                                                            title="Clic para copiar 1er Apellido"
+                                                        >
+                                                            {d.apellido1}
+                                                        </span>
+                                                        {d.apellido2 && (
+                                                            <span
+                                                                className="px-1.5 py-0.5 bg-gray-50 text-gray-700 rounded-md hover:bg-telmex-blue hover:text-white cursor-pointer transition-colors text-[10px] font-black border border-gray-100 uppercase tracking-tight"
+                                                                onClick={(e) => copiarAlPortapapeles(e, d.apellido2, '2do Apellido')}
+                                                                title="Clic para copiar 2do Apellido"
+                                                            >
+                                                                {d.apellido2}
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={(e) => copiarAlPortapapeles(e, clave.identificador, 'Usuario')}
+                                                className="flex-1 flex items-center justify-between px-2.5 py-2 bg-blue-50 text-blue-700 rounded-lg border-2 border-blue-100 hover:border-blue-300 transition-all text-[11px] group/btn shadow-sm"
+                                                title="Copiar Usuario"
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <User size={12} className="text-blue-500" />
+                                                    <span className="font-mono font-black truncate">{clave.identificador}</span>
+                                                </div>
+                                                <Copy size={10} className="opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => copiarAlPortapapeles(e, u.usuario, 'Contraseña')}
+                                                className="flex-1 flex items-center justify-between px-2.5 py-2 bg-orange-50 text-orange-700 rounded-lg border-2 border-orange-100 hover:border-orange-300 transition-all text-[11px] group/btn shadow-sm"
+                                                title="Copiar Contraseña"
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <Lock size={12} className="text-orange-500" />
+                                                    <span className="font-mono font-black truncate">{u.usuario}</span>
+                                                </div>
+                                                <Copy size={10} className="opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button
-                                        onClick={(e) => copiarDual(e, clave.identificador, u.usuario)}
-                                        className="p-1.5 text-orange-500 hover:bg-orange-50 rounded-md transition-colors border border-orange-100 flex items-center gap-1"
-                                        title="Copiar Usuario + Contraseña"
-                                    >
-                                        <Zap size={14} fill="currentColor" />
-                                        <span className="text-[10px] font-bold">PEGADO RÁPIDO</span>
-                                    </button>
                                 </div>
                             ))}
                         </div>
