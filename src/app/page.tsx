@@ -63,7 +63,7 @@ export default function DashboardPage() {
                         .from('perfiles')
                         .select('*')
                         .eq('id', user.id)
-                        .single();
+                        .maybeSingle(); // Usar maybeSingle para evitar errores si no existe
                     if (miPerfil) setPerfilActual(miPerfil);
                 }
 
@@ -80,7 +80,6 @@ export default function DashboardPage() {
                         c.user_id === user.id
                     );
                 }
-
 
                 setClientes(clientesFiltrados);
                 setMetricas(calcularMetricas(clientesFiltrados));
@@ -103,47 +102,11 @@ export default function DashboardPage() {
                         }
                     });
 
-                    const superVendedores = Object.entries(ventasPorUsuario)
+                    const sv = Object.entries(ventasPorUsuario)
                         .filter(([_, total]) => total > 7)
                         .map(([email, total]) => ({ email, total }));
 
-                    (window as any).superVendedores = superVendedores; // Temporal para pasar al render o usar un state
-                    setSuperVendedores(superVendedores);
-                }
-
-                // Suscripción Realtime (Solo para Ruiz)
-                if (esBoss) {
-                    const channel = supabase
-                        .channel('schema-db-changes')
-                        .on(
-                            'postgres_changes',
-                            {
-                                event: '*', // Escuchar todo para detectar cambios de estado a vendido
-                                schema: 'public',
-                                table: 'clientes'
-                            },
-                            (payload: any) => {
-                                console.log('Cambio detectado:', payload);
-                                const { new: newRow, old: oldRow } = payload;
-
-                                // Si el cliente pasa a 'vendido' o se inserta como 'vendido'
-                                if (newRow.estado_pipeline === 'vendido' && (!oldRow || oldRow.estado_pipeline !== 'vendido')) {
-                                    setNuevaAlerta({
-                                        cliente: newRow.nombre,
-                                        promotor: newRow.promotor_nombre || newRow.usuario || 'Promotor',
-                                        paquete: newRow.paquete
-                                    });
-
-                                    // Recargar lista para que se vea en la tabla inmediatamente
-                                    cargarDatos();
-                                }
-                            }
-                        )
-                        .subscribe();
-
-                    return () => {
-                        supabase.removeChannel(channel);
-                    };
+                    setSuperVendedores(sv);
                 }
             } catch (error) {
                 console.error("Error al cargar dashboard:", error);
@@ -152,7 +115,40 @@ export default function DashboardPage() {
             }
         };
         cargarDatos();
-    }, []);
+    }, [router]);
+
+    // Suscripción Realtime (Efecto separado)
+    useEffect(() => {
+        if (user?.email === 'ruizmosinfinitum2025@gmail.com') {
+            const channel = supabase
+                .channel('schema-db-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'clientes'
+                    },
+                    (payload: any) => {
+                        const { new: newRow, old: oldRow } = payload;
+                        if (newRow.estado_pipeline === 'vendido' && (!oldRow || oldRow.estado_pipeline !== 'vendido')) {
+                            setNuevaAlerta({
+                                cliente: newRow.nombre,
+                                promotor: newRow.promotor_nombre || newRow.usuario || 'Promotor',
+                                paquete: newRow.paquete
+                            });
+                            // No llamamos a cargarDatos directamente aquí para evitar bucles, 
+                            // pero el usuario puede refrescar o podemos hacer un fetch puntual selectivo.
+                        }
+                    }
+                )
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
+        }
+    }, [user]);
 
     const [superVendedores, setSuperVendedores] = useState<{ email: string, total: number }[]>([]);
 
@@ -165,7 +161,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-3 md:p-6 space-y-4 md:space-y-6">
             <InstalacionAlert nuevaInstalacion={nuevaAlerta} />
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -236,7 +232,7 @@ export default function DashboardPage() {
             )}
 
             {/* Métricas Principales */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                 <MetricCard
                     title="Leads del Mes"
                     value={metricas.leadsMes}
