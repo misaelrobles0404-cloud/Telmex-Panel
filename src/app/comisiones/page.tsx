@@ -306,7 +306,10 @@ export default function ComisionesPage() {
                                                         {cliente.folio_siac}
                                                     </div>
                                                     {cliente.orden_servicio && (
-                                                        <div className="text-xs text-blue-600 font-semibold mt-0.5">
+                                                        <div
+                                                            className="font-mono text-xs text-blue-700 font-bold mt-1 w-fit bg-blue-50/50 px-1 rounded cursor-text"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
                                                             OS: {cliente.orden_servicio}
                                                         </div>
                                                     )}
