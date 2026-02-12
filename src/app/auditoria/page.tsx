@@ -466,7 +466,8 @@ export default function AuditoriaPage() {
                                                         <option value="contactado">Prospectos</option>
                                                         <option value="interesado">Interesado</option>
                                                         <option value="cierre_programado">Cierre Programado</option>
-                                                        <option value="vendido">Vendido/Instalado</option>
+                                                        <option value="vendido">Instalado</option>
+                                                        Riverside:
                                                         <option value="sin_cobertura">Sin Cobertura</option>
                                                         <option value="perdido">Cancelado/Perdido</option>
                                                     </select>

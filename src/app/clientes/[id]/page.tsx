@@ -504,7 +504,7 @@ Solo necesito que me confirmes para agendar.
                                                 'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
                                             }`}
                                     >
-                                        {estado.replace(/_/g, ' ').toUpperCase()}
+                                        {estado === 'vendido' ? 'INSTALADO' : estado.replace(/_/g, ' ').toUpperCase()}
                                     </button>
                                 ))}
                             </div>

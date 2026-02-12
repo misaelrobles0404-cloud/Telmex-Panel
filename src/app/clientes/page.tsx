@@ -241,7 +241,7 @@ export default function ClientesPage() {
                     <option value="contactado">Prospectos</option>
                     <option value="interesado">Interesado</option>
                     <option value="cierre_programado">Cierre Programado</option>
-                    <option value="vendido">Vendido</option>
+                    <option value="vendido">Instalado</option>
                     <option value="sin_cobertura">Sin Cobertura</option>
                 </select>
             </div>
@@ -265,7 +265,7 @@ export default function ClientesPage() {
                                                     cliente.estado_pipeline === 'sin_cobertura' ? 'bg-red-100 text-red-700' :
                                                         'bg-gray-100 text-gray-800'
                                             }`}>
-                                            {cliente.estado_pipeline === 'vendido' && 'Vendido'}
+                                            {cliente.estado_pipeline === 'vendido' && 'Instalado'}
                                             {cliente.estado_pipeline === 'cierre_programado' && 'Cierre Programado'}
                                             {cliente.estado_pipeline === 'interesado' && 'Interesado'}
                                             {cliente.estado_pipeline === 'contactado' && 'Prospecto'}

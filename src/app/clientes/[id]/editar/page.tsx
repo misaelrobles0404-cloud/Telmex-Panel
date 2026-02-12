@@ -390,6 +390,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                         { value: 'megacable', label: 'Megacable' },
                                         { value: 'axtel', label: 'Axtel' },
                                         { value: 'dish', label: 'Dish' },
+                                        { value: 'vendido', label: 'Instalado' },
+                                        { value: 'riverside', label: 'Riverside' },
                                         { value: 'otro', label: 'Otro' },
                                     ]}
                                 />

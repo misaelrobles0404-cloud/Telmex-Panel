@@ -56,7 +56,7 @@ export default function ReportesPage() {
         { name: 'Prospectos', value: metricas.contactados },
         { name: 'Interesado', value: metricas.interesados },
         { name: 'Cierre', value: metricas.cierresProgramados },
-        { name: 'Vendido', value: metricas.vendidos },
+        { name: 'Instalado', value: metricas.vendidos },
         { name: 'Sin Cobertura', value: metricas.sin_cobertura },
     ];
 
@@ -154,7 +154,7 @@ export default function ReportesPage() {
                                 <XAxis type="number" />
                                 <YAxis dataKey="motivo" type="category" width={100} />
                                 <Tooltip />
-                                <Bar dataKey="cantidad" fill="#EF4444" name="Clientes Perdidos" />
+                                <Bar dataKey="instalados" name="Instalados" fill="#22c55e" />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
