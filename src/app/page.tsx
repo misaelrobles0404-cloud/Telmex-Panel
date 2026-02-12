@@ -38,117 +38,123 @@ export default function DashboardPage() {
     const [perfilActual, setPerfilActual] = useState<PerfilUsuario | null>(null);
     const [nuevaAlerta, setNuevaAlerta] = useState<any>(null);
 
-    useEffect(() => {
-        const cargarDatos = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                setUser(user);
+    const cargarDatos = React.useCallback(async (skipLoading = false) => {
+        try {
+            if (!skipLoading) setLoading(true);
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
 
-                const clientesData = await obtenerClientes();
+            const clientesData = await obtenerClientes();
 
-                // Lógica de Perfiles: Súper Boss (Ruiz) y Administrador (Misael)
-                const esBoss = user?.email === 'ruizmosinfinitum2025@gmail.com';
-                const esMisael = user?.email === 'misaelrobles0404@gmail.com';
-                const esAdmin = esBoss || esMisael;
+            // Lógica de Perfiles: Súper Boss (Ruiz) y Administrador (Misael)
+            const esBoss = user?.email === 'ruizmosinfinitum2025@gmail.com';
+            const esMisael = user?.email === 'misaelrobles0404@gmail.com';
+            const esAdmin = esBoss || esMisael;
 
-                if (esAdmin) {
-                    const { data: perfilesData, error: pfError } = await supabase.from('perfiles').select('*');
-                    if (pfError) console.error("Error cargando perfiles:", pfError);
-                    setPerfiles(perfilesData || []);
-                }
-
-                // Cargar perfil del usuario actual para el saludo
-                if (user?.id) {
-                    const { data: miPerfil } = await supabase
-                        .from('perfiles')
-                        .select('*')
-                        .eq('id', user.id)
-                        .maybeSingle(); // Usar maybeSingle para evitar errores si no existe
-                    if (miPerfil) setPerfilActual(miPerfil);
-                }
-
-                let clientesFiltrados = clientesData;
-                // Si es Misael, aunque tenga rango de admin para ver alertas, su panel muestra solo sus clientes
-                if (esMisael) {
-                    clientesFiltrados = clientesData.filter(c =>
-                        c.usuario === user.email ||
-                        c.user_id === user.id
-                    );
-                } else if (!esAdmin && user?.email) {
-                    clientesFiltrados = clientesData.filter(c =>
-                        c.usuario === user.email ||
-                        c.user_id === user.id
-                    );
-                }
-
-                setClientes(clientesFiltrados);
-                setMetricas(calcularMetricas(clientesFiltrados));
-
-                // Si es Admin, calcular Super Vendedores (>7 instalaciones por semana)
-                if (esAdmin) {
-                    const hoy = new Date();
-                    const inicioSemana = new Date(hoy);
-                    const diaSemana = hoy.getDay() || 7;
-                    inicioSemana.setHours(0, 0, 0, 0);
-                    inicioSemana.setDate(inicioSemana.getDate() - diaSemana + 1);
-
-                    const ventasPorUsuario: Record<string, number> = {};
-                    clientesData.forEach(c => {
-                        if (c.estado_pipeline === 'vendido' && c.fecha_instalacion) {
-                            const fechaInst = new Date(c.fecha_instalacion);
-                            if (fechaInst >= inicioSemana && c.usuario) {
-                                ventasPorUsuario[c.usuario] = (ventasPorUsuario[c.usuario] || 0) + 1;
-                            }
-                        }
-                    });
-
-                    const sv = Object.entries(ventasPorUsuario)
-                        .filter(([_, total]) => total > 7)
-                        .map(([email, total]) => ({ email, total }));
-
-                    setSuperVendedores(sv);
-                }
-            } catch (error) {
-                console.error("Error al cargar dashboard:", error);
-            } finally {
-                setLoading(false);
+            if (esAdmin) {
+                const { data: perfilesData, error: pfError } = await supabase.from('perfiles').select('*');
+                if (pfError) console.error("Error cargando perfiles:", pfError);
+                setPerfiles(perfilesData || []);
             }
-        };
-        cargarDatos();
+
+            // Cargar perfil del usuario actual para el saludo
+            if (user?.id) {
+                const { data: miPerfil } = await supabase
+                    .from('perfiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .maybeSingle();
+                if (miPerfil) setPerfilActual(miPerfil);
+            }
+
+            let clientesFiltrados = clientesData;
+            // Si es Misael, aunque tenga rango de admin para ver alertas, su panel muestra solo sus clientes
+            if (esMisael) {
+                clientesFiltrados = clientesData.filter(c =>
+                    c.usuario === user.email ||
+                    c.user_id === user.id
+                );
+            } else if (!esAdmin && user?.email) {
+                clientesFiltrados = clientesData.filter(c =>
+                    c.usuario === user.email ||
+                    c.user_id === user.id
+                );
+            }
+
+            setClientes(clientesFiltrados);
+            setMetricas(calcularMetricas(clientesFiltrados));
+
+            // Si es Admin, calcular Super Vendedores (>7 instalaciones por semana)
+            if (esAdmin) {
+                const hoy = new Date();
+                const inicioSemana = new Date(hoy);
+                const diaSemana = hoy.getDay() || 7;
+                inicioSemana.setHours(0, 0, 0, 0);
+                inicioSemana.setDate(inicioSemana.getDate() - diaSemana + 1);
+
+                const ventasPorUsuario: Record<string, number> = {};
+                clientesData.forEach(c => {
+                    if (c.estado_pipeline === 'vendido' && c.fecha_instalacion) {
+                        const fechaInst = new Date(c.fecha_instalacion);
+                        if (fechaInst >= inicioSemana && c.usuario) {
+                            ventasPorUsuario[c.usuario] = (ventasPorUsuario[c.usuario] || 0) + 1;
+                        }
+                    }
+                });
+
+                const sv = Object.entries(ventasPorUsuario)
+                    .filter(([_, total]) => total > 7)
+                    .map(([email, total]) => ({ email, total }));
+
+                setSuperVendedores(sv);
+            }
+        } catch (error) {
+            console.error("Error al cargar dashboard:", error);
+        } finally {
+            if (!skipLoading) setLoading(false);
+        }
     }, [router]);
+
+    useEffect(() => {
+        cargarDatos();
+    }, [cargarDatos]);
 
     // Suscripción Realtime (Efecto separado)
     useEffect(() => {
-        if (user?.email === 'ruizmosinfinitum2025@gmail.com') {
-            const channel = supabase
-                .channel('schema-db-changes')
-                .on(
-                    'postgres_changes',
-                    {
-                        event: '*',
-                        schema: 'public',
-                        table: 'clientes'
-                    },
-                    (payload: any) => {
+        if (!user) return;
+
+        const channel = supabase
+            .channel('schema-db-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'clientes'
+                },
+                (payload: any) => {
+                    // Refrescar datos silenciosamente ante cualquier cambio
+                    cargarDatos(true);
+
+                    // Alerta específica para instalaciones (solo si es Boss)
+                    if (user?.email === 'ruizmosinfinitum2025@gmail.com') {
                         const { new: newRow, old: oldRow } = payload;
-                        if (newRow.estado_pipeline === 'vendido' && (!oldRow || oldRow.estado_pipeline !== 'vendido')) {
+                        if (newRow && newRow.estado_pipeline === 'vendido' && (!oldRow || oldRow.estado_pipeline !== 'vendido')) {
                             setNuevaAlerta({
                                 cliente: newRow.nombre,
                                 promotor: newRow.promotor_nombre || newRow.usuario || 'Promotor',
                                 paquete: newRow.paquete
                             });
-                            // No llamamos a cargarDatos directamente aquí para evitar bucles, 
-                            // pero el usuario puede refrescar o podemos hacer un fetch puntual selectivo.
                         }
                     }
-                )
-                .subscribe();
+                }
+            )
+            .subscribe();
 
-            return () => {
-                supabase.removeChannel(channel);
-            };
-        }
-    }, [user]);
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [user, cargarDatos]);
 
     const [superVendedores, setSuperVendedores] = useState<{ email: string, total: number }[]>([]);
 
