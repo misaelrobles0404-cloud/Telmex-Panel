@@ -44,12 +44,12 @@ export default function DashboardPage() {
 
                 const clientesData = await obtenerClientes();
 
-                // Lógica de Perfiles: Solo para el Súper Boss (Ruiz)
+                // Lógica de Perfiles: Súper Boss (Ruiz) y Administrador (Misael)
                 const esBoss = user?.email === 'ruizmosinfinitum2025@gmail.com';
-                // Misael quiere ver alertas de productividad pero ser tratado como empleado en su panel
-                const esAdmin = esBoss || user?.email === 'misaelrobles0404@gmail.com';
+                const esMisael = user?.email === 'misaelrobles0404@gmail.com';
+                const esAdmin = esBoss || esMisael;
 
-                if (esBoss) {
+                if (esAdmin) {
                     const { data: perfilesData, error: pfError } = await supabase.from('perfiles').select('*');
                     if (pfError) console.error("Error cargando perfiles:", pfError);
                     setPerfiles(perfilesData || []);
@@ -67,7 +67,7 @@ export default function DashboardPage() {
 
                 let clientesFiltrados = clientesData;
                 // Si es Misael, aunque tenga rango de admin para ver alertas, su panel muestra solo sus clientes
-                if (user?.email === 'misaelrobles0404@gmail.com') {
+                if (esMisael) {
                     clientesFiltrados = clientesData.filter(c => c.usuario === user.email);
                 } else if (!esAdmin && user?.email) {
                     clientesFiltrados = clientesData.filter(c => c.usuario === user.email);
