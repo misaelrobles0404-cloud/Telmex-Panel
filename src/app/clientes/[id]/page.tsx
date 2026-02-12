@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { DocumentManager } from '@/components/DocumentManager';
 import { ClavesPortalCard } from '@/components/ClavesPortalCard';
+import { Toast } from '@/components/ui/Toast';
 
 export default function ClienteDetallePage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -25,6 +26,11 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const [folioSiacInput, setFolioSiacInput] = useState('');
     const [ordenServicioInput, setOrdenServicioInput] = useState('');
     const [perfilUsuario, setPerfilUsuario] = useState<{ nombre_completo: string } | null>(null);
+    const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+
+    const mostrarToast = (message: string) => {
+        setToast({ message, isVisible: true });
+    };
 
     useEffect(() => {
         const cargarCliente = async () => {
@@ -352,7 +358,7 @@ GASTOS DE INSTALACION
         }
 
         navigator.clipboard.writeText(formato).then(() => {
-            alert('¡Formato copiado al portapapeles!');
+            mostrarToast('¡Formato copiado!');
         }).catch(err => {
             console.error('Error al copiar:', err);
             alert('Error al copiar el formato');
@@ -361,7 +367,7 @@ GASTOS DE INSTALACION
 
     const copiarAlPortapapeles = (texto: string, label: string) => {
         navigator.clipboard.writeText(texto).then(() => {
-            alert(`${label} copiado al portapapeles.`);
+            mostrarToast(`${label} copiado`);
         }).catch(err => {
             console.error('Error al copiar:', err);
         });
@@ -387,7 +393,7 @@ Si me pasas su contacto y contrata, ¡te lo agradeceré muchísimo! Mi trabajo d
 ¡Gracias por tu apoyo!`;
 
         navigator.clipboard.writeText(mensaje).then(() => {
-            alert('Mensaje copiado. Pégalo en el chat.');
+            mostrarToast('Mensaje copiado');
             setModalReferidosOpen(false);
         });
     };
@@ -416,7 +422,7 @@ Solo necesito que me confirmes para agendar.
 ¡Quedo atento!`;
 
         navigator.clipboard.writeText(mensaje).then(() => {
-            alert('Mensaje de seguimiento copiado.');
+            mostrarToast('Seguimiento copiado');
             setModalSeguimientoOpen(false);
         });
     };
@@ -436,6 +442,12 @@ Solo necesito que me confirmes para agendar.
                 <ArrowLeft size={20} className="mr-2" />
                 Volver a Clientes
             </Button>
+
+            <Toast
+                message={toast.message}
+                isVisible={toast.isVisible}
+                onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+            />
 
             {/* Encabezado del Cliente */}
             <div className="flex flex-col mb-6 gap-4">

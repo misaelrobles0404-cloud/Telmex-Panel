@@ -7,8 +7,9 @@ import { Cliente, EstadoPipeline } from '@/types';
 import { obtenerClientes, guardarCliente } from '@/lib/storage';
 import { formatearFecha, formatearMoneda, generarId } from '@/lib/utils';
 import { CLAVES_PORTAL } from '@/data/claves';
-import { CheckCircle, XCircle, Search, Calendar, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Search, Calendar, AlertCircle, Copy } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
+import { Toast } from '@/components/ui/Toast';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
@@ -19,6 +20,18 @@ export default function ComisionesPage() {
     const [clientesPagados, setClientesPagados] = useState<Record<string, { clientes: Cliente[], total: number }>>({});
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+
+    const mostrarToast = (message: string) => {
+        setToast({ message, isVisible: true });
+    };
+
+    const copiarAlPortapapeles = (e: React.MouseEvent, texto: string, label: string) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(texto).then(() => {
+            mostrarToast(`${label} copiado`);
+        });
+    };
 
     const router = useRouter();
 
@@ -309,17 +322,21 @@ export default function ComisionesPage() {
                                                 </td>
                                                 <td className="py-2 px-4 align-top">
                                                     <div
-                                                        className="font-mono text-gray-900 w-fit cursor-text"
-                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="font-mono text-gray-900 w-fit cursor-pointer hover:text-telmex-blue transition-colors flex items-center gap-1 group/item"
+                                                        onClick={(e) => cliente.folio_siac && copiarAlPortapapeles(e, cliente.folio_siac, 'Folio')}
+                                                        title="Click para copiar"
                                                     >
                                                         {cliente.folio_siac}
+                                                        <Copy size={10} className="opacity-0 group-hover/item:opacity-50 transition-opacity" />
                                                     </div>
                                                     {cliente.orden_servicio && (
                                                         <div
-                                                            className="font-mono text-xs text-blue-700 font-bold mt-1 w-fit bg-blue-50/50 px-1 rounded cursor-text"
-                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="font-mono text-xs text-blue-700 font-bold mt-1 w-fit bg-blue-50/50 px-1 rounded cursor-pointer hover:bg-blue-100 transition-colors flex items-center gap-1 group/item"
+                                                            onClick={(e) => copiarAlPortapapeles(e, cliente.orden_servicio!, 'OS')}
+                                                            title="Click para copiar"
                                                         >
                                                             OS: {cliente.orden_servicio}
+                                                            <Copy size={10} className="opacity-0 group-hover/item:opacity-50 transition-opacity" />
                                                         </div>
                                                     )}
                                                 </td>
@@ -541,6 +558,11 @@ export default function ComisionesPage() {
                     ))
                 )}
             </div>
+            <Toast
+                message={toast.message}
+                isVisible={toast.isVisible}
+                onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+            />
         </div>
     );
 }

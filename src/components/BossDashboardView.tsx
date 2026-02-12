@@ -3,8 +3,9 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Cliente, PerfilUsuario } from '@/types';
-import { Users, Phone, Hash, Key, Clock, CheckCircle2, ChevronDown, FilterX, ListFilter, Search, Calendar } from 'lucide-react';
+import { Copy, Users, Phone, Hash, Key, Clock, CheckCircle2, ChevronDown, FilterX, ListFilter, Search, Calendar } from 'lucide-react';
 import { formatearMoneda } from '@/lib/utils';
+import { Toast } from './ui/Toast';
 
 interface BossDashboardViewProps {
     clientes: Cliente[];
@@ -18,6 +19,18 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
     const [filtros, setFiltros] = React.useState<Record<string, 'todas' | 'instaladas' | 'programadas'>>({});
     // Estado para el buscador de promotores
     const [busqueda, setBusqueda] = React.useState('');
+    const [toast, setToast] = React.useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+
+    const mostrarToast = (message: string) => {
+        setToast({ message, isVisible: true });
+    };
+
+    const copiarAlPortapapeles = (e: React.MouseEvent, texto: string, label: string) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(texto).then(() => {
+            mostrarToast(`${label} copiado`);
+        });
+    };
 
     // Obtener lista de emails únicos de perfiles para asegurar que todos aparezcan
     const todosLosEmails = Array.from(new Set(perfiles.map(p => p.email)));
@@ -193,13 +206,23 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                         <td className="px-6 py-4">
                                                             <div className="space-y-1.5">
                                                                 <div className="flex items-center gap-2 text-[10px]">
-                                                                    <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1">
+                                                                    <span
+                                                                        className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-gray-200 transition-colors"
+                                                                        onClick={(e) => cliente.folio_siac && copiarAlPortapapeles(e, cliente.folio_siac, 'Folio')}
+                                                                        title="Click para copiar"
+                                                                    >
                                                                         <Hash size={10} /> SIAC: {cliente.folio_siac || '---'}
+                                                                        {cliente.folio_siac && <Copy size={10} className="ml-1 opacity-50" />}
                                                                     </span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-[10px]">
-                                                                    <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1">
+                                                                    <span
+                                                                        className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-blue-100 transition-colors"
+                                                                        onClick={(e) => cliente.usuario_portal_asignado && copiarAlPortapapeles(e, cliente.usuario_portal_asignado, 'Clave')}
+                                                                        title="Click para copiar"
+                                                                    >
                                                                         <Key size={10} /> CLAVE: {cliente.usuario_portal_asignado || '---'}
+                                                                        {cliente.usuario_portal_asignado && <Copy size={10} className="ml-1 opacity-50" />}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -278,6 +301,12 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                     </button>
                 </div>
             )}
+
+            <Toast
+                message={toast.message}
+                isVisible={toast.isVisible}
+                onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+            />
         </div>
     );
 }
