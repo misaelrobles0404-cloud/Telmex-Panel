@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Cliente, PerfilUsuario } from '@/types';
-import { Users, Phone, Hash, Key, Clock, CheckCircle2 } from 'lucide-react';
+import { Users, Phone, Hash, Key, Clock, CheckCircle2, ChevronDown, FilterX, ListFilter } from 'lucide-react';
 import { formatearMoneda } from '@/lib/utils';
 
 interface BossDashboardViewProps {
@@ -68,53 +68,57 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
 
                 return (
                     <Card key={email} className={`border-l-4 border-l-telmex-blue shadow-sm hover:shadow-md transition-all duration-200 ${!isExpandido ? 'opacity-90' : ''}`}>
-                        <CardHeader
-                            className="bg-white hover:bg-gray-50/50 cursor-pointer transition-colors px-6 py-4"
+                        <div
+                            className="bg-white hover:bg-gray-50/50 cursor-pointer transition-colors"
                             onClick={() => toggleExpandir(email)}
                         >
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div className="flex items-center gap-4 flex-1">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl uppercase shadow-sm transition-transform duration-200 ${isExpandido ? 'scale-110 bg-telmex-blue text-white' : 'bg-gray-100 text-gray-500'}`}>
-                                        {nombreMostrar.charAt(0)}
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <CardTitle className="text-xl text-gray-900 font-bold">{nombreMostrar}</CardTitle>
-                                            <ChevronDown size={20} className={`text-gray-400 transition-transform duration-300 ${isExpandido ? 'rotate-180' : ''}`} />
+                            <CardHeader className="px-6 py-4 mb-0">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4 flex-1">
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl uppercase shadow-sm transition-transform duration-200 ${isExpandido ? 'scale-110 bg-telmex-blue text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                            {nombreMostrar.charAt(0)}
                                         </div>
-                                        <p className="text-sm text-gray-500 font-medium">{email}</p>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <CardTitle className="text-xl text-gray-900 font-bold mb-0">{nombreMostrar}</CardTitle>
+                                                <ChevronDown size={20} className={`text-gray-400 transition-transform duration-300 ${isExpandido ? 'rotate-180' : ''}`} />
+                                            </div>
+                                            <p className="text-sm text-gray-500 font-medium">{email}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                                        {/* Contadores Resumen */}
+                                        <div className="hidden sm:flex items-center gap-4 mr-2">
+                                            <div className="text-right">
+                                                <p className="text-[10px] text-blue-500 uppercase font-black tracking-widest leading-none">Prog.</p>
+                                                <p className="text-sm font-black text-blue-800">{ventasProgramadas.length}</p>
+                                            </div>
+                                            <div className="text-right border-l pl-4 border-gray-200">
+                                                <p className="text-[10px] text-green-500 uppercase font-black tracking-widest leading-none">Inst.</p>
+                                                <p className="text-sm font-black text-green-800">{ventasInstaladas.length}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Desglose de Filtro (Select Nativo con estilo Premium) */}
+                                        <div className="relative group">
+                                            <select
+                                                value={filtroActual}
+                                                onChange={(e) => cambiarFiltro(email, e.target.value as any)}
+                                                className="appearance-none bg-gray-50 border-2 border-gray-100 rounded-xl px-4 py-2 pr-10 text-[10px] font-black uppercase tracking-wider text-gray-700 hover:border-telmex-blue focus:border-telmex-blue focus:outline-none transition-all cursor-pointer shadow-sm min-w-[160px]"
+                                            >
+                                                <option value="todas">Ver Todos</option>
+                                                <option value="programadas">Programadas</option>
+                                                <option value="instaladas">Instaladas</option>
+                                            </select>
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                                <ListFilter size={14} />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                                    <button
-                                        onClick={() => cambiarFiltro(email, 'programadas')}
-                                        className={`text-center px-4 py-2 rounded-xl transition-all border-2 ${filtroActual === 'programadas' ? 'bg-blue-100 border-blue-300 ring-2 ring-blue-100' : 'bg-blue-50/50 border-transparent hover:border-blue-200'}`}
-                                    >
-                                        <p className={`text-[10px] uppercase font-black tracking-tighter ${filtroActual === 'programadas' ? 'text-blue-700' : 'text-blue-500'}`}>Programadas</p>
-                                        <p className={`text-xl font-black ${filtroActual === 'programadas' ? 'text-blue-800' : 'text-blue-600'}`}>{ventasProgramadas.length}</p>
-                                    </button>
-
-                                    <button
-                                        onClick={() => cambiarFiltro(email, 'instaladas')}
-                                        className={`text-center px-4 py-2 rounded-xl transition-all border-2 ${filtroActual === 'instaladas' ? 'bg-green-100 border-green-300 ring-2 ring-green-100' : 'bg-green-50/50 border-transparent hover:border-green-200'}`}
-                                    >
-                                        <p className={`text-[10px] uppercase font-black tracking-tighter ${filtroActual === 'instaladas' ? 'text-green-700' : 'text-green-500'}`}>Instaladas</p>
-                                        <p className={`text-xl font-black ${filtroActual === 'instaladas' ? 'text-green-800' : 'text-green-600'}`}>{ventasInstaladas.length}</p>
-                                    </button>
-
-                                    {filtroActual !== 'todas' && (
-                                        <button
-                                            onClick={() => cambiarFiltro(email, 'todas')}
-                                            className="p-2 text-gray-400 hover:text-telmex-blue hover:bg-gray-100 rounded-lg transition-all"
-                                            title="Quitar filtro"
-                                        >
-                                            <FilterX size={18} />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </CardHeader>
+                            </CardHeader>
+                        </div>
 
                         {isExpandido && (
                             <CardContent className="p-0 overflow-x-auto border-t border-gray-100 animate-in slide-in-from-top-2 duration-200">
@@ -133,11 +137,11 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                             {clientesFiltrados.map((cliente) => (
                                                 <tr key={cliente.id} className="hover:bg-blue-50/30 transition-colors group">
                                                     <td className="px-6 py-4">
-                                                        <div className="font-bold text-gray-900 group-hover:text-telmex-blue transition-colors">
+                                                        <div className="font-bold text-gray-900 group-hover:text-telmex-blue transition-colors text-sm">
                                                             {cliente.nombre}
                                                         </div>
-                                                        <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                                                            <Phone size={12} />
+                                                        <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-0.5">
+                                                            <Phone size={10} />
                                                             {cliente.no_tt}
                                                         </div>
                                                     </td>
@@ -156,7 +160,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <div className="text-xs font-black text-gray-800 uppercase tracking-tighter">
+                                                        <div className="text-[11px] font-black text-gray-800 uppercase tracking-tighter">
                                                             {cliente.tipo_servicio.replace('_', ' ')}
                                                         </div>
                                                         <div className="text-[10px] text-gray-500 font-medium">
@@ -177,7 +181,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
-                                                        <span className="text-lg font-black text-gray-900">
+                                                        <span className="text-base font-black text-gray-900">
                                                             {cliente.estado_pipeline === 'vendido'
                                                                 ? formatearMoneda(
                                                                     (cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback')
@@ -194,10 +198,10 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                     </table>
                                 ) : (
                                     <div className="p-12 text-center bg-gray-50/30">
-                                        <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                            <FilterX className="text-gray-400" size={32} />
+                                        <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                                            <FilterX size={32} />
                                         </div>
-                                        <p className="text-gray-500 font-bold">No hay registros para este filtro</p>
+                                        <p className="text-gray-500 font-bold">No hay registros con este filtro</p>
                                         <button
                                             onClick={() => cambiarFiltro(email, 'todas')}
                                             className="mt-2 text-telmex-blue text-sm font-bold hover:underline"
@@ -214,5 +218,3 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
         </div>
     );
 }
-
-import { ChevronDown, FilterX } from 'lucide-react';
