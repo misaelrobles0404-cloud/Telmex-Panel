@@ -175,6 +175,12 @@ export interface Metricas {
     cierresProgramados: number;
     vendidos: number;
     sin_cobertura: number;
+    // Boss specific
+    ventasProgramadasHoy: number;
+    promotorTop?: {
+        nombre: string;
+        total: number;
+    };
 }
 
 // ============================================

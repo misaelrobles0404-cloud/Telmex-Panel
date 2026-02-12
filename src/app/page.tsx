@@ -83,7 +83,7 @@ export default function DashboardPage() {
             }
 
             setClientes(clientesFiltrados);
-            setMetricas(calcularMetricas(clientesFiltrados));
+            setMetricas(calcularMetricas(clientesFiltrados, esAdmin ? perfiles : undefined));
 
             // Si es Admin, calcular Super Vendedores (>7 instalaciones por semana)
             if (esAdmin) {
@@ -254,35 +254,67 @@ export default function DashboardPage() {
 
             {/* Métricas Principales */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-                <MetricCard
-                    title="Leads del Mes"
-                    value={metricas.leadsMes}
-                    icon={Users}
-                    color="blue"
-                    trend={{ value: 12, isPositive: true }}
-                />
+                {user?.email === 'ruizmosinfinitum2025@gmail.com' ? (
+                    <>
+                        <MetricCard
+                            title="Ventas Programadas Hoy"
+                            value={metricas.ventasProgramadasHoy}
+                            icon={Calendar}
+                            color="blue"
+                        />
+                        <MetricCard
+                            title="Ventas de la Semana"
+                            value={metricas.ventasSemana}
+                            icon={TrendingUp}
+                            color="green"
+                        />
+                        <MetricCard
+                            title="Ventas del Mes"
+                            value={metricas.ventasMes}
+                            icon={Trophy}
+                            color="yellow"
+                        />
+                        <MetricCard
+                            title="Promotor Top"
+                            value={metricas.promotorTop?.nombre || '---'}
+                            subtitle={metricas.promotorTop ? `${metricas.promotorTop.total} instalaciones` : 'Sin ventas'}
+                            icon={Star}
+                            color="purple"
+                        />
+                    </>
+                ) : (
+                    <>
+                        <MetricCard
+                            title="Leads del Mes"
+                            value={metricas.leadsMes}
+                            icon={Users}
+                            color="blue"
+                            trend={{ value: 12, isPositive: true }}
+                        />
 
-                <MetricCard
-                    title="Ventas del Mes"
-                    value={metricas.ventasMes}
-                    icon={TrendingUp}
-                    color="green"
-                    trend={{ value: 8, isPositive: true }}
-                />
+                        <MetricCard
+                            title="Ventas del Mes"
+                            value={metricas.ventasMes}
+                            icon={TrendingUp}
+                            color="green"
+                            trend={{ value: 8, isPositive: true }}
+                        />
 
-                <MetricCard
-                    title="Comisiones del Mes"
-                    value={formatearMoneda(metricas.comisionesMes)}
-                    icon={DollarSign}
-                    color="yellow"
-                />
+                        <MetricCard
+                            title="Comisiones del Mes"
+                            value={formatearMoneda(metricas.comisionesMes)}
+                            icon={DollarSign}
+                            color="yellow"
+                        />
 
-                <MetricCard
-                    title="Tasa de Conversión"
-                    value={`${metricas.tasaConversion.toFixed(1)}%`}
-                    icon={Phone}
-                    color="purple"
-                />
+                        <MetricCard
+                            title="Tasa de Conversión"
+                            value={`${metricas.tasaConversion.toFixed(1)}%`}
+                            icon={Phone}
+                            color="purple"
+                        />
+                    </>
+                )}
             </div>
 
             {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Súper Boss */}
