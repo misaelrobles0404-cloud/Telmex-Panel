@@ -48,7 +48,8 @@ export default function DashboardPage() {
                 const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || esBoss;
 
                 if (esBoss) {
-                    const { data: perfilesData } = await supabase.from('perfiles').select('*');
+                    const { data: perfilesData, error: pfError } = await supabase.from('perfiles').select('*');
+                    if (pfError) console.error("Error cargando perfiles:", pfError);
                     setPerfiles(perfilesData || []);
                 }
 
