@@ -10,6 +10,7 @@ import { CLAVES_PORTAL } from '@/data/claves';
 import { CheckCircle, XCircle, Search, Calendar, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function ComisionesPage() {
     const [clientesPendientes, setClientesPendientes] = useState<Cliente[]>([]);
@@ -27,7 +28,15 @@ export default function ComisionesPage() {
 
     const cargarClientes = async () => {
         try {
-            const todos = await obtenerClientes();
+            const { data: { user } } = await supabase.auth.getUser();
+            const data = await obtenerClientes();
+
+            // Filtrado: Misael ve todo, los demás (incluyendo Ruiz) solo lo suyo en esta vista personal
+            const esSuperAdmin = user?.email === 'misaelrobles0404@gmail.com';
+
+            const todos = esSuperAdmin
+                ? data
+                : data.filter(c => c.usuario === user?.email);
 
             // 1. Pendientes: Tienen folio SIAC pero no están vendidos, rechazados ni cancelados
             const pendientes = todos.filter(c =>

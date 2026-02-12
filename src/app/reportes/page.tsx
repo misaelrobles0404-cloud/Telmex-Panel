@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { calcularMetricas, formatearMoneda } from '@/lib/utils';
 import { obtenerPublicaciones, obtenerClientes } from '@/lib/storage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { supabase } from '@/lib/supabase';
 
 export default function ReportesPage() {
     const [metricas, setMetricas] = useState(calcularMetricas());
@@ -14,10 +15,17 @@ export default function ReportesPage() {
     useEffect(() => {
         const cargarDatos = async () => {
             try {
-                const [clientes, pubs] = await Promise.all([
+                const { data: { user } } = await supabase.auth.getUser();
+                const [allClientes, pubs] = await Promise.all([
                     obtenerClientes(),
                     obtenerPublicaciones()
                 ]);
+
+                // Filtrado: Misael ve todo, los demás solo sus propios datos
+                const esSuperAdmin = user?.email === 'misaelrobles0404@gmail.com';
+                const clientes = (esSuperAdmin || !user?.email)
+                    ? allClientes
+                    : allClientes.filter(c => c.usuario === user.email);
 
                 setMetricas(calcularMetricas(clientes));
                 calcularRoiPorPlataforma(pubs);

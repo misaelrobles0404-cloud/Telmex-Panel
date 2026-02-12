@@ -82,11 +82,13 @@ export default function ClientesPage() {
 
                 const data = await obtenerClientes();
 
-                // Lógica de Filtrado: Si no es Admin (Misael o Ruiz Boss), filtrar por su propio correo
-                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'ruizmosinfinitum2025@gmail.com';
+                // Lógica de Filtrado: 
+                // Misael (SuperAdmin) ve todo.
+                // Ruiz (Boss) y Promotores ven solo lo SUYO en esta pestaña personal.
+                const esSuperAdmin = user?.email === 'misaelrobles0404@gmail.com';
 
                 let clientesFiltradosData = data;
-                if (!esAdmin && user?.email) {
+                if (!esSuperAdmin && user?.email) {
                     clientesFiltradosData = data.filter(c => c.usuario === user.email);
                 }
 
