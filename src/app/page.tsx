@@ -22,6 +22,8 @@ import { Cliente } from '@/types';
 import { BLOQUES_TIEMPO, obtenerBloqueActual } from '@/data/agenda';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { BossDashboardView } from '@/components/BossDashboardView';
+import { PerfilUsuario } from '@/types';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -31,6 +33,7 @@ export default function DashboardPage() {
     const bloqueActual = obtenerBloqueActual();
 
     const [user, setUser] = useState<any>(null);
+    const [perfiles, setPerfiles] = useState<PerfilUsuario[]>([]);
 
     useEffect(() => {
         const cargarDatos = async () => {
@@ -42,6 +45,11 @@ export default function DashboardPage() {
 
                 // Lógica de Filtrado: Si no es Admin (Misael o Ruiz Boss), filtrar por su propio correo
                 const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'ruizmosinfinitum2025@gmail.com';
+
+                if (esAdmin) {
+                    const { data: perfilesData } = await supabase.from('perfiles').select('*');
+                    setPerfiles(perfilesData || []);
+                }
 
                 let clientesFiltrados = clientesData;
                 if (!esAdmin && user?.email) {
@@ -198,22 +206,31 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* Pipeline de Ventas */}
+            {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Admin */}
             <div>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-semibold text-gray-900">Pipeline de Ventas</h2>
-                    <Button
-                        variant="ghost"
-                        onClick={() => router.push('/clientes')}
-                    >
-                        Ver Todos
-                    </Button>
-                </div>
+                {user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'ruizmosinfinitum2025@gmail.com' ? (
+                    <BossDashboardView
+                        clientes={clientes}
+                        perfiles={perfiles}
+                    />
+                ) : (
+                    <>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-2xl font-semibold text-gray-900">Pipeline de Ventas</h2>
+                            <Button
+                                variant="ghost"
+                                onClick={() => router.push('/clientes')}
+                            >
+                                Ver Todos
+                            </Button>
+                        </div>
 
-                <PipelineView
-                    clientes={clientes}
-                    onClienteClick={(cliente) => router.push(`/clientes/${cliente.id}`)}
-                />
+                        <PipelineView
+                            clientes={clientes}
+                            onClienteClick={(cliente) => router.push(`/clientes/${cliente.id}`)}
+                        />
+                    </>
+                )}
             </div>
 
             {/* Agenda del Día */}

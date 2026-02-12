@@ -228,6 +228,17 @@ export interface Recordatorio {
 }
 
 // ============================================
+// PERFIL DE USUARIO
+// ============================================
+
+export interface PerfilUsuario {
+    id: string; // auth.uid()
+    email: string;
+    nombre_completo: string;
+    creado_en: string;
+}
+
+// ============================================
 // REQUISITOS POR TIPO DE SERVICIO
 // ============================================
 

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { MobileHeader } from '@/components/MobileHeader';
 import { FacebookPixelWrapper } from '@/components/FacebookPixelWrapper';
+import { PerfilOnboarding } from '@/components/PerfilOnboarding';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -37,6 +38,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                 </main>
             </div>
             <FacebookPixelWrapper />
+            <PerfilOnboarding />
         </div>
     );
 }
