@@ -178,14 +178,27 @@ export default function DashboardPage() {
                     </p>
                 </div>
 
-                <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={() => router.push('/clientes/nuevo')}
-                >
-                    <Plus size={20} />
-                    Nuevo Cliente
-                </Button>
+                <div className="flex items-center gap-3">
+                    {user?.email === 'ruizmosinfinitum2025@gmail.com' && (
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            className="border-telmex-blue text-telmex-blue hover:bg-blue-50"
+                            onClick={() => router.push('/nominas')}
+                        >
+                            <DollarSign size={20} />
+                            Nóminas
+                        </Button>
+                    )}
+                    <Button
+                        variant="primary"
+                        size="lg"
+                        onClick={() => router.push('/clientes/nuevo')}
+                    >
+                        <Plus size={20} />
+                        Nuevo Cliente
+                    </Button>
+                </div>
             </div>
 
             {/* Alerta de Productividad (Solo Boss) */}
