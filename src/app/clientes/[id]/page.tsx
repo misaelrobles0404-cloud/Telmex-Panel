@@ -423,21 +423,23 @@ Solo necesito que me confirmes para agendar.
     };
 
     return (
-        <div className="p-6 max-w-6xl mx-auto">
+        <div className="p-4 md:p-6 max-w-6xl mx-auto overflow-hidden">
             <Button
                 variant="ghost"
                 onClick={() => router.back()}
-                className="mb-4"
+                className="mb-4 -ml-2"
             >
-                <ArrowLeft size={20} />
+                <ArrowLeft size={20} className="mr-2" />
                 Volver a Clientes
             </Button>
 
             {/* Encabezado del Cliente */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">{cliente.nombre}</h1>
-                    <div className="flex items-center gap-3 mt-2">
+            <div className="flex flex-col mb-6 gap-4">
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 break-words leading-tight">
+                        {cliente.nombre}
+                    </h1>
+                    <div className="flex flex-wrap items-center gap-3">
                         <span className={`badge ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
                             cliente.tipo_servicio === 'portabilidad' ? 'badge-purple' :
                                 'badge-green'
@@ -451,12 +453,12 @@ Solo necesito que me confirmes para agendar.
                     </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 w-full">
                     {cliente.estado_pipeline !== 'vendido' && cliente.estado_pipeline !== 'sin_cobertura' && (
                         <Button
                             variant="secondary"
                             onClick={() => setModalSeguimientoOpen(true)}
-                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
+                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 flex-1 md:flex-none"
                             title="Dar seguimiento a prospecto"
                         >
                             <span className="mr-1">📨</span> Dar Seguimiento
@@ -467,31 +469,35 @@ Solo necesito que me confirmes para agendar.
                         <Button
                             variant="secondary"
                             onClick={() => setModalReferidosOpen(true)}
-                            className="bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-yellow-200"
+                            className="bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-yellow-200 flex-1 md:flex-none"
                             title="Pedir referidos a cliente feliz"
                         >
                             <span className="mr-1">🎁</span> Pedir Referidos
                         </Button>
                     )}
-                    <Button variant="secondary" onClick={generarFormatoSIAC} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200">
-                        <Copy size={16} /> Copiar Formato
+                    <Button variant="secondary" onClick={generarFormatoSIAC} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200 flex-1 md:flex-none">
+                        <Copy size={16} className="mr-1" /> Copiar Formato
                     </Button>
-                    <Button variant="secondary" onClick={() => router.push(`/clientes/${cliente.id}/editar`)}>
-                        <Edit size={16} /> Editar
+                    <Button variant="secondary" onClick={() => router.push(`/clientes/${cliente.id}/editar`)} className="flex-1 md:flex-none">
+                        <Edit size={16} className="mr-1" /> Editar
                     </Button>
-                    <Button variant="danger" onClick={async () => {
-                        if (confirm('¿Estás seguro de eliminar este cliente? Esta acción no se puede deshacer.')) {
-                            if (cliente) {
-                                try {
-                                    await eliminarCliente(cliente.id);
-                                    router.push('/clientes');
-                                } catch (error) {
-                                    alert('Error al eliminar cliente');
+                    <Button
+                        variant="danger"
+                        className="flex-1 md:flex-none"
+                        onClick={async () => {
+                            if (confirm('¿Estás seguro de eliminar este cliente? Esta acción no se puede deshacer.')) {
+                                if (cliente) {
+                                    try {
+                                        await eliminarCliente(cliente.id);
+                                        router.push('/clientes');
+                                    } catch (error) {
+                                        alert('Error al eliminar cliente');
+                                    }
                                 }
                             }
-                        }
-                    }}>
-                        <Trash2 size={16} /> Eliminar
+                        }}
+                    >
+                        <Trash2 size={16} className="mr-1" /> Eliminar
                     </Button>
                 </div>
             </div>
@@ -706,16 +712,17 @@ Solo necesito que me confirmes para agendar.
 
                             <div className="pt-4 border-t border-gray-100">
                                 <label className="text-gray-500 mb-1 block">Folio SIAC</label>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap md:flex-nowrap gap-2">
                                     <input
                                         type="text"
                                         value={folioSiacInput}
                                         onChange={(e) => setFolioSiacInput(e.target.value)}
                                         placeholder="Ingresa Folio SIAC"
-                                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
+                                        className="flex-1 min-w-[120px] px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
                                     />
-                                    <Button variant="primary" size="sm" onClick={guardarFolioSiac} disabled={folioSiacInput === (cliente.folio_siac || '')}>
-                                        <Save size={14} />
+                                    <Button variant="primary" size="sm" onClick={guardarFolioSiac} disabled={folioSiacInput === (cliente.folio_siac || '')} className="w-full md:w-auto">
+                                        <Save size={14} className="mr-1 md:mr-0" />
+                                        <span className="md:hidden">Guardar Folio</span>
                                     </Button>
                                 </div>
 
@@ -731,16 +738,17 @@ Solo necesito que me confirmes para agendar.
                                 </div>
 
                                 <label className="text-gray-500 mb-1 block mt-4">Orden de Servicio (OS)</label>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap md:flex-nowrap gap-2">
                                     <input
                                         type="text"
                                         value={ordenServicioInput}
                                         onChange={(e) => setOrdenServicioInput(e.target.value)}
                                         placeholder="Orden de Servicio"
-                                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
+                                        className="flex-1 min-w-[120px] px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-telmex-blue"
                                     />
-                                    <Button variant="primary" size="sm" onClick={guardarOrdenServicio} disabled={ordenServicioInput === (cliente.orden_servicio || '')}>
-                                        <Save size={14} />
+                                    <Button variant="primary" size="sm" onClick={guardarOrdenServicio} disabled={ordenServicioInput === (cliente.orden_servicio || '')} className="w-full md:w-auto">
+                                        <Save size={14} className="mr-1 md:mr-0" />
+                                        <span className="md:hidden">Guardar OS</span>
                                     </Button>
                                 </div>
                                 <div className="mt-2 text-sm">
