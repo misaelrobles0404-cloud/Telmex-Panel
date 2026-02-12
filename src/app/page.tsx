@@ -24,6 +24,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { BossDashboardView } from '@/components/BossDashboardView';
 import { PerfilUsuario } from '@/types';
+import { InstalacionAlert } from '@/components/InstalacionAlert';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -35,6 +36,7 @@ export default function DashboardPage() {
     const [user, setUser] = useState<any>(null);
     const [perfiles, setPerfiles] = useState<PerfilUsuario[]>([]);
     const [perfilActual, setPerfilActual] = useState<PerfilUsuario | null>(null);
+    const [nuevaAlerta, setNuevaAlerta] = useState<any>(null);
 
     useEffect(() => {
         const cargarDatos = async () => {
@@ -108,6 +110,41 @@ export default function DashboardPage() {
                     (window as any).superVendedores = superVendedores; // Temporal para pasar al render o usar un state
                     setSuperVendedores(superVendedores);
                 }
+
+                // Suscripción Realtime (Solo para Ruiz)
+                if (esBoss) {
+                    const channel = supabase
+                        .channel('schema-db-changes')
+                        .on(
+                            'postgres_changes',
+                            {
+                                event: '*', // Escuchar todo para detectar cambios de estado a vendido
+                                schema: 'public',
+                                table: 'clientes'
+                            },
+                            (payload: any) => {
+                                console.log('Cambio detectado:', payload);
+                                const { new: newRow, old: oldRow } = payload;
+
+                                // Si el cliente pasa a 'vendido' o se inserta como 'vendido'
+                                if (newRow.estado_pipeline === 'vendido' && (!oldRow || oldRow.estado_pipeline !== 'vendido')) {
+                                    setNuevaAlerta({
+                                        cliente: newRow.nombre,
+                                        promotor: newRow.promotor_nombre || newRow.usuario || 'Promotor',
+                                        paquete: newRow.paquete
+                                    });
+
+                                    // Recargar lista para que se vea en la tabla inmediatamente
+                                    cargarDatos();
+                                }
+                            }
+                        )
+                        .subscribe();
+
+                    return () => {
+                        supabase.removeChannel(channel);
+                    };
+                }
             } catch (error) {
                 console.error("Error al cargar dashboard:", error);
             } finally {
@@ -129,6 +166,7 @@ export default function DashboardPage() {
 
     return (
         <div className="p-6 space-y-6">
+            <InstalacionAlert nuevaInstalacion={nuevaAlerta} />
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
