@@ -27,7 +27,6 @@ interface Paquete {
     velocidad: number;
     activo: boolean;
     categoria: 'residencial' | 'pyme';
-    netflix: boolean;
     llamadasIlimitadas: boolean;
     beneficios?: string;
 }
@@ -69,9 +68,8 @@ export default function AdminCatalogoPage() {
                     velocidad: p.velocidad,
                     activo: true,
                     categoria: 'residencial' as any,
-                    netflix: p.netflix,
                     llamadasIlimitadas: p.llamadasIlimitadas,
-                    beneficios: ''
+                    beneficios: p.netflix ? 'Incluye Netflix' : ''
                 })),
                 ...PAQUETES_PYME.map(p => ({
                     id: p.id,
@@ -80,9 +78,8 @@ export default function AdminCatalogoPage() {
                     velocidad: p.velocidad,
                     activo: true,
                     categoria: 'pyme' as any,
-                    netflix: p.netflix,
                     llamadasIlimitadas: p.llamadasIlimitadas,
-                    beneficios: ''
+                    beneficios: p.netflix ? 'Incluye Netflix' : ''
                 }))
             ];
             setPaquetes(initialPaquetes);
@@ -110,7 +107,6 @@ export default function AdminCatalogoPage() {
             velocidad: 0,
             activo: true,
             categoria: 'residencial',
-            netflix: false,
             llamadasIlimitadas: true,
             beneficios: ''
         };
@@ -243,16 +239,7 @@ export default function AdminCatalogoPage() {
                                                 onChange={(e) => actualizarPaquete(p.id, 'llamadasIlimitadas', e.target.checked)}
                                                 className="rounded text-telmex-blue w-4 h-4"
                                             />
-                                            <span className="text-[10px] font-bold text-gray-700 uppercase">Telefonía</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={p.netflix}
-                                                onChange={(e) => actualizarPaquete(p.id, 'netflix', e.target.checked)}
-                                                className="rounded text-telmex-blue w-4 h-4"
-                                            />
-                                            <span className="text-[10px] font-bold text-gray-700 uppercase">Netflix</span>
+                                            <span className="text-[10px] font-bold text-gray-700 uppercase">Incluye Telefonía</span>
                                         </label>
                                     </div>
 
