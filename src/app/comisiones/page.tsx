@@ -35,7 +35,6 @@ export default function ComisionesPage() {
                 c.folio_siac.trim() !== '' &&
                 c.estado_pipeline !== 'vendido' &&
                 c.estado_pipeline !== 'sin_cobertura' &&
-                c.estado_pipeline !== 'cobertura_cobre' &&
                 c.estado_pipeline !== 'cancelado'
             );
             setClientesPendientes(pendientes);
@@ -44,7 +43,7 @@ export default function ComisionesPage() {
             const rechazados = todos.filter(c =>
                 c.folio_siac &&
                 c.folio_siac.trim() !== '' &&
-                (c.estado_pipeline === 'sin_cobertura' || c.estado_pipeline === 'cobertura_cobre')
+                c.estado_pipeline === 'sin_cobertura'
             );
             setClientesRechazados(rechazados);
 
