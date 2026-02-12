@@ -98,47 +98,29 @@ export default function NuevoClientePage() {
         };
         cargarDatos();
 
-        // Cargar borrador si existe
-        const borrador = localStorage.getItem('nuevo_cliente_borrador');
-        if (borrador) {
-            try {
-                const datosBorrador = JSON.parse(borrador);
-                setFormData(datosBorrador);
-                console.log('Borrador restaurado');
-            } catch (e) {
-                console.error('Error al restaurar borrador', e);
-            }
-        }
+        // Limpiar cualquier residuo de borrador antiguo una sola vez al entrar
+        localStorage.removeItem('nuevo_cliente_borrador');
     }, []);
 
-    // Auto-guardado cada que cambia formData
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            localStorage.setItem('nuevo_cliente_borrador', JSON.stringify(formData));
-        }, 500); // Debounce de 500ms para no saturar
-
-        return () => clearTimeout(timeoutId);
-    }, [formData]);
-
-    const handleGuardarProspecto = async () => {
-        if (!formData.noTT) {
-            alert('Para prospecto se requiere al menos el Teléfono');
+    const handleGuardarProspecto = async (silent = false) => {
+        if (!formData.noTT && !formData.nombre) {
+            if (!silent) alert('Para prospecto se requiere al menos el Teléfono o Nombre');
             return;
         }
 
         if (!user) {
-            alert('Error de sesión');
+            if (!silent) alert('Error de sesión');
             return;
         }
 
-        setLoading(true);
+        if (!silent) setLoading(true);
         const nombreFinal = formData.nombre.trim() || `Prospecto ${formData.noTT}`;
 
         const cliente: Cliente = {
             id: crypto.randomUUID(),
             user_id: user.id,
             nombre: nombreFinal,
-            no_tt: formData.noTT,
+            no_tt: formData.noTT || 'PENDIENTE',
             no_ref: formData.noRef || 'PENDIENTE',
             no_ref_2: formData.noRef2 || undefined,
             correo: formData.correo || 'pendiente@correo.com',
@@ -160,6 +142,7 @@ export default function NuevoClientePage() {
             clave_paquete: 'pendiente',
             velocidad: 0,
             precio_mensual: 0,
+            incluye_telefono: false,
             tiene_internet: false,
             tiene_telefono_fijo: false,
             proveedor_actual: undefined,
@@ -181,13 +164,51 @@ export default function NuevoClientePage() {
 
         try {
             await guardarCliente(cliente);
-            router.push('/clientes');
+            localStorage.removeItem('nuevo_cliente_borrador');
+            if (!silent) router.push('/clientes');
         } catch (error: any) {
             console.error('Error al guardar prospecto:', error);
-            alert(`Error al guardar prospecto: ${error?.message || 'Error desconocido'}`);
+            if (!silent) alert(`Error al guardar prospecto: ${error?.message || 'Error desconocido'}`);
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
+    };
+
+    const limpiarFormulario = () => {
+        if (!confirm('¿Seguro que deseas limpiar todo el formulario?')) return;
+        setFormData({
+            nombre: '',
+            noTT: '',
+            noRef: '',
+            noRef2: '',
+            correo: '',
+            calle: '',
+            numeroExterior: '',
+            numeroInterior: '',
+            colonia: '',
+            cp: '',
+            cd: '',
+            estado: '',
+            entreCalle1: '',
+            entreCalle2: '',
+            ine: '',
+            curp: '',
+            usuario: user?.email || '',
+            tipoCliente: 'residencial',
+            paqueteId: '',
+            tieneInternet: false,
+            tieneTelefonoFijo: false,
+            proveedorActual: '',
+            numeroAPortar: '',
+            nipPortabilidad: '',
+            fechaVigencia: '',
+            formatoPortabilidad: false,
+            cartaBaja: false,
+            estadoCuentaMegacable: false,
+            notas: '',
+            campanaId: '',
+        });
+        localStorage.removeItem('nuevo_cliente_borrador');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -263,6 +284,7 @@ export default function NuevoClientePage() {
 
         try {
             await guardarCliente(cliente);
+            localStorage.removeItem('nuevo_cliente_borrador');
             router.push('/clientes');
         } catch (error: any) {
             console.error('Error al guardar cliente:', error);
@@ -286,8 +308,19 @@ export default function NuevoClientePage() {
                     Volver
                 </Button>
 
-                <h1 className="text-3xl font-bold text-gray-900">Nuevo Cliente</h1>
-                <p className="text-gray-600 mt-1">Formulario de captura TELMEX</p>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Nuevo Cliente</h1>
+                        <p className="text-gray-600 mt-1">Formulario de captura TELMEX</p>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        onClick={limpiarFormulario}
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                        Limpiar Formulario
+                    </Button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -782,7 +815,7 @@ export default function NuevoClientePage() {
 
                             <Button
                                 type="button"
-                                onClick={handleGuardarProspecto}
+                                onClick={() => handleGuardarProspecto()}
                                 className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
                             >
                                 <UserPlus size={20} className="mr-2" />
