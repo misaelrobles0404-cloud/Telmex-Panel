@@ -90,6 +90,9 @@ export default function NuevoClientePage() {
         const cargarDatos = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
+            if (user?.email) {
+                setFormData(prev => ({ ...prev, usuario: user.email }));
+            }
             const pubs = await obtenerPublicaciones();
             setCampanas(pubs);
         };
@@ -150,7 +153,7 @@ export default function NuevoClientePage() {
             entre_calle_2: '',
             ine: '',
             curp: 'PENDIENTE',
-            usuario: '',
+            usuario: user.email || '',
             tipo_servicio: tipoServicio,
             tipo_cliente: formData.tipoCliente,
             paquete: 'POR DEFINIR',
@@ -231,7 +234,7 @@ export default function NuevoClientePage() {
             entre_calle_2: formData.entreCalle2,
             ine: formData.ine,
             curp: formData.curp,
-            usuario: formData.usuario,
+            usuario: formData.usuario || user.email || '',
             tipo_servicio: tipoServicio,
             tipo_cliente: formData.tipoCliente,
             paquete: `${paqueteSeleccionado.velocidad} Mbps`,

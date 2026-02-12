@@ -14,14 +14,23 @@ interface BossDashboardViewProps {
 export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps) {
     // Agrupar clientes por usuario (email)
     const clientesPorPromotor = clientes.reduce((acc, cliente) => {
-        const promotorEmail = cliente.usuario || 'Sin Asignar';
-        if (!acc[promotorEmail]) acc[promotorEmail] = [];
-        acc[promotorEmail].push(cliente);
+        // Intentar usar campo usuario (email), si no, intentar buscar email por user_id
+        let promotorEmail = cliente.usuario;
+
+        if (!promotorEmail && cliente.user_id) {
+            const perfil = perfiles.find(p => p.id === cliente.user_id);
+            if (perfil) promotorEmail = perfil.email;
+        }
+
+        const key = promotorEmail || 'Sin Asignar';
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(cliente);
         return acc;
     }, {} as Record<string, Cliente[]>);
 
     // Mapeo de emails a nombres completos
     const nombrePromotor = (email: string) => {
+        if (email === 'Sin Asignar') return 'Sin Asignar';
         const perfil = perfiles.find(p => p.email === email);
         return perfil ? perfil.nombre_completo : email.split('@')[0];
     };
@@ -111,10 +120,10 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border-2 ${cliente.estado_pipeline === 'vendido'
-                                                        ? 'bg-green-100 text-green-700 border-green-200'
-                                                        : cliente.estado_pipeline === 'cierre_programado'
-                                                            ? 'bg-purple-100 text-purple-700 border-purple-200'
-                                                            : 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                                                    ? 'bg-green-100 text-green-700 border-green-200'
+                                                    : cliente.estado_pipeline === 'cierre_programado'
+                                                        ? 'bg-purple-100 text-purple-700 border-purple-200'
+                                                        : 'bg-yellow-100 text-yellow-700 border-yellow-200'
                                                     }`}>
                                                     {cliente.estado_pipeline === 'vendido' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
                                                     {cliente.estado_pipeline.replace('_', ' ')}
