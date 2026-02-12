@@ -475,30 +475,49 @@ Solo necesito que me confirmes para agendar.
                             <span className="mr-1">🎁</span> Pedir Referidos
                         </Button>
                     )}
-                    <Button variant="secondary" onClick={generarFormatoSIAC} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200 flex-1 md:flex-none">
-                        <Copy size={16} className="mr-1" /> Copiar Formato
-                    </Button>
+
+                    {/* Copiar Formato: Solo si tiene Folio SIAC (Cierre Programado o Vendido) */}
+                    {(cliente.estado_pipeline === 'cierre_programado' || cliente.estado_pipeline === 'vendido') && cliente.folio_siac && (
+                        <Button variant="secondary" onClick={generarFormatoSIAC} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200 flex-1 md:flex-none">
+                            <Copy size={16} className="mr-1" /> Copiar Formato
+                        </Button>
+                    )}
+
                     <Button variant="secondary" onClick={() => router.push(`/clientes/${cliente.id}/editar`)} className="flex-1 md:flex-none">
                         <Edit size={16} className="mr-1" /> Editar
                     </Button>
-                    <Button
-                        variant="danger"
-                        className="flex-1 md:flex-none"
-                        onClick={async () => {
-                            if (confirm('¿Estás seguro de eliminar este cliente? Esta acción no se puede deshacer.')) {
-                                if (cliente) {
-                                    try {
-                                        await eliminarCliente(cliente.id);
-                                        router.push('/clientes');
-                                    } catch (error) {
-                                        alert('Error al eliminar cliente');
+
+                    {/* Eliminar: Bloqueado en Cierre Programado o Vendido para seguridad */}
+                    {cliente.estado_pipeline !== 'cierre_programado' && cliente.estado_pipeline !== 'vendido' ? (
+                        <Button
+                            variant="danger"
+                            className="flex-1 md:flex-none"
+                            onClick={async () => {
+                                if (confirm('¿Estás seguro de eliminar este cliente? Esta acción no se puede deshacer.')) {
+                                    if (cliente) {
+                                        try {
+                                            await eliminarCliente(cliente.id);
+                                            router.push('/clientes');
+                                        } catch (error) {
+                                            alert('Error al eliminar cliente');
+                                        }
                                     }
                                 }
-                            }
-                        }}
-                    >
-                        <Trash2 size={16} className="mr-1" /> Eliminar
-                    </Button>
+                            }}
+                        >
+                            <Trash2 size={16} className="mr-1" /> Eliminar
+                        </Button>
+                    ) : (
+                        <div className="flex-1 md:flex-none" title="No se puede eliminar un cliente con Folio SIAC asignado">
+                            <Button
+                                variant="ghost"
+                                className="w-full text-gray-400 cursor-not-allowed border border-gray-100"
+                                disabled
+                            >
+                                <Trash2 size={16} className="mr-1" /> Bloqueado
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
 
