@@ -25,6 +25,7 @@ import { supabase } from '@/lib/supabase';
 import { BossDashboardView } from '@/components/BossDashboardView';
 import { PerfilUsuario } from '@/types';
 import { InstalacionAlert } from '@/components/InstalacionAlert';
+import { AnnouncementBanner } from '@/components/AnnouncementBanner';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -169,6 +170,7 @@ export default function DashboardPage() {
     return (
         <div className="p-3 md:p-6 space-y-4 md:space-y-6">
             <InstalacionAlert nuevaInstalacion={nuevaAlerta} />
+            <AnnouncementBanner />
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>

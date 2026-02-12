@@ -206,7 +206,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         let formato = '';
 
         // Automatización: Usar el nombre del perfil del usuario logueado
-        // Si no se encuentra (caso raro), usar el nombre del cliente o un placeholder
+        // Automatización: Usar el nombre del perfil del usuario logueado
         const nombrePromotor = perfilUsuario?.nombre_completo || "PROMOTOR NO REGISTRADO";
         const promotorLine = `NOMBRE DE PROMOTOR: ${nombrePromotor.toUpperCase()}`;
 

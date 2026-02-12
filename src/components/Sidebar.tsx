@@ -3,17 +3,34 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, Calendar, MessageSquare, BarChart3, Calculator, Settings, Menu, X, ImageIcon, CheckCircle, MapPin, Megaphone, LogOut, ClipboardCheck } from 'lucide-react';
+import {
+    LayoutDashboard,
+    Users,
+    Calendar,
+    BarChart3,
+    Calculator,
+    Settings,
+    X,
+    CheckCircle,
+    LogOut,
+    ClipboardCheck,
+    ShieldCheck,
+    Menu,
+    Package
+} from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Clientes', href: '/clientes', icon: Users },
     { name: 'Agenda', href: '/agenda', icon: Calendar },
-    { name: 'Verificar Comisiones', href: '/comisiones', icon: CheckCircle }, // Nuevo módulo
+    { name: 'Verificar Comisiones', href: '/comisiones', icon: CheckCircle },
     { name: 'Auditoría', href: '/auditoria', icon: ClipboardCheck },
     { name: 'Calculadora', href: '/calculadora', icon: Calculator },
     { name: 'Reportes', href: '/reportes', icon: BarChart3 },
+    { name: 'Catálogo', href: '/admin/catalogo', icon: Package, adminOnly: true },
+    { name: 'Administración', href: '/admin/config', icon: ShieldCheck, adminOnly: true },
+    { name: 'Configuración', href: '/perfil', icon: Settings },
 ];
 
 interface SidebarProps {
@@ -97,9 +114,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     {/* Navigation */}
                     <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
                         {navigation.map((item) => {
-                            // Restricción para Auditoría (Sólo Misael y Ruiz Boss)
+                            // Restricción para Auditoría y Administración (Sólo Misael y Ruiz Boss)
                             const isAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'ruizmosinfinitum2025@gmail.com';
-                            if (item.name === 'Auditoría' && !isAdmin) {
+                            if ((item.name === 'Auditoría' || item.adminOnly) && !isAdmin) {
                                 return null;
                             }
 
@@ -143,11 +160,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <div className="flex-shrink-0 p-4 border-t border-telmex-blue/30 bg-telmex-darkblue">
                         <div className="flex items-center gap-3 text-sm text-gray-300">
                             <div className="w-8 h-8 rounded-full bg-telmex-blue flex items-center justify-center text-white font-semibold">
-                                U
+                                {user?.email?.[0].toUpperCase() || 'U'}
                             </div>
-                            <div>
-                                <p className="font-medium text-white truncate max-w-[140px]">{user?.email?.split('@')[0] || 'Usuario'}</p>
-                                <p className="text-xs text-blue-200">{user?.email || 'Agente TELMEX'}</p>
+                            <div className="min-w-0">
+                                <p className="font-medium text-white truncate">{user?.email?.split('@')[0] || 'Usuario'}</p>
+                                <p className="text-xs text-blue-200 truncate">{user?.email || 'Agente TELMEX'}</p>
                             </div>
                         </div>
                         <button
