@@ -14,8 +14,8 @@ interface BossDashboardViewProps {
 export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps) {
     // Estado para controlar qué tarjetas están expandidas
     const [expandidos, setExpandidos] = React.useState<Record<string, boolean>>({});
-    // Estado para controlar el filtro de cada tarjeta: 'todas', 'instaladas', 'programadas', 'interesados'
-    const [filtros, setFiltros] = React.useState<Record<string, 'todas' | 'instaladas' | 'programadas' | 'interesados'>>({});
+    // Estado para controlar el filtro de cada tarjeta: 'todas', 'instaladas', 'programadas'
+    const [filtros, setFiltros] = React.useState<Record<string, 'todas' | 'instaladas' | 'programadas'>>({});
     // Estado para el buscador de promotores
     const [busqueda, setBusqueda] = React.useState('');
 
@@ -34,7 +34,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
         setExpandidos(prev => ({ ...prev, [email]: !prev[email] }));
     };
 
-    const cambiarFiltro = (email: string, filtro: 'todas' | 'instaladas' | 'programadas' | 'interesados') => {
+    const cambiarFiltro = (email: string, filtro: 'todas' | 'instaladas' | 'programadas') => {
         setFiltros(prev => ({ ...prev, [email]: filtro }));
     };
 
@@ -89,8 +89,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                         .filter(c => {
                             if (filtroActual === 'instaladas') return c.estado_pipeline === 'vendido';
                             if (filtroActual === 'programadas') return c.estado_pipeline === 'cierre_programado';
-                            if (filtroActual === 'interesados') return c.estado_pipeline === 'interesado';
-                            return c.estado_pipeline === 'vendido' || c.estado_pipeline === 'cierre_programado' || c.estado_pipeline === 'interesado';
+                            return c.estado_pipeline === 'vendido' || c.estado_pipeline === 'cierre_programado';
                         })
                         .sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
 
@@ -141,7 +140,6 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                     <option value="todas">Ver Todos</option>
                                                     <option value="programadas">Cierres Prog.</option>
                                                     <option value="instaladas">Instaladas</option>
-                                                    <option value="interesados">Interesados</option>
                                                 </select>
                                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                                                     <ListFilter size={14} />
