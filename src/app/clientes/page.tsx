@@ -149,32 +149,33 @@ export default function ClientesPage() {
     });
 
     return (
-        <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
+        <div className="p-4 md:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Clientes</h1>
-                    <p className="text-gray-600 mt-1">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Clientes</h1>
+                    <p className="text-gray-600 text-sm md:text-base mt-1">
                         {clientes.length} cliente{clientes.length !== 1 ? 's' : ''} registrado{clientes.length !== 1 ? 's' : ''}
                     </p>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                     <Button
                         variant="outline"
-                        size="lg"
+                        size="sm"
                         onClick={handleLimpieza}
-                        className="text-red-600 border-red-200 hover:bg-red-50"
+                        className="flex-1 sm:flex-none text-red-600 border-red-200 hover:bg-red-50 text-xs md:text-sm"
                         title="Eliminar clientes antiguos (> 1 mes)"
                     >
-                        <Trash2 size={20} className="mr-2" />
+                        <Trash2 size={16} className="mr-1 md:mr-2" />
                         Limpieza
                     </Button>
                     <Button
                         variant="primary"
-                        size="lg"
+                        size="sm"
                         onClick={() => router.push('/clientes/nuevo')}
+                        className="flex-1 sm:flex-none text-xs md:text-sm"
                     >
-                        <Plus size={20} />
+                        <Plus size={16} className="mr-1 md:mr-2" />
                         Nuevo Cliente
                     </Button>
                 </div>
@@ -257,58 +258,63 @@ export default function ClientesPage() {
                         <CardContent className="p-6">
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h3 className="text-lg font-semibold text-gray-900">{cliente.nombre}</h3>
-                                        <span className={`badge ${cliente.estado_pipeline === 'vendido' ? 'badge-green' :
-                                            cliente.estado_pipeline === 'cierre_programado' ? 'badge-purple' :
-                                                cliente.estado_pipeline === 'interesado' ? 'badge-blue' :
-                                                    cliente.estado_pipeline === 'sin_cobertura' ? 'bg-red-100 text-red-700' :
-                                                        'bg-gray-100 text-gray-800'
-                                            }`}>
-                                            {cliente.estado_pipeline === 'vendido' && 'Instalado'}
-                                            {cliente.estado_pipeline === 'cierre_programado' && 'Cierre Programado'}
-                                            {cliente.estado_pipeline === 'interesado' && 'Interesado'}
-                                            {cliente.estado_pipeline === 'contactado' && 'Prospecto'}
-                                            {cliente.estado_pipeline === 'sin_cobertura' && 'Sin Cobertura'}
-                                        </span>
-                                        <span className={`badge ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
-                                            cliente.tipo_servicio === 'portabilidad' ? 'badge-purple' :
-                                                'badge-green'
-                                            }`}>
-                                            {cliente.tipo_servicio === 'linea_nueva' && 'Línea Nueva'}
-                                            {cliente.tipo_servicio === 'portabilidad' && 'Portabilidad'}
-                                            {cliente.tipo_servicio === 'winback' && 'Winback'}
-                                        </span>
+                                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                                        <h3 className="text-base md:text-lg font-semibold text-gray-900 truncate max-w-[200px] md:max-w-none">{cliente.nombre}</h3>
+                                        <div className="flex flex-wrap gap-1 md:gap-2">
+                                            <span className={`badge text-[10px] md:text-xs ${cliente.estado_pipeline === 'vendido' ? 'badge-green' :
+                                                cliente.estado_pipeline === 'cierre_programado' ? 'badge-purple' :
+                                                    cliente.estado_pipeline === 'interesado' ? 'badge-blue' :
+                                                        cliente.estado_pipeline === 'sin_cobertura' ? 'bg-red-100 text-red-700' :
+                                                            'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                {cliente.estado_pipeline === 'vendido' && 'Instalado'}
+                                                {cliente.estado_pipeline === 'cierre_programado' && 'Cierre Programado'}
+                                                {cliente.estado_pipeline === 'interesado' && 'Interesado'}
+                                                {cliente.estado_pipeline === 'contactado' && 'Prospecto'}
+                                                {cliente.estado_pipeline === 'sin_cobertura' && 'Sin Cobertura'}
+                                            </span>
+                                            <span className={`badge text-[10px] md:text-xs ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
+                                                cliente.tipo_servicio === 'portabilidad' ? 'badge-purple' :
+                                                    'badge-green'
+                                                }`}>
+                                                {cliente.tipo_servicio === 'linea_nueva' && 'Línea Nueva'}
+                                                {cliente.tipo_servicio === 'portabilidad' && 'Portabilidad'}
+                                                {cliente.tipo_servicio === 'winback' && 'Winback'}
+                                            </span>
+                                        </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                        <div>
-                                            <p className="text-gray-500">Teléfono (TT)</p>
-                                            <p className="font-medium text-gray-900">{cliente.no_tt}</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 text-xs md:text-sm">
+                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Teléfono (TT)</p>
+                                            <p className="font-medium text-gray-900 break-all">{cliente.no_tt}</p>
                                         </div>
-                                        <div>
-                                            <p className="text-gray-500">Referencias</p>
+                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Referencias</p>
                                             <p className="font-medium text-gray-900">R1: {cliente.no_ref}</p>
                                             {cliente.no_ref_2 && (
-                                                <p className="text-xs text-gray-500">R2: {cliente.no_ref_2}</p>
+                                                <p className="text-[10px] text-gray-500">R2: {cliente.no_ref_2}</p>
                                             )}
                                         </div>
-                                        <div>
-                                            <p className="text-gray-500">Correo</p>
-                                            <p className="font-medium text-gray-900">{cliente.correo}</p>
+                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Correo</p>
+                                            <p className="font-medium text-gray-900 break-all">{cliente.correo}</p>
                                         </div>
-                                        <div>
-                                            <p className="text-gray-500">Paquete</p>
-                                            <p className="font-medium text-gray-900">{cliente.paquete}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-500">Comisión</p>
-                                            <p className="font-medium text-telmex-blue">{formatearMoneda(cliente.comision)}</p>
+                                        <div className="grid grid-cols-2 gap-2 sm:block sm:bg-transparent sm:p-0">
+                                            <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
+                                                <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Paquete</p>
+                                                <p className="font-medium text-gray-900 truncate">{cliente.paquete}</p>
+                                            </div>
+                                            <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
+                                                <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Comisión</p>
+                                                <p className="font-black text-telmex-blue text-base">{formatearMoneda(cliente.comision)}</p>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="mt-3 text-xs text-gray-500">
-                                        Contactado: {formatearFecha(cliente.fecha_contacto)}
+                                    <div className="mt-4 pt-3 border-t border-gray-100 text-[10px] text-gray-400 flex justify-between items-center">
+                                        <span>ID: {cliente.id.substring(0, 8)}...</span>
+                                        <span>Contactado: {formatearFecha(cliente.fecha_contacto)}</span>
                                     </div>
                                 </div>
                             </div>
