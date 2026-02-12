@@ -2,33 +2,29 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Cliente } from '@/types';
 import { calcularMetricas, formatearMoneda } from '@/lib/utils';
-import { obtenerPublicaciones, obtenerClientes } from '@/lib/storage';
+import { obtenerClientes } from '@/lib/storage';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { supabase } from '@/lib/supabase';
 
 export default function ReportesPage() {
     const [metricas, setMetricas] = useState(calcularMetricas());
-    const [roiData, setRoiData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const cargarDatos = async () => {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
-                const [allClientes, pubs] = await Promise.all([
-                    obtenerClientes(),
-                    obtenerPublicaciones()
-                ]);
+                const allClientes = await obtenerClientes();
 
                 // Filtrado: Misael ve todo, los demás solo sus propios datos
                 const esSuperAdmin = user?.email === 'misaelrobles0404@gmail.com';
-                const clientes = (esSuperAdmin || !user?.email)
+                const clientes: Cliente[] = (esSuperAdmin || !user?.email)
                     ? allClientes
-                    : allClientes.filter(c => c.usuario === user.email);
+                    : allClientes.filter((c: Cliente) => c.usuario === user.email);
 
                 setMetricas(calcularMetricas(clientes));
-                calcularRoiPorPlataforma(pubs);
             } catch (error) {
                 console.error("Error al cargar reportes:", error);
             } finally {
@@ -38,27 +34,6 @@ export default function ReportesPage() {
         cargarDatos();
     }, []);
 
-    const calcularRoiPorPlataforma = (pubs: any[]) => {
-        const stats: Record<string, { gasto: number; leads: number }> = {
-            facebook: { gasto: 0, leads: 0 },
-            instagram: { gasto: 0, leads: 0 },
-            marketplace: { gasto: 0, leads: 0 }
-        };
-
-        pubs.forEach(pub => {
-            if (pub.plataforma && stats[pub.plataforma]) {
-                stats[pub.plataforma].gasto += (pub.activa ? pub.presupuesto * 30 : 0); // Estimado mensual
-                stats[pub.plataforma].leads += (pub.leads_generados || 0);
-            }
-        });
-
-        const data = [
-            { name: 'Facebook', gasto: stats.facebook.gasto, leads: stats.facebook.leads },
-            { name: 'Instagram', gasto: stats.instagram.gasto, leads: stats.instagram.leads },
-            { name: 'Marketplace', gasto: stats.marketplace.gasto, leads: stats.marketplace.leads },
-        ];
-        setRoiData(data);
-    };
 
     const dataPipeline = [
         { name: 'Prospectos', value: metricas.contactados },
@@ -169,54 +144,6 @@ export default function ReportesPage() {
                 </Card>
             </div>
 
-            {/* ROI y Comisiones */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Inversión en Campañas Estimada (Mensual)</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={roiData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <Tooltip formatter={(value) => formatearMoneda(value as number)} />
-                                <Legend />
-                                <Bar dataKey="gasto" fill="#8B5CF6" name="Gasto Estimado" />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Resumen de Comisiones</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <span className="text-gray-700">Comisiones Hoy</span>
-                                <span className="text-xl font-bold text-telmex-blue">
-                                    {formatearMoneda(metricas.comisionesHoy)}
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <span className="text-gray-700">Comisiones Semana</span>
-                                <span className="text-xl font-bold text-telmex-blue">
-                                    {formatearMoneda(metricas.comisionesSemana)}
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between p-4 bg-telmex-blue/10 rounded-lg">
-                                <span className="text-gray-700 font-semibold">Comisiones Mes</span>
-                                <span className="text-2xl font-bold text-telmex-blue">
-                                    {formatearMoneda(metricas.comisionesMes)}
-                                </span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
         </div>
     );
 }

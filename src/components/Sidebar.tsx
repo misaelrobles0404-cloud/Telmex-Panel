@@ -11,7 +11,6 @@ const navigation = [
     { name: 'Clientes', href: '/clientes', icon: Users },
     { name: 'Agenda', href: '/agenda', icon: Calendar },
     { name: 'Verificar Comisiones', href: '/comisiones', icon: CheckCircle }, // Nuevo módulo
-    { name: 'Campañas', href: '/campanas', icon: Megaphone },
     { name: 'Auditoría', href: '/auditoria', icon: ClipboardCheck },
     { name: 'Calculadora', href: '/calculadora', icon: Calculator },
     { name: 'Reportes', href: '/reportes', icon: BarChart3 },

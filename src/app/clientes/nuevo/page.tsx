@@ -6,11 +6,10 @@ import { Input, Select, Textarea } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types';
-import { guardarCliente, obtenerPublicaciones } from '@/lib/storage';
+import { guardarCliente } from '@/lib/storage';
 import { clasificarServicio, calcularComision, generarId } from '@/lib/utils';
 import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
 import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus, AlertTriangle } from 'lucide-react';
-import { Publicacion } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { ClavesPortalCard } from '@/components/ClavesPortalCard';
 
@@ -61,9 +60,6 @@ export default function NuevoClientePage() {
 
         // Notas
         notas: '',
-
-        // Campaña
-        campanaId: '',
     });
 
     const [loading, setLoading] = useState(false);
@@ -84,7 +80,6 @@ export default function NuevoClientePage() {
     };
 
     const [user, setUser] = useState<any>(null);
-    const [campanas, setCampanas] = useState<Publicacion[]>([]);
 
     useEffect(() => {
         const cargarDatos = async () => {
@@ -93,8 +88,6 @@ export default function NuevoClientePage() {
             if (user?.email) {
                 setFormData(prev => ({ ...prev, usuario: user.email || '' }));
             }
-            const pubs = await obtenerPublicaciones();
-            setCampanas(pubs);
         };
         cargarDatos();
 
@@ -157,7 +150,6 @@ export default function NuevoClientePage() {
             fecha_ultima_actividad: new Date().toISOString(),
             comision: 0,
             notas: formData.notas,
-            campana_id: formData.campanaId || undefined,
             creado_en: new Date().toISOString(),
             actualizado_en: new Date().toISOString(),
         };
@@ -206,7 +198,6 @@ export default function NuevoClientePage() {
             cartaBaja: false,
             estadoCuentaMegacable: false,
             notas: '',
-            campanaId: '',
         });
         localStorage.removeItem('nuevo_cliente_borrador');
     };
@@ -277,7 +268,6 @@ export default function NuevoClientePage() {
             fecha_ultima_actividad: new Date().toISOString(),
             comision: calcularComision(tipoServicio),
             notas: formData.notas,
-            campana_id: formData.campanaId || undefined,
             creado_en: new Date().toISOString(),
             actualizado_en: new Date().toISOString(),
         };
@@ -781,18 +771,6 @@ export default function NuevoClientePage() {
                                 <CardTitle>Origen y Notas</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <Select
-                                    label="Campaña de Origen"
-                                    value={formData.campanaId}
-                                    onChange={(e) => setFormData({ ...formData, campanaId: e.target.value })}
-                                    options={[
-                                        { value: '', label: 'Sin campaña (Directo)' },
-                                        ...campanas.map((p: Publicacion) => ({
-                                            value: p.id,
-                                            label: p.titulo
-                                        }))
-                                    ]}
-                                />
                                 <Textarea
                                     label="Notas adicionales"
                                     value={formData.notas}

@@ -69,9 +69,6 @@ export interface Cliente {
     folio_siac?: string;
     orden_servicio?: string;
 
-    // Campaña de origen
-    campana_id?: string;
-
     // Pipeline y seguimiento
     estado_pipeline: EstadoPipeline;
     fecha_contacto: string;
@@ -136,23 +133,6 @@ export interface PaqueteTelmex {
     llamadasIlimitadas: boolean;
 }
 
-// ============================================
-// PUBLICACIÓN
-// ============================================
-
-export interface Publicacion {
-    id: string; // Will use UUID
-    user_id?: string;
-    titulo: string;
-    plataforma: 'facebook' | 'instagram' | 'marketplace';
-    fecha_publicacion: string;
-    presupuesto: number;
-    alcance?: number;
-    interacciones?: number;
-    leads_generados: number;
-    url_publicacion?: string;
-    activa: boolean;
-}
 
 // ============================================
 // BLOQUE DE TIEMPO (AGENDA)
@@ -195,11 +175,6 @@ export interface Metricas {
     cierresProgramados: number;
     vendidos: number;
     sin_cobertura: number;
-
-    // Presupuesto publicitario
-    presupuestoGastadoHoy: number;
-    presupuestoGastadoMes: number;
-    roi: number;
 }
 
 // ============================================

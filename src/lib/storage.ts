@@ -1,4 +1,4 @@
-import { Cliente, TipoServicio, Documento, Actividad, Publicacion, Recordatorio } from '@/types';
+import { Cliente, TipoServicio, Documento, Actividad, Recordatorio } from '@/types';
 import { supabase } from './supabase';
 
 // ============================================
@@ -9,7 +9,6 @@ const STORAGE_KEYS = {
     CLIENTES: 'telmex_clientes',
     DOCUMENTOS: 'telmex_documentos',
     ACTIVIDADES: 'telmex_actividades',
-    PUBLICACIONES: 'telmex_publicaciones',
     RECORDATORIOS: 'telmex_recordatorios',
 } as const;
 
@@ -53,10 +52,6 @@ export function eliminarRecordatorio(id: string): void {
 export async function guardarCliente(cliente: Cliente): Promise<void> {
     const { documentos, ...datosParaGuardar } = cliente;
 
-    // Sanitización de campos especiales para evitar errores de sintaxis SQL (UUID, DATE)
-    if (datosParaGuardar.campana_id === '') {
-        datosParaGuardar.campana_id = undefined;
-    }
 
     // Si la fecha de vigencia es una cadena vacía, debe ser null para Postgres
     const d = datosParaGuardar as any;
@@ -134,45 +129,6 @@ export async function eliminarClientesMasivos(ids: string[]): Promise<void> {
     }
 }
 
-// ============================================
-// PUBLICACIONES / CAMPAÑAS (SUPABASE)
-// ============================================
-
-export async function guardarPublicacion(publicacion: Publicacion): Promise<void> {
-    const { error } = await supabase
-        .from('campanas')
-        .upsert(publicacion);
-
-    if (error) {
-        console.error('Error al guardar campaña en Supabase:', error);
-        throw error;
-    }
-}
-
-export async function obtenerPublicaciones(): Promise<Publicacion[]> {
-    const { data, error } = await supabase
-        .from('campanas')
-        .select('*');
-
-    if (error) {
-        console.error('Error al obtener campañas de Supabase:', error);
-        return [];
-    }
-
-    return data || [];
-}
-
-export async function eliminarPublicacion(id: string): Promise<void> {
-    const { error } = await supabase
-        .from('campanas')
-        .delete()
-        .eq('id', id);
-
-    if (error) {
-        console.error('Error al eliminar campaña en Supabase:', error);
-        throw error;
-    }
-}
 
 // ============================================
 // DOCUMENTOS & ACTIVIDADES (Next Phase)
