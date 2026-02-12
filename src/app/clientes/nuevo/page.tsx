@@ -94,7 +94,28 @@ export default function NuevoClientePage() {
             setCampanas(pubs);
         };
         cargarDatos();
+
+        // Cargar borrador si existe
+        const borrador = localStorage.getItem('nuevo_cliente_borrador');
+        if (borrador) {
+            try {
+                const datosBorrador = JSON.parse(borrador);
+                setFormData(datosBorrador);
+                console.log('Borrador restaurado');
+            } catch (e) {
+                console.error('Error al restaurar borrador', e);
+            }
+        }
     }, []);
+
+    // Auto-guardado cada que cambia formData
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            localStorage.setItem('nuevo_cliente_borrador', JSON.stringify(formData));
+        }, 500); // Debounce de 500ms para no saturar
+
+        return () => clearTimeout(timeoutId);
+    }, [formData]);
 
     const handleGuardarProspecto = async () => {
         if (!formData.noTT) {
