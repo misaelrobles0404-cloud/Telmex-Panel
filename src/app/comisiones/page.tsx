@@ -77,7 +77,7 @@ export default function ComisionesPage() {
             );
             setClientesCancelados(cancelados);
 
-            // 2. Pagados/Vendidos: Estado 'vendido'
+            // 2. Pagados/Vendidos: Estado 'posteado'
             // Agrupar por semana de corte (Lunes)
             const vendidos = todos.filter(c => c.estado_pipeline === 'vendido');
             const agrupados: Record<string, { clientes: Cliente[], total: number }> = {};

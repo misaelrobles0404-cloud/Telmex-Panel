@@ -85,7 +85,7 @@ export function calcularMetricas(clientesInput?: Cliente[], perfiles?: any[]): M
 
     // Ventas Programadas Hoy: Cierres programados con fecha de seguimiento hoy
     const ventasProgramadasHoy = clientes.filter(c => {
-        if (c.estado_pipeline !== 'cierre_programado' || !c.proximo_seguimiento) return false;
+        if (c.estado_pipeline !== 'capturado' || !c.proximo_seguimiento) return false;
         const fechaSeg = startOfDay(new Date(c.proximo_seguimiento));
         return fechaSeg.getTime() === hoy.getTime();
     }).length;
@@ -93,19 +93,19 @@ export function calcularMetricas(clientesInput?: Cliente[], perfiles?: any[]): M
     // Ventas Reales (Instalaciones)
     // Usamos fecha_instalacion para ventas, si no existe usamos actualizado_en como fallback
     const ventasSemana = clientes.filter(c => {
-        if (c.estado_pipeline !== 'vendido') return false;
+        if (c.estado_pipeline !== 'posteado') return false;
         const fechaVenta = new Date(c.fecha_instalacion || c.actualizado_en);
         return isAfter(fechaVenta, inicioSemana);
     }).length;
 
     const ventasMes = clientes.filter(c => {
-        if (c.estado_pipeline !== 'vendido') return false;
+        if (c.estado_pipeline !== 'posteado') return false;
         const fechaVenta = new Date(c.fecha_instalacion || c.actualizado_en);
         return isAfter(fechaVenta, inicioMes);
     }).length;
 
     const ventasHoy = clientes.filter(c => {
-        if (c.estado_pipeline !== 'vendido') return false;
+        if (c.estado_pipeline !== 'posteado') return false;
         const fechaVenta = startOfDay(new Date(c.fecha_instalacion || c.actualizado_en));
         return fechaVenta.getTime() === hoy.getTime();
     }).length;
@@ -113,7 +113,7 @@ export function calcularMetricas(clientesInput?: Cliente[], perfiles?: any[]): M
     // Calcular Promotor Top del Mes (por instalaciones)
     const ventasPorPromotor: Record<string, number> = {};
     clientes.filter(c => {
-        if (c.estado_pipeline !== 'vendido') return false;
+        if (c.estado_pipeline !== 'posteado') return false;
         const fechaVenta = new Date(c.fecha_instalacion || c.actualizado_en);
         return isAfter(fechaVenta, inicioMes);
     }).forEach(c => {
@@ -150,7 +150,7 @@ export function calcularMetricas(clientesInput?: Cliente[], perfiles?: any[]): M
     // Comisiones (Mes)
     const comisionesMes = clientes
         .filter(c => {
-            if (c.estado_pipeline !== 'vendido') return false;
+            if (c.estado_pipeline !== 'posteado') return false;
             return isAfter(new Date(c.fecha_instalacion || c.actualizado_en), inicioMes);
         })
         .reduce((sum, c) => sum + (c.comision || 0), 0);
@@ -162,17 +162,17 @@ export function calcularMetricas(clientesInput?: Cliente[], perfiles?: any[]): M
         leadsHoy: clientes.filter(c => isAfter(new Date(c.fecha_contacto), hoy)).length,
         leadsSemana: clientes.filter(c => isAfter(new Date(c.fecha_contacto), inicioSemana)).length,
         leadsMes: clientesMes.length,
-        tasaConversion: clientes.length > 0 ? (clientes.filter(c => c.estado_pipeline === 'vendido').length / clientes.length) * 100 : 0,
+        tasaConversion: clientes.length > 0 ? (clientes.filter(c => c.estado_pipeline === 'posteado').length / clientes.length) * 100 : 0,
         ventasHoy,
         ventasSemana,
         ventasMes,
         comisionesHoy: 0, // Not requested but part of interface
         comisionesSemana: 0,
         comisionesMes,
-        contactados: clientes.filter(c => c.estado_pipeline === 'contactado').length,
-        interesados: clientes.filter(c => c.estado_pipeline === 'interesado').length,
-        cierresProgramados: clientes.filter(c => c.estado_pipeline === 'cierre_programado').length,
-        vendidos: clientes.filter(c => c.estado_pipeline === 'vendido').length,
+        prospectos: clientes.filter(c => c.estado_pipeline === 'prospecto').length,
+        pendientesCaptura: clientes.filter(c => c.estado_pipeline === 'pendiente_captura').length,
+        capturados: clientes.filter(c => c.estado_pipeline === 'capturado').length,
+        posteados: clientes.filter(c => c.estado_pipeline === 'posteado').length,
         sin_cobertura: clientes.filter(c => c.estado_pipeline === 'sin_cobertura').length,
         ventasProgramadasHoy,
         promotorTop: topEmail ? { nombre: nombrePromotorTop, total: maxVentas } : undefined

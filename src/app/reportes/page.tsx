@@ -36,11 +36,11 @@ export default function ReportesPage() {
 
 
     const dataPipeline = [
-        { name: 'Prospectos', value: metricas.contactados },
-        { name: 'Interesado', value: metricas.interesados },
-        { name: 'Cierre', value: metricas.cierresProgramados },
-        { name: 'Instalado', value: metricas.vendidos },
-        { name: 'Sin Cobertura', value: metricas.sin_cobertura },
+        { name: 'Prospectos', value: metricas.prospectos },
+        { name: 'Pendientes', value: metricas.pendientesCaptura },
+        { name: 'Capturados', value: metricas.capturados },
+        { name: 'Posteados', value: metricas.posteados },
+        { name: 'Sin Cobertur', value: metricas.sin_cobertura },
     ];
 
     // Datos simulados para razones de rechazo (basado en industria común)

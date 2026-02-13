@@ -94,8 +94,8 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                         (c.user_id && perfiles.find(p => p.id === c.user_id)?.email === email)
                     );
 
-                    const ventasProgramadasCount = clientesVendedor.filter(c => c.estado_pipeline === 'cierre_programado').length;
-                    const ventasInstaladasCount = clientesVendedor.filter(c => c.estado_pipeline === 'vendido').length;
+                    const ventasProgramadasCount = clientesVendedor.filter(c => c.estado_pipeline === 'capturado').length;
+                    const ventasInstaladasCount = clientesVendedor.filter(c => c.estado_pipeline === 'posteado').length;
 
                     // Aplicar filtro visual refinado
                     const clientesFiltrados = clientesVendedor
@@ -134,11 +134,11 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                             {/* Contadores Resumen */}
                                             <div className="hidden sm:flex items-center gap-4 mr-2">
                                                 <div className="text-right">
-                                                    <p className="text-[10px] text-blue-500 uppercase font-black tracking-widest leading-none">Prog.</p>
+                                                    <p className="text-[10px] text-blue-500 uppercase font-black tracking-widest leading-none">Capt.</p>
                                                     <p className="text-sm font-black text-blue-800">{ventasProgramadasCount}</p>
                                                 </div>
                                                 <div className="text-right border-l pl-4 border-gray-200">
-                                                    <p className="text-[10px] text-green-500 uppercase font-black tracking-widest leading-none">Inst.</p>
+                                                    <p className="text-[10px] text-green-500 uppercase font-black tracking-widest leading-none">Post.</p>
                                                     <p className="text-sm font-black text-green-800">{ventasInstaladasCount}</p>
                                                 </div>
                                             </div>
@@ -151,8 +151,8 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                     className="appearance-none bg-gray-50 border-2 border-gray-100 rounded-xl px-4 py-2 pr-10 text-[10px] font-black uppercase tracking-wider text-gray-700 hover:border-telmex-blue focus:border-telmex-blue focus:outline-none transition-all cursor-pointer shadow-sm min-w-[160px]"
                                                 >
                                                     <option value="todas">Ver Todos</option>
-                                                    <option value="programadas">Cierres Prog.</option>
-                                                    <option value="instaladas">Instaladas</option>
+                                                    <option value="programadas">Capturados</option>
+                                                    <option value="instaladas">Posteados</option>
                                                 </select>
                                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                                                     <ListFilter size={14} />
@@ -192,11 +192,11 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <div className="flex flex-col">
                                                                 <span className="text-[10px] text-gray-400 font-bold uppercase leading-none mb-1">
-                                                                    {cliente.estado_pipeline === 'vendido' ? 'Instalación' : 'Registro'}
+                                                                    {cliente.estado_pipeline === 'posteado' ? 'Instalación' : 'Registro'}
                                                                 </span>
                                                                 <span className="text-xs font-black text-gray-700 flex items-center gap-1">
                                                                     <Calendar size={12} className="text-telmex-blue" />
-                                                                    {cliente.estado_pipeline === 'vendido'
+                                                                    {cliente.estado_pipeline === 'posteado'
                                                                         ? formatearFechaSimple(cliente.fecha_instalacion)
                                                                         : formatearFechaSimple(cliente.creado_en)
                                                                     }
@@ -239,21 +239,21 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide border-2 ${cliente.estado_pipeline === 'vendido'
+                                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide border-2 ${cliente.estado_pipeline === 'posteado'
                                                                 ? 'bg-green-100 text-green-700 border-green-200'
-                                                                : cliente.estado_pipeline === 'cierre_programado'
+                                                                : cliente.estado_pipeline === 'capturado'
                                                                     ? 'bg-purple-100 text-purple-700 border-purple-200'
                                                                     : 'bg-yellow-100 text-yellow-700 border-yellow-200'
                                                                 }`}>
-                                                                {cliente.estado_pipeline === 'vendido' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
-                                                                {cliente.estado_pipeline === 'vendido' ? 'INSTALADO' :
+                                                                {cliente.estado_pipeline === 'posteado' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
+                                                                {cliente.estado_pipeline === 'posteado' ? 'POSTEADO' :
                                                                     cliente.estado_pipeline === 'cancelado' ? 'CANCELADO' :
                                                                         cliente.estado_pipeline.replace(/_/g, ' ').toUpperCase()}
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4 text-right">
                                                             <span className="text-base font-black text-gray-900">
-                                                                {cliente.estado_pipeline === 'vendido'
+                                                                {cliente.estado_pipeline === 'posteado'
                                                                     ? formatearMoneda(
                                                                         (cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback')
                                                                             ? 300

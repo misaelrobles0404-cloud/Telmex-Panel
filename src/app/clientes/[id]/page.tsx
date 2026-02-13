@@ -157,22 +157,22 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const guardarFolioSiac = async () => {
         if (!cliente) return;
 
-        const nuevoEstado: EstadoPipeline = 'cierre_programado';
+        const nuevoEstado: EstadoPipeline = 'capturado';
 
         const clienteActualizado: Cliente = {
             ...cliente,
             folio_siac: folioSiacInput,
-            estado_pipeline: cliente.estado_pipeline === 'vendido' ? 'vendido' : nuevoEstado,
+            estado_pipeline: cliente.estado_pipeline === 'posteado' ? 'posteado' : nuevoEstado,
             actualizado_en: new Date().toISOString()
         };
 
-        if (cliente.estado_pipeline !== nuevoEstado && cliente.estado_pipeline !== 'vendido') {
+        if (cliente.estado_pipeline !== nuevoEstado && cliente.estado_pipeline !== 'posteado') {
             clienteActualizado.actividades = [
                 {
                     id: generarId(),
                     clienteId: cliente.id,
                     tipo: 'cambio_estado',
-                    descripcion: `Folio SIAC asignado: ${folioSiacInput}. Estado actualizado a Cierre Programado.`,
+                    descripcion: `Folio SIAC asignado: ${folioSiacInput}. Estado actualizado a CAPTURADO.`,
                     fecha: new Date().toISOString()
                 },
                 ...cliente.actividades || []
@@ -495,7 +495,7 @@ Solo necesito que me confirmes para agendar.
                 </div>
 
                 <div className="flex flex-wrap gap-2 w-full">
-                    {cliente.estado_pipeline !== 'vendido' && cliente.estado_pipeline !== 'sin_cobertura' && (
+                    {cliente.estado_pipeline !== 'posteado' && cliente.estado_pipeline !== 'sin_cobertura' && (
                         <Button
                             variant="secondary"
                             onClick={() => setModalSeguimientoOpen(true)}
@@ -506,7 +506,7 @@ Solo necesito que me confirmes para agendar.
                         </Button>
                     )}
 
-                    {cliente.estado_pipeline === 'vendido' && (
+                    {cliente.estado_pipeline === 'posteado' && (
                         <Button
                             variant="secondary"
                             onClick={() => setModalReferidosOpen(true)}
@@ -517,8 +517,8 @@ Solo necesito que me confirmes para agendar.
                         </Button>
                     )}
 
-                    {/* Copiar Formato: Solo si tiene Folio SIAC (Cierre Programado o Vendido) */}
-                    {(cliente.estado_pipeline === 'cierre_programado' || cliente.estado_pipeline === 'vendido') && cliente.folio_siac && (
+                    {/* Copiar Formato: Solo si tiene Folio SIAC (Capturado o Posteado) */}
+                    {(cliente.estado_pipeline === 'capturado' || cliente.estado_pipeline === 'posteado') && cliente.folio_siac && (
                         <Button variant="secondary" onClick={generarFormatoSIAC} className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200 flex-1 md:flex-none">
                             <Copy size={16} className="mr-1" /> Copiar Formato
                         </Button>
@@ -528,8 +528,8 @@ Solo necesito que me confirmes para agendar.
                         <Edit size={16} className="mr-1" /> Editar
                     </Button>
 
-                    {/* Eliminar: Bloqueado en Cierre Programado o Vendido para seguridad */}
-                    {cliente.estado_pipeline !== 'cierre_programado' && cliente.estado_pipeline !== 'vendido' ? (
+                    {/* Eliminar: Bloqueado en Capturado o Posteado para seguridad */}
+                    {cliente.estado_pipeline !== 'capturado' && cliente.estado_pipeline !== 'posteado' ? (
                         <Button
                             variant="danger"
                             className="flex-1 md:flex-none"
@@ -571,7 +571,7 @@ Solo necesito que me confirmes para agendar.
                         <CardContent className="p-6">
                             <label className="label mb-2">Estado del Pipeline</label>
                             <div className="flex flex-wrap gap-2">
-                                {['contactado', 'interesado', 'cierre_programado', 'vendido', 'sin_cobertura'].map((estado) => (
+                                {['prospecto', 'pendiente_captura', 'capturado', 'posteado', 'sin_cobertura'].map((estado) => (
                                     <button
                                         key={estado}
                                         onClick={() => actualizarEstado(estado as EstadoPipeline)}
@@ -581,7 +581,7 @@ Solo necesito que me confirmes para agendar.
                                                 'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
                                             }`}
                                     >
-                                        {estado === 'vendido' ? 'INSTALADO' : estado.replace(/_/g, ' ').toUpperCase()}
+                                        {estado === 'posteado' ? 'POSTEADO' : estado.replace(/_/g, ' ').toUpperCase()}
                                     </button>
                                 ))}
                             </div>
@@ -760,7 +760,6 @@ Solo necesito que me confirmes para agendar.
                                                 {actividad.tipo === 'cambio_estado' && <CheckCircle size={14} />}
                                                 {actividad.tipo === 'llamada' && <Phone size={14} />}
                                                 {(actividad.tipo === 'whatsapp' || actividad.tipo === 'correo') && <Mail size={14} />}
-                                                {actividad.tipo === 'cita' && <Calendar size={14} />}
                                                 {actividad.tipo === 'nota' && <FileText size={14} />}
                                             </div>
                                             <div className="flex-1">

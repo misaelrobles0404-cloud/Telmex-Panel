@@ -97,7 +97,7 @@ export default function NominasPage() {
                 const { data: clientesData } = await supabase
                     .from('clientes')
                     .select('*')
-                    .eq('estado_pipeline', 'vendido')
+                    .eq('estado_pipeline', 'posteado')
                     .is('id_nomina', null);
 
                 setClientesPendientes(clientesData || []);

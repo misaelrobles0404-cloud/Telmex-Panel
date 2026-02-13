@@ -168,10 +168,10 @@ export default function AuditoriaPage() {
                 const datoExcel = mapaExcel[folio] || {};
 
                 // Normalizar Estatus
-                let estadoSugerido = cliente?.estado_pipeline || 'vendido';
+                let estadoSugerido = cliente?.estado_pipeline || 'posteado';
                 if (datoExcel.estatus) {
                     const statusLower = datoExcel.estatus.toLowerCase();
-                    if (statusLower.includes('instalad') || statusLower.includes('liquid')) estadoSugerido = 'vendido';
+                    if (statusLower.includes('instalad') || statusLower.includes('liquid')) estadoSugerido = 'posteado';
                     else if (statusLower.includes('cancel') || statusLower.includes('rechaz') || statusLower.includes('baja') || statusLower.includes('dev')) estadoSugerido = 'sin_cobertura';
                 }
 
@@ -437,7 +437,7 @@ export default function AuditoriaPage() {
                                                         <div className="text-xs">
                                                             <div className="font-bold text-gray-900">{item.cliente.nombre} {item.cliente.apellidos}</div>
                                                             <div className="text-gray-500">{item.cliente.user_id || 'Sin Vendedor'}</div>
-                                                            <div className={`mt-1 inline-block px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold border ${item.cliente.estado_pipeline === 'vendido' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-600 border-gray-200'
+                                                            <div className={`mt-1 inline-block px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold border ${item.cliente.estado_pipeline === 'posteado' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-600 border-gray-200'
                                                                 }`}>
                                                                 {item.cliente.estado_pipeline}
                                                             </div>
@@ -463,13 +463,12 @@ export default function AuditoriaPage() {
                                                         value={item.nuevo_estado}
                                                         onChange={(e) => actualizarFila(idx, 'nuevo_estado', e.target.value)}
                                                     >
-                                                        <option value="contactado">Prospectos</option>
-                                                        <option value="interesado">Interesado</option>
-                                                        <option value="cierre_programado">Cierre Programado</option>
-                                                        <option value="vendido">Instalado</option>
-                                                        Riverside:
+                                                        <option value="prospecto">Prospectos</option>
+                                                        <option value="pendiente_captura">Pendiente Capturar</option>
+                                                        <option value="capturado">Capturado</option>
+                                                        <option value="posteado">Posteado</option>
                                                         <option value="sin_cobertura">Sin Cobertura</option>
-                                                        <option value="perdido">Cancelado/Perdido</option>
+                                                        <option value="cancelado">Cancelado/Perdido</option>
                                                     </select>
                                                 </td>
 

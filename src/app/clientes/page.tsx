@@ -244,11 +244,10 @@ export default function ClientesPage() {
                     className="input"
                 >
                     <option value="todos">Todos los prospectos activos</option>
-                    <option value="contactado">Prospectos</option>
-                    <option value="interesado">Interesado</option>
-                    <option value="cierre_programado">Cierre Programado</option>
-                    <option value="vendido">Instalado</option>
-                    <option value="sin_cobertura">Sin Cobertura</option>
+                    <option value="prospecto">Prospectos</option>
+                    <option value="pendiente_captura">Pendiente Capturar</option>
+                    <option value="capturado">Capturado</option>
+                    <option value="posteado">Posteado</option>
                 </select>
             </div>
 
@@ -266,16 +265,16 @@ export default function ClientesPage() {
                                     <div className="flex flex-wrap items-center gap-2 mb-3">
                                         <h3 className="text-base md:text-lg font-semibold text-gray-900 truncate max-w-[200px] md:max-w-none">{cliente.nombre}</h3>
                                         <div className="flex flex-wrap gap-1 md:gap-2">
-                                            <span className={`badge text-[10px] md:text-xs ${cliente.estado_pipeline === 'vendido' ? 'badge-green' :
-                                                cliente.estado_pipeline === 'cierre_programado' ? 'badge-purple' :
-                                                    cliente.estado_pipeline === 'interesado' ? 'badge-blue' :
-                                                        cliente.estado_pipeline === 'sin_cobertura' ? 'bg-red-100 text-red-700' :
-                                                            'bg-gray-100 text-gray-800'
+                                            <span className={`badge text-[10px] md:text-xs ${cliente.estado_pipeline === 'posteado' ? 'badge-green' :
+                                                cliente.estado_pipeline === 'capturado' ? 'badge-purple' :
+                                                    cliente.estado_pipeline === 'prospecto' ? 'badge-blue' :
+                                                        cliente.estado_pipeline === 'pendiente_captura' ? 'badge-yellow' :
+                                                            'badge-red'
                                                 }`}>
-                                                {cliente.estado_pipeline === 'vendido' && 'Instalado'}
-                                                {cliente.estado_pipeline === 'cierre_programado' && 'Cierre Programado'}
-                                                {cliente.estado_pipeline === 'interesado' && 'Interesado'}
-                                                {cliente.estado_pipeline === 'contactado' && 'Prospecto'}
+                                                {cliente.estado_pipeline === 'posteado' && 'Posteado'}
+                                                {cliente.estado_pipeline === 'capturado' && 'Capturado'}
+                                                {cliente.estado_pipeline === 'prospecto' && 'Prospecto'}
+                                                {cliente.estado_pipeline === 'pendiente_captura' && 'Pendiente'}
                                                 {cliente.estado_pipeline === 'sin_cobertura' && 'Sin Cobertura'}
                                             </span>
                                             <span className={`badge text-[10px] md:text-xs ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :

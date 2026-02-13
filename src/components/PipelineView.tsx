@@ -11,11 +11,10 @@ interface PipelineViewProps {
 }
 
 const ESTADOS: { estado: EstadoPipeline; label: string; color: string }[] = [
-    { estado: 'contactado', label: 'Prospectos', color: 'bg-gray-100 border-gray-300' },
-    { estado: 'interesado', label: 'Interesado', color: 'bg-blue-100 border-blue-300' },
-    { estado: 'cierre_programado', label: 'Cierre Programado (Folio SIAC)', color: 'bg-purple-100 border-purple-300' },
-    { estado: 'vendido', label: 'Instalado', color: 'bg-green-100 border-green-300' },
-    { estado: 'sin_cobertura', label: 'Sin Cobertura', color: 'bg-red-100 border-red-300' },
+    { estado: 'prospecto', label: 'PROSPECTOS', color: 'bg-gray-100 border-gray-300' },
+    { estado: 'pendiente_captura', label: 'PENDIENTE CAPTURAR', color: 'bg-blue-100 border-blue-300' },
+    { estado: 'capturado', label: 'CAPTURADO', color: 'bg-purple-100 border-purple-300' },
+    { estado: 'posteado', label: 'POSTEADO', color: 'bg-green-100 border-green-300' },
 ];
 
 export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
@@ -23,7 +22,7 @@ export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
         clientes.filter((c) => c.estado_pipeline === estado);
 
     return (
-        <div className="flex flex-nowrap lg:grid lg:grid-cols-5 gap-4 overflow-x-auto pb-4 lg:pb-0 lg:overflow-x-visible">
+        <div className="flex flex-nowrap lg:grid lg:grid-cols-4 gap-4 overflow-x-auto pb-4 lg:pb-0 lg:overflow-x-visible">
             {ESTADOS.map(({ estado, label, color }) => {
                 const clientesEnEstado = clientesPorEstado(estado);
                 const totalComision = clientesEnEstado.reduce((sum, c) => sum + c.comision, 0);
@@ -34,7 +33,7 @@ export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
                             <h3 className="font-semibold text-sm">{label}</h3>
                             <p className="text-xs text-gray-600 mt-1">
                                 {clientesEnEstado.length} cliente{clientesEnEstado.length !== 1 ? 's' : ''}
-                                {estado === 'vendido' && ` • ${formatearMoneda(totalComision)}`}
+                                {estado === 'posteado' && ` • ${formatearMoneda(totalComision)}`}
                             </p>
                         </div>
 

@@ -217,12 +217,14 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             carta_baja: formData.cartaBaja,
             estado_cuenta_megacable: formData.estadoCuentaMegacable,
             estado_pipeline: (() => {
-                if (formData.folioSiac && formData.folioSiac.trim() !== '' && estadoPipeline !== 'vendido') {
-                    return 'cierre_programado';
+                if (formData.folioSiac && formData.folioSiac.trim() !== '' && estadoPipeline !== 'posteado') {
+                    return 'capturado';
                 }
                 // Sanitizar estados obsoletos
-                if (estadoPipeline === 'perdido') return 'sin_cobertura';
-                if (estadoPipeline === 'cotizacion') return 'interesado';
+                if (estadoPipeline === 'contactado') return 'prospecto';
+                if (estadoPipeline === 'interesado') return 'prospecto';
+                if (estadoPipeline === 'cierre_programado') return 'capturado';
+                if (estadoPipeline === 'vendido') return 'posteado';
                 return estadoPipeline as any;
             })(),
             fecha_contacto: fechaCreacion,

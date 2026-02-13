@@ -4,7 +4,7 @@
 
 export type TipoServicio = 'linea_nueva' | 'portabilidad' | 'winback';
 export type TipoCliente = 'residencial' | 'pyme';
-export type EstadoPipeline = 'contactado' | 'interesado' | 'cierre_programado' | 'vendido' | 'sin_cobertura' | 'cancelado';
+export type EstadoPipeline = 'prospecto' | 'pendiente_captura' | 'capturado' | 'posteado' | 'sin_cobertura' | 'cancelado';
 export type Proveedor = 'totalplay' | 'izzi' | 'megacable' | 'axtel' | 'dish' | 'otro';
 
 // ============================================
@@ -111,7 +111,7 @@ export interface Documento {
 export interface Actividad {
     id: string;
     clienteId: string;
-    tipo: 'llamada' | 'whatsapp' | 'correo' | 'nota' | 'cambio_estado' | 'cita';
+    tipo: 'llamada' | 'whatsapp' | 'correo' | 'nota' | 'cambio_estado';
     descripcion: string;
     fecha: string;
     resultado?: string;
@@ -133,19 +133,6 @@ export interface PaqueteTelmex {
 }
 
 
-// ============================================
-// BLOQUE DE TIEMPO (AGENDA)
-// ============================================
-
-export interface BloqueTiempo {
-    id: string;
-    horaInicio: string; // "09:00"
-    horaFin: string; // "11:00"
-    actividad: string;
-    objetivo: string;
-    icono: string;
-    color: string;
-}
 
 // ============================================
 // MÉTRICAS DEL DASHBOARD
@@ -169,10 +156,10 @@ export interface Metricas {
     comisionesMes: number;
 
     // Pipeline
-    contactados: number;
-    interesados: number;
-    cierresProgramados: number;
-    vendidos: number;
+    prospectos: number;
+    pendientesCaptura: number;
+    capturados: number;
+    posteados: number;
     sin_cobertura: number;
     // Boss specific
     ventasProgramadasHoy: number;

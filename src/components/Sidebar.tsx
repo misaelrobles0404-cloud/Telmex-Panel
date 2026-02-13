@@ -23,7 +23,6 @@ import { supabase } from '@/lib/supabase';
 const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Clientes', href: '/clientes', icon: Users },
-    { name: 'Agenda', href: '/agenda', icon: Calendar },
     { name: 'Verificar Comisiones', href: '/comisiones', icon: CheckCircle },
     { name: 'Auditoría', href: '/auditoria', icon: ClipboardCheck },
     { name: 'Calculadora', href: '/calculadora', icon: Calculator },

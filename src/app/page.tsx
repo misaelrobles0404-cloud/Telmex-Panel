@@ -19,7 +19,6 @@ import {
 import { obtenerClientes } from '@/lib/storage';
 import { calcularMetricas, formatearMoneda } from '@/lib/utils';
 import { Cliente } from '@/types';
-import { BLOQUES_TIEMPO, obtenerBloqueActual } from '@/data/agenda';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { BossDashboardView } from '@/components/BossDashboardView';
@@ -32,7 +31,6 @@ export default function DashboardPage() {
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [metricas, setMetricas] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const bloqueActual = obtenerBloqueActual();
 
     const [user, setUser] = useState<any>(null);
     const [perfiles, setPerfiles] = useState<PerfilUsuario[]>([]);
@@ -99,7 +97,7 @@ export default function DashboardPage() {
 
                 const ventasPorUsuario: Record<string, number> = {};
                 clientesData.forEach(c => {
-                    if (c.estado_pipeline === 'vendido' && c.fecha_instalacion) {
+                    if (c.estado_pipeline === 'posteado' && c.fecha_instalacion) {
                         const fechaInst = new Date(c.fecha_instalacion);
                         if (fechaInst >= inicioSemana && c.usuario) {
                             ventasPorUsuario[c.usuario] = (ventasPorUsuario[c.usuario] || 0) + 1;
@@ -107,8 +105,11 @@ export default function DashboardPage() {
                     }
                 });
 
+                // Misael Robles quiere ver empleados con 8 o más instalaciones (umbral 8)
+                const umbralSuperVendedor = esMisael ? 8 : 7;
+
                 const sv = Object.entries(ventasPorUsuario)
-                    .filter(([_, total]) => total > 7)
+                    .filter(([_, total]) => total >= umbralSuperVendedor)
                     .map(([email, total]) => ({ email, total }));
 
                 setSuperVendedores(sv);
@@ -144,7 +145,7 @@ export default function DashboardPage() {
                     // Alerta específica para instalaciones (solo si es Boss)
                     if (user?.email === 'ruizmosinfinitum2025@gmail.com') {
                         const { new: newRow, old: oldRow } = payload;
-                        if (newRow && newRow.estado_pipeline === 'vendido' && (!oldRow || oldRow.estado_pipeline !== 'vendido')) {
+                        if (newRow && newRow.estado_pipeline === 'posteado' && (!oldRow || oldRow.estado_pipeline !== 'posteado')) {
                             setNuevaAlerta({
                                 cliente: newRow.nombre,
                                 promotor: newRow.promotor_nombre || newRow.usuario || 'Promotor',
@@ -257,29 +258,6 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* Bloque de Tiempo Actual (Oculto para Boss) */}
-            {bloqueActual && user?.email !== 'ruizmosinfinitum2025@gmail.com' && (
-                <Card className="bg-gradient-to-r from-telmex-blue to-telmex-lightblue text-white">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="text-4xl">{bloqueActual.icono}</div>
-                            <div className="flex-1">
-                                <h3 className="text-xl font-semibold">{bloqueActual.actividad}</h3>
-                                <p className="text-white/90 mt-1">{bloqueActual.objetivo}</p>
-                                <p className="text-sm text-white/80 mt-2">
-                                    {bloqueActual.horaInicio} - {bloqueActual.horaFin}
-                                </p>
-                            </div>
-                            <Button
-                                variant="secondary"
-                                onClick={() => router.push('/agenda')}
-                            >
-                                Ver Agenda
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
 
             {/* Métricas Principales */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
@@ -373,51 +351,6 @@ export default function DashboardPage() {
                 )}
             </div>
 
-            {/* Agenda del Día */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <CardTitle>Agenda del Día</CardTitle>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => router.push('/agenda')}
-                        >
-                            <Calendar size={16} />
-                            Ver Completa
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-3">
-                        {BLOQUES_TIEMPO.map((bloque) => {
-                            const esActual = bloqueActual?.id === bloque.id;
-
-                            return (
-                                <div
-                                    key={bloque.id}
-                                    className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${esActual ? 'bg-telmex-blue/10 border-2 border-telmex-blue' : 'bg-gray-50'
-                                        }`}
-                                >
-                                    <div className="text-2xl">{bloque.icono}</div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <h4 className="font-semibold text-gray-900">{bloque.actividad}</h4>
-                                            {esActual && (
-                                                <span className="badge badge-blue">Ahora</span>
-                                            )}
-                                        </div>
-                                        <p className="text-sm text-gray-600 mt-1">{bloque.objetivo}</p>
-                                    </div>
-                                    <div className="text-sm font-medium text-gray-500">
-                                        {bloque.horaInicio} - {bloque.horaFin}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </CardContent>
-            </Card>
 
             {/* Acciones Rápidas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
