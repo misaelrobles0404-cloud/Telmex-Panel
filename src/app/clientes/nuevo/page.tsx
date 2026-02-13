@@ -331,7 +331,10 @@ export default function NuevoClientePage() {
                 {/* Sidebar Izquierda - Claves Portal */}
                 <div className="hidden lg:block lg:col-span-1">
                     <div className="sticky top-6">
-                        <ClavesPortalCard />
+                        <ClavesPortalCard
+                            ciudad={formData.cd}
+                            onSeleccionar={(usuarioId) => setFormData(prev => ({ ...prev, usuario: usuarioId }))}
+                        />
                     </div>
                 </div>
 

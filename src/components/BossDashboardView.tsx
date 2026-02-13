@@ -100,9 +100,9 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                     // Aplicar filtro visual refinado
                     const clientesFiltrados = clientesVendedor
                         .filter(c => {
-                            if (filtroActual === 'instaladas') return c.estado_pipeline === 'vendido';
-                            if (filtroActual === 'programadas') return c.estado_pipeline === 'cierre_programado';
-                            return c.estado_pipeline === 'vendido' || c.estado_pipeline === 'cierre_programado';
+                            if (filtroActual === 'instaladas') return c.estado_pipeline === 'posteado';
+                            if (filtroActual === 'programadas') return c.estado_pipeline === 'capturado';
+                            return c.estado_pipeline === 'posteado' || c.estado_pipeline === 'capturado';
                         })
                         .sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
 
@@ -151,8 +151,8 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                     className="appearance-none bg-gray-50 border-2 border-gray-100 rounded-xl px-4 py-2 pr-10 text-[10px] font-black uppercase tracking-wider text-gray-700 hover:border-telmex-blue focus:border-telmex-blue focus:outline-none transition-all cursor-pointer shadow-sm min-w-[160px]"
                                                 >
                                                     <option value="todas">Ver Todos</option>
-                                                    <option value="programadas">Capturados</option>
-                                                    <option value="instaladas">Posteados</option>
+                                                    <option value="programadas">CAPTURADOS</option>
+                                                    <option value="instaladas">POSTEADOS</option>
                                                 </select>
                                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                                                     <ListFilter size={14} />
@@ -246,9 +246,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                                     : 'bg-yellow-100 text-yellow-700 border-yellow-200'
                                                                 }`}>
                                                                 {cliente.estado_pipeline === 'posteado' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
-                                                                {cliente.estado_pipeline === 'posteado' ? 'POSTEADO' :
-                                                                    cliente.estado_pipeline === 'cancelado' ? 'CANCELADO' :
-                                                                        cliente.estado_pipeline.replace(/_/g, ' ').toUpperCase()}
+                                                                {cliente.estado_pipeline.replace(/_/g, ' ').toUpperCase()}
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4 text-right">

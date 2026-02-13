@@ -244,10 +244,10 @@ export default function ClientesPage() {
                     className="input"
                 >
                     <option value="todos">Todos los prospectos activos</option>
-                    <option value="prospecto">Prospectos</option>
-                    <option value="pendiente_captura">Pendiente Capturar</option>
-                    <option value="capturado">Capturado</option>
-                    <option value="posteado">Posteado</option>
+                    <option value="prospecto">PROSPECTO</option>
+                    <option value="pendiente_captura">PENDIENTE CAPTURA</option>
+                    <option value="capturado">CAPTURADO</option>
+                    <option value="posteado">POSTEADO</option>
                 </select>
             </div>
 
@@ -271,11 +271,11 @@ export default function ClientesPage() {
                                                         cliente.estado_pipeline === 'pendiente_captura' ? 'badge-yellow' :
                                                             'badge-red'
                                                 }`}>
-                                                {cliente.estado_pipeline === 'posteado' && 'Posteado'}
-                                                {cliente.estado_pipeline === 'capturado' && 'Capturado'}
-                                                {cliente.estado_pipeline === 'prospecto' && 'Prospecto'}
-                                                {cliente.estado_pipeline === 'pendiente_captura' && 'Pendiente'}
-                                                {cliente.estado_pipeline === 'sin_cobertura' && 'Sin Cobertura'}
+                                                {cliente.estado_pipeline === 'posteado' && 'POSTEADO'}
+                                                {cliente.estado_pipeline === 'capturado' && 'CAPTURADO'}
+                                                {cliente.estado_pipeline === 'prospecto' && 'PROSPECTO'}
+                                                {cliente.estado_pipeline === 'pendiente_captura' && 'PENDIENTE CAPTURA'}
+                                                {cliente.estado_pipeline === 'sin_cobertura' && 'SIN COBERTURA'}
                                             </span>
                                             <span className={`badge text-[10px] md:text-xs ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
                                                 cliente.tipo_servicio === 'portabilidad' ? 'badge-purple' :

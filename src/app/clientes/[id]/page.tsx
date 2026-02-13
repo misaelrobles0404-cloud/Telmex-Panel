@@ -172,7 +172,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                     id: generarId(),
                     clienteId: cliente.id,
                     tipo: 'cambio_estado',
-                    descripcion: `Folio SIAC asignado: ${folioSiacInput}. Estado actualizado a CAPTURADO.`,
+                    descripcion: `Folio SIAC asignado: ${folioSiacInput}. Estado actualizado a CIERRE PROGRAMADO.`,
                     fecha: new Date().toISOString()
                 },
                 ...cliente.actividades || []
@@ -581,7 +581,12 @@ Solo necesito que me confirmes para agendar.
                                                 'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
                                             }`}
                                     >
-                                        {estado === 'posteado' ? 'POSTEADO' : estado.replace(/_/g, ' ').toUpperCase()}
+                                        {estado === 'prospecto' ? 'PROSPECTO' :
+                                            estado === 'pendiente_captura' ? 'INTERESADO' :
+                                                estado === 'capturado' ? 'CIERRE PROGRAMADO' :
+                                                    estado === 'posteado' ? 'INSTALADO' :
+                                                        estado === 'sin_cobertura' ? 'SIN COBERTURA' :
+                                                            estado.toUpperCase()}
                                     </button>
                                 ))}
                             </div>

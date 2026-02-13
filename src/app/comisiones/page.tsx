@@ -51,11 +51,11 @@ export default function ComisionesPage() {
                 ? data
                 : data.filter(c => c.usuario === user?.email);
 
-            // 1. Pendientes: Tienen folio SIAC pero no están vendidos, rechazados ni cancelados
+            // 1. Pendientes: Tienen folio SIAC pero no están instalados, rechazados ni cancelados
             const pendientes = todos.filter(c =>
                 c.folio_siac &&
                 c.folio_siac.trim() !== '' &&
-                c.estado_pipeline !== 'vendido' &&
+                c.estado_pipeline !== 'posteado' &&
                 c.estado_pipeline !== 'sin_cobertura' &&
                 c.estado_pipeline !== 'cancelado'
             );
@@ -77,9 +77,9 @@ export default function ComisionesPage() {
             );
             setClientesCancelados(cancelados);
 
-            // 2. Pagados/Vendidos: Estado 'posteado'
+            // 2. Pagados/Instalados: Estado 'posteado'
             // Agrupar por semana de corte (Lunes)
-            const vendidos = todos.filter(c => c.estado_pipeline === 'vendido');
+            const vendidos = todos.filter(c => c.estado_pipeline === 'posteado');
             const agrupados: Record<string, { clientes: Cliente[], total: number }> = {};
 
             vendidos.forEach(cliente => {
@@ -127,13 +127,13 @@ export default function ComisionesPage() {
     };
 
     const confirmarInstalacion = async (cliente: Cliente) => {
-        if (!confirm(`¿Confirmar instalación del folio ${cliente.folio_siac}?\n\nEsto marcará al cliente como VENDIDO y sumará la comisión a tus reportes.`)) return;
+        if (!confirm(`¿Confirmar instalación del folio ${cliente.folio_siac}?\n\nEsto marcará al cliente como INSTALADO y sumará la comisión a tus reportes.`)) return;
 
         setLoading(true);
         const hoy = new Date().toISOString();
         const clienteActualizado: Cliente = {
             ...cliente,
-            estado_pipeline: 'vendido',
+            estado_pipeline: 'posteado',
             fecha_instalacion: hoy, // Guardamos fecha exacta
             actualizado_en: hoy,
             actividades: [

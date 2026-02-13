@@ -14,18 +14,29 @@ export function PerfilOnboarding() {
 
     useEffect(() => {
         const checkPerfil = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-            setUser(user);
+            try {
+                const { data: { user: authUser } } = await supabase.auth.getUser();
+                if (!authUser) return;
+                setUser(authUser);
 
-            const { data: perfil } = await supabase
-                .from('perfiles')
-                .select('nombre_completo')
-                .eq('id', user.id)
-                .single();
+                // Usamos maybeSingle para que no lance error si no hay resultados
+                const { data: perfil, error } = await supabase
+                    .from('perfiles')
+                    .select('nombre_completo')
+                    .eq('id', authUser.id)
+                    .maybeSingle();
 
-            if (!perfil || !perfil.nombre_completo) {
-                setShowModal(true);
+                if (error) {
+                    console.error("Error al verificar perfil:", error);
+                    // Si hay error de permiso o tabla, no bloqueamos pero lo registramos
+                    return;
+                }
+
+                if (!perfil || !perfil.nombre_completo) {
+                    setShowModal(true);
+                }
+            } catch (err) {
+                console.error("Fallo crítico en onboarding:", err);
             }
         };
         checkPerfil();

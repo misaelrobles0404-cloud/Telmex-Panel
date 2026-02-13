@@ -11,10 +11,12 @@ interface PipelineViewProps {
 }
 
 const ESTADOS: { estado: EstadoPipeline; label: string; color: string }[] = [
-    { estado: 'prospecto', label: 'PROSPECTOS', color: 'bg-gray-100 border-gray-300' },
-    { estado: 'pendiente_captura', label: 'PENDIENTE CAPTURAR', color: 'bg-blue-100 border-blue-300' },
+    { estado: 'prospecto', label: 'PROSPECTO', color: 'bg-gray-100 border-gray-300' },
+    { estado: 'pendiente_captura', label: 'PENDIENTE CAPTURA', color: 'bg-blue-100 border-blue-300' },
     { estado: 'capturado', label: 'CAPTURADO', color: 'bg-purple-100 border-purple-300' },
     { estado: 'posteado', label: 'POSTEADO', color: 'bg-green-100 border-green-300' },
+    { estado: 'sin_cobertura', label: 'SIN COBERTURA', color: 'bg-red-100 border-red-300' },
+    { estado: 'cancelado', label: 'CANCELADO', color: 'bg-orange-100 border-orange-300' },
 ];
 
 export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
@@ -22,7 +24,7 @@ export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
         clientes.filter((c) => c.estado_pipeline === estado);
 
     return (
-        <div className="flex flex-nowrap lg:grid lg:grid-cols-4 gap-4 overflow-x-auto pb-4 lg:pb-0 lg:overflow-x-visible">
+        <div className="flex flex-nowrap lg:grid lg:grid-cols-6 gap-4 overflow-x-auto pb-4 lg:pb-0 lg:overflow-x-visible">
             {ESTADOS.map(({ estado, label, color }) => {
                 const clientesEnEstado = clientesPorEstado(estado);
                 const totalComision = clientesEnEstado.reduce((sum, c) => sum + c.comision, 0);
@@ -57,6 +59,9 @@ export function PipelineView({ clientes, onClienteClick }: PipelineViewProps) {
                                                 cliente.tipo_servicio === 'portabilidad' ? 'Portabilidad' :
                                                     'Winback'}
                                         </span>
+                                        {cliente.estado_pipeline === 'sin_cobertura' && (
+                                            <span className="badge badge-red ml-1">Sin Cobertura</span>
+                                        )}
                                     </div>
                                 </Card>
                             ))}
