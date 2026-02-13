@@ -88,10 +88,14 @@ export default function DashboardPage() {
             // Si es Admin, calcular Super Vendedores (>7 instalaciones por semana)
             if (esAdmin) {
                 const hoy = new Date();
+                const diaSemana = hoy.getDay(); // 0 = Dom, 1 = Lun, 2 = Mar, 3 = Mie, 4 = Jue, 5 = Vie, 6 = Sab
+
+                // Si el corte es Miércoles, la semana empieza el Jueves anterior
+                // Días a retroceder para llegar al Jueves: (diaSemana - 4 + 7) % 7
+                const diasParaJueves = (diaSemana - 4 + 7) % 7;
                 const inicioSemana = new Date(hoy);
-                const diaSemana = hoy.getDay() || 7;
+                inicioSemana.setDate(hoy.getDate() - diasParaJueves);
                 inicioSemana.setHours(0, 0, 0, 0);
-                inicioSemana.setDate(inicioSemana.getDate() - diaSemana + 1);
 
                 const ventasPorUsuario: Record<string, number> = {};
                 clientesData.forEach(c => {
@@ -171,6 +175,31 @@ export default function DashboardPage() {
         <div className="p-3 md:p-6 space-y-4 md:space-y-6">
             <InstalacionAlert nuevaInstalacion={nuevaAlerta} />
             <AnnouncementBanner />
+
+            {/* Recordatorio de Corte (Solo Miércoles) */}
+            {new Date().getDay() === 3 && (
+                <Card className="bg-red-600 text-white border-0 shadow-xl animate-pulse">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white/20 p-2 rounded-lg">
+                                <AlertCircle size={24} />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-lg leading-tight text-white">¡HOY ES DÍA DE CORTE! ⚠️</h3>
+                                <p className="text-white/90 text-sm">Realiza el último chequeo de los posteos (instaladas) hoy antes del cierre.</p>
+                            </div>
+                        </div>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            className="bg-white text-red-600 hover:bg-gray-100 border-0 font-bold"
+                            onClick={() => router.push('/comisiones')}
+                        >
+                            Ir a Comisiones
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>

@@ -37,28 +37,35 @@ export default function NominasPage() {
     const [perfiles, setPerfiles] = useState<PerfilUsuario[]>([]);
     const [user, setUser] = useState<any>(null);
 
-    // Calcular periodos (Lunes a Domingo de la semana pasada)
+    // Calcular periodos (Jueves a Miércoles de la semana que acaba de cerrar)
     const getPeriodoSemanaPasada = () => {
         const hoy = new Date();
-        const lunes = new Date(hoy);
-        const diaSemana = hoy.getDay() || 7;
+        const miercolesPasado = new Date(hoy);
+        const diaSemana = hoy.getDay(); // 0 = Dom, 1 = Lun, 2 = Mar, 3 = Mie, 4 = Jue, 5 = Vie, 6 = Sab
 
-        // Ir al lunes de la semana pasada
-        lunes.setDate(hoy.getDate() - diaSemana - 6);
-        lunes.setHours(0, 0, 0, 0);
+        // Retroceder hasta el miércoles más cercano (si hoy es jue(4), vie(5), sab(6), dom(0), lun(1), mar(2))
+        // Días a retroceder para llegar al miércoles: (diaSemana - 3 + 7) % 7
+        // Si hoy es Miércoles (3), retrocedemos 7 días para el periodo anterior, o 0 si queremos el que cierra hoy.
+        // El usuario dice que el JUEVES a las 5 AM ya deben estar listas.
+        // Entonces si hoy es Jueves(4), el miércoles pasado fue ayer.
 
-        const domingo = new Date(lunes);
-        domingo.setDate(lunes.getDate() + 6);
-        domingo.setHours(23, 59, 59, 999);
+        const diasARetroceder = (diaSemana - 3 + 7) % 7 || 7;
+        miercolesPasado.setDate(hoy.getDate() - diasARetroceder);
+        miercolesPasado.setHours(23, 59, 59, 999);
 
-        // Calcular número de semana (Semana 1 empieza el 2 de Feb 2026)
-        const fechaReferencia = new Date('2026-02-02');
-        const diffDias = Math.floor((lunes.getTime() - fechaReferencia.getTime()) / (1000 * 60 * 60 * 24));
+        const juevesAnterior = new Date(miercolesPasado);
+        juevesAnterior.setDate(miercolesPasado.getDate() - 6);
+        juevesAnterior.setHours(0, 0, 0, 0);
+
+        // Calcular número de semana (Semana 1 empieza el 2 de Feb 2026 - Lunes)
+        // Ajustamos para que coincida con la lógica de periodos
+        const fechaReferencia = new Date('2026-02-05'); // Jueves
+        const diffDias = Math.floor((juevesAnterior.getTime() - fechaReferencia.getTime()) / (1000 * 60 * 60 * 24));
         const numSemana = Math.floor(diffDias / 7) + 1;
 
         return {
-            inicio: lunes,
-            fin: domingo,
+            inicio: juevesAnterior,
+            fin: miercolesPasado,
             nombre: `NOMINA SEMANA ${numSemana}`
         };
     };
@@ -165,7 +172,7 @@ export default function NominasPage() {
                         <DollarSign className="text-telmex-blue p-2 bg-blue-50 rounded-2xl w-12 h-12" />
                         Módulo de Nóminas
                     </h1>
-                    <p className="text-gray-500 mt-2 font-medium">Control de liquidaciones semanales para promotores</p>
+                    <p className="text-gray-50 mt-2 font-medium">Corte semanal los Miércoles | Disponibles los Jueves 5:00 AM</p>
                 </div>
 
                 <div className="flex items-center gap-3">

@@ -657,19 +657,44 @@ Solo necesito que me confirmes para agendar.
 
                                     <p className="text-lg font-medium text-gray-900 leading-relaxed">
                                         <span
-                                            onClick={() => copiarAlPortapapeles(`${cliente.calle} ${cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''} ${cliente.numero_interior ? `Int. ${cliente.numero_interior}` : ''}`, 'Calle')}
+                                            onClick={() => copiarAlPortapapeles(cliente.calle, 'Calle')}
                                             className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
                                             title="Copiar Calle"
                                         >
-                                            {cliente.calle} {cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''} {cliente.numero_interior ? `Int. ${cliente.numero_interior}` : ''}
-                                        </span>, <span
-                                            onClick={() => copiarAlPortapapeles(cliente.colonia, 'Colonia')}
+                                            {cliente.calle}
+                                        </span>
+                                        {cliente.numero_exterior && (
+                                            <>
+                                                {" "}
+                                                <span
+                                                    onClick={() => copiarAlPortapapeles(cliente.numero_exterior!, 'Número Exterior')}
+                                                    className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
+                                                    title="Copiar Número Exterior"
+                                                >
+                                                    No. {cliente.numero_exterior}
+                                                </span>
+                                            </>
+                                        )}
+                                        {cliente.numero_interior && (
+                                            <>
+                                                {" "}
+                                                <span
+                                                    onClick={() => copiarAlPortapapeles(cliente.numero_interior!, 'Número Interior')}
+                                                    className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
+                                                    title="Copiar Número Interior"
+                                                >
+                                                    Int. {cliente.numero_interior}
+                                                </span>
+                                            </>
+                                        )}
+                                        , <span
+                                            onClick={() => copiarAlPortapapeles(cliente.colonia || '', 'Colonia')}
                                             className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
                                             title="Copiar Colonia"
                                         >
                                             {cliente.colonia}
                                         </span>, <span
-                                            onClick={() => copiarAlPortapapeles(cliente.cp, 'CP')}
+                                            onClick={() => copiarAlPortapapeles(cliente.cp || '', 'CP')}
                                             className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
                                             title="Copiar Código Postal"
                                         >
@@ -677,13 +702,13 @@ Solo necesito que me confirmes para agendar.
                                         </span>
                                         <br />
                                         <span
-                                            onClick={() => copiarAlPortapapeles(cliente.cd, 'Ciudad')}
+                                            onClick={() => copiarAlPortapapeles(cliente.cd || '', 'Ciudad')}
                                             className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
                                             title="Copiar Ciudad"
                                         >
                                             {cliente.cd}
                                         </span>, <span
-                                            onClick={() => copiarAlPortapapeles(cliente.estado, 'Estado')}
+                                            onClick={() => copiarAlPortapapeles(cliente.estado || '', 'Estado')}
                                             className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
                                             title="Copiar Estado"
                                         >
@@ -693,9 +718,9 @@ Solo necesito que me confirmes para agendar.
 
                                     {(cliente.entre_calle_1 || cliente.entre_calle_2) && (
                                         <p
-                                            onClick={() => copiarAlPortapapeles(`Entre ${cliente.entre_calle_1} y ${cliente.entre_calle_2}`, 'Entre Calles')}
+                                            onClick={() => copiarAlPortapapeles(`${cliente.entre_calle_1} y ${cliente.entre_calle_2}`, 'Entre Calles')}
                                             className="text-xs text-gray-500 mt-1 cursor-pointer hover:text-telmex-blue transition-colors flex items-center gap-1 italic"
-                                            title="Copiar Entre Calles"
+                                            title="Copiar Nombres de Calles"
                                         >
                                             Entre: {cliente.entre_calle_1} y {cliente.entre_calle_2}
                                             <Copy size={10} />
@@ -827,10 +852,26 @@ Solo necesito que me confirmes para agendar.
                         <CardContent className="space-y-4 text-sm">
                             <div>
                                 <p className="text-gray-500 mb-1">Referencias</p>
-                                <p className="font-medium text-gray-900">Ref 1: {cliente.no_ref}</p>
-                                {cliente.no_ref_2 && (
-                                    <p className="font-medium text-gray-900 mt-1">Ref 2: {cliente.no_ref_2}</p>
-                                )}
+                                <div className="space-y-1">
+                                    <p
+                                        className="font-medium text-gray-900 cursor-pointer hover:text-telmex-blue transition-colors flex items-center gap-1"
+                                        onClick={() => copiarAlPortapapeles(cliente.no_ref, 'Referencia 1')}
+                                        title="Copiar Referencia 1"
+                                    >
+                                        Ref 1: {cliente.no_ref}
+                                        <Copy size={12} className="opacity-50" />
+                                    </p>
+                                    {cliente.no_ref_2 && (
+                                        <p
+                                            className="font-medium text-gray-900 cursor-pointer hover:text-telmex-blue transition-colors flex items-center gap-1"
+                                            onClick={() => copiarAlPortapapeles(cliente.no_ref_2!, 'Referencia 2')}
+                                            title="Copiar Referencia 2"
+                                        >
+                                            Ref 2: {cliente.no_ref_2}
+                                            <Copy size={12} className="opacity-50" />
+                                        </p>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="pt-4 border-t border-gray-100">
