@@ -429,7 +429,7 @@ Solo necesito que me confirmes para agendar.
         const curp = cliente.curp || 'PENDIENTE';
         const tt = cliente.no_tt || 'PENDIENTE';
 
-        const formato = `(CURP ${curp.toUpperCase()} EMPRESA MOS PROYECTOS CLIENTE SOLICITA SE COMUNIQUE AL NUMERO TT ${tt})`;
+        const formato = `CURP ${curp.toUpperCase()} EMPRESA MOS PROYECTOS CLIENTE SOLICITA SE COMUNIQUE AL NUMERO TT ${tt}`;
 
         navigator.clipboard.writeText(formato).then(() => {
             mostrarToast('Formato MOS copiado');
