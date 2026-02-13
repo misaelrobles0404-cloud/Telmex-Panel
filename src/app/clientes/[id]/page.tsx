@@ -253,14 +253,12 @@ ${promotorLine}
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
 FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
+${cliente.tipo_servicio === 'portabilidad' ? `**PORTABILIDAD**
+NIP: ${cliente.nip_portabilidad || 'SOLICITADO'}
+NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
+((COMPETIDOR)): ${cliente.proveedor_actual?.toUpperCase() || 'OTRO'}
 —————————————————
-**PORTABILIDAD**
-NIP: ${cliente.nip_portabilidad || ''}
-GENERICO: 
-NUMERO A SER PORTADO: ${cliente.numero_a_portar || ''}
-((COMPETIDOR)): ${cliente.proveedor_actual ? cliente.proveedor_actual.toUpperCase() : ''}
-—————————————————
-NOMBRE DE CLIENTE: 
+` : ''}NOMBRE DE CLIENTE: 
 ${cliente.nombre.toUpperCase()}
 —————————————————
 ■ NUM. TITULAR:  ${cliente.no_tt}
@@ -968,12 +966,6 @@ Solo necesito que me confirmes para agendar.
                                         <p className="text-gray-500">Número a Portar</p>
                                         <p className="font-medium text-gray-900">{cliente.numero_a_portar}</p>
                                     </div>
-                                    {cliente.fecha_vigencia && (
-                                        <div>
-                                            <p className="text-gray-500">Vigencia NIP</p>
-                                            <p className="font-medium text-gray-900">{cliente.fecha_vigencia}</p>
-                                        </div>
-                                    )}
                                 </>
                             )}
                         </CardContent>

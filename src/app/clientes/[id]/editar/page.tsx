@@ -55,7 +55,6 @@ export default function EditarClientePage({ params }: { params: { id: string } }
         // Portabilidad
         numeroAPortar: '',
         nipPortabilidad: '',
-        fechaVigencia: '',
         formatoPortabilidad: false,
         cartaBaja: false,
 
@@ -123,7 +122,6 @@ export default function EditarClientePage({ params }: { params: { id: string } }
 
                     numeroAPortar: cliente.numero_a_portar || '',
                     nipPortabilidad: cliente.nip_portabilidad || '',
-                    fechaVigencia: cliente.fecha_vigencia || '',
                     formatoPortabilidad: cliente.formato_portabilidad || false,
                     cartaBaja: cliente.carta_baja || false,
 
@@ -215,7 +213,6 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             proveedor_actual: (formData.proveedorActual as any) || undefined,
             numero_a_portar: formData.numeroAPortar,
             nip_portabilidad: formData.nipPortabilidad,
-            fecha_vigencia: formData.fechaVigencia || undefined,
             formato_portabilidad: formData.formatoPortabilidad,
             carta_baja: formData.cartaBaja,
             estado_cuenta_megacable: formData.estadoCuentaMegacable,
@@ -421,7 +418,15 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     <CardContent>
                         <Select label="Seleccionar Paquete" value={formData.paqueteId} disabled={loadingPaquetes} onChange={(e) => setFormData({ ...formData, paqueteId: e.target.value })}
                             options={paquetesDynamicos
-                                .filter(p => p.activo !== false && (p.categoria === formData.tipoCliente || (formData.tipoCliente === 'residencial' && p.categoria === 'solo_internet')))
+                                .filter(p => {
+                                    if (p.activo === false) return false;
+                                    const matchesCategoria = p.categoria === formData.tipoCliente || (formData.tipoCliente === 'residencial' && p.categoria === 'solo_internet');
+
+                                    // En portabilidad esconder los que son solo internet (sin telefono)
+                                    if (tipoServicio === 'portabilidad' && !p.llamadasIlimitadas) return false;
+
+                                    return matchesCategoria;
+                                })
                                 .map(p => ({
                                     value: p.id,
                                     label: p.nombre || `${p.velocidad} Mbps - $${p.precio}/mes`
@@ -460,8 +465,16 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 <Input label="Número a Portar" value={formData.numeroAPortar} onChange={(e) => setFormData({ ...formData, numeroAPortar: e.target.value })} required />
                                 {tipoServicio === 'portabilidad' && (
                                     <>
-                                        <Input label="NIP Portabilidad (Opcional)" value={formData.nipPortabilidad} onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })} />
-                                        <Input label="Fecha Vigencia" type="date" value={formData.fechaVigencia} onChange={(e) => setFormData({ ...formData, fechaVigencia: e.target.value })} />
+                                        <div className="relative group">
+                                            <Input label="NIP Portabilidad" value={formData.nipPortabilidad} onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })} placeholder="Vacio si no lo tiene" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, nipPortabilidad: '0000' })}
+                                                className="absolute right-2 top-8 text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded border border-gray-300 transition-colors"
+                                            >
+                                                Usar Genérico (0000)
+                                            </button>
+                                        </div>
                                         <label className="flex items-center gap-2 cursor-pointer">
                                             <input type="checkbox" checked={formData.formatoPortabilidad} onChange={(e) => setFormData({ ...formData, formatoPortabilidad: e.target.checked })} className="w-4 h-4" />
                                             <span className="text-sm font-medium text-gray-700">Formato de Portabilidad</span>

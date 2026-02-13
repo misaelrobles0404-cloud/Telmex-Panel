@@ -52,13 +52,6 @@ export function eliminarRecordatorio(id: string): void {
 export async function guardarCliente(cliente: Cliente): Promise<void> {
     const { documentos, ...datosParaGuardar } = cliente;
 
-
-    // Si la fecha de vigencia es una cadena vacía, debe ser null para Postgres
-    const d = datosParaGuardar as any;
-    if (d.fecha_vigencia === '') {
-        d.fecha_vigencia = undefined;
-    }
-
     /*
     console.log('Guardando cliente:', {
         id: cliente.id,

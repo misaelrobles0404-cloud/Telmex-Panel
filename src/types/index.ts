@@ -58,7 +58,6 @@ export interface Cliente {
     // Datos específicos de portabilidad
     numero_a_portar?: string;
     nip_portabilidad?: string;
-    fecha_vigencia?: string;
     formato_portabilidad?: boolean;
     carta_baja?: boolean;
 
@@ -240,7 +239,6 @@ export const REQUISITOS_SERVICIO: Record<TipoServicio, Requisitos> = {
         campos: [
             'Número de Teléfono a Portar',
             'NIP de Portabilidad (Marcar 051)',
-            'Fecha de vigencia del NIP',
             'Formato de Portabilidad firmado'
         ]
     },

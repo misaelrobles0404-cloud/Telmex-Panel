@@ -52,7 +52,6 @@ export default function NuevoClientePage() {
         // Portabilidad
         numeroAPortar: '',
         nipPortabilidad: '',
-        fechaVigencia: '',
         formatoPortabilidad: false,
         cartaBaja: false,
 
@@ -160,7 +159,6 @@ export default function NuevoClientePage() {
             proveedor_actual: undefined,
             numero_a_portar: '',
             nip_portabilidad: '',
-            fecha_vigencia: formData.fechaVigencia || undefined,
             formato_portabilidad: false,
             carta_baja: false,
             estado_cuenta_megacable: false,
@@ -212,7 +210,6 @@ export default function NuevoClientePage() {
             proveedorActual: '',
             numeroAPortar: '',
             nipPortabilidad: '',
-            fechaVigencia: '',
             formatoPortabilidad: false,
             cartaBaja: false,
             estadoCuentaMegacable: false,
@@ -277,7 +274,6 @@ export default function NuevoClientePage() {
             proveedor_actual: formData.proveedorActual as any,
             numero_a_portar: formData.numeroAPortar,
             nip_portabilidad: formData.nipPortabilidad,
-            fecha_vigencia: formData.fechaVigencia || undefined,
             formato_portabilidad: formData.formatoPortabilidad,
             carta_baja: formData.cartaBaja,
             estado_cuenta_megacable: formData.estadoCuentaMegacable,
@@ -693,7 +689,15 @@ export default function NuevoClientePage() {
                                     disabled={loadingPaquetes}
                                     onChange={(e) => setFormData({ ...formData, paqueteId: e.target.value })}
                                     options={paquetesDynamicos
-                                        .filter(p => p.activo !== false && (p.categoria === formData.tipoCliente || (formData.tipoCliente === 'residencial' && p.categoria === 'solo_internet')))
+                                        .filter(p => {
+                                            if (p.activo === false) return false;
+                                            const matchesCategoria = p.categoria === formData.tipoCliente || (formData.tipoCliente === 'residencial' && p.categoria === 'solo_internet');
+
+                                            // En portabilidad esconder los que son solo internet (sin telefono)
+                                            if (tipoServicio === 'portabilidad' && !p.llamadasIlimitadas) return false;
+
+                                            return matchesCategoria;
+                                        })
                                         .map(p => ({
                                             value: p.id,
                                             label: p.nombre || `${p.velocidad} Mbps - $${p.precio}/mes`
@@ -743,18 +747,21 @@ export default function NuevoClientePage() {
 
                                         {tipoServicio === 'portabilidad' && (
                                             <>
-                                                <Input
-                                                    label="NIP Portabilidad (051) - Opcional"
-                                                    value={formData.nipPortabilidad}
-                                                    onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })}
-                                                />
-
-                                                <Input
-                                                    label="Fecha de Vigencia"
-                                                    type="date"
-                                                    value={formData.fechaVigencia}
-                                                    onChange={(e) => setFormData({ ...formData, fechaVigencia: e.target.value })}
-                                                />
+                                                <div className="relative group">
+                                                    <Input
+                                                        label="NIP Portabilidad (051)"
+                                                        value={formData.nipPortabilidad}
+                                                        onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })}
+                                                        placeholder="Vacio si no lo tiene"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData({ ...formData, nipPortabilidad: '0000' })}
+                                                        className="absolute right-2 top-8 text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded border border-gray-300 transition-colors"
+                                                    >
+                                                        Usar Genérico (0000)
+                                                    </button>
+                                                </div>
 
                                                 <div>
                                                     <label className="flex items-center gap-2 cursor-pointer">
