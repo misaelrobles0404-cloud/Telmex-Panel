@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { obtenerAnuncio, AppAnnouncement } from '@/lib/admin';
 import { AlertCircle, Info, CheckCircle, XCircle, X } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export function AnnouncementBanner() {
     const [announcement, setAnnouncement] = useState<AppAnnouncement | null>(null);
