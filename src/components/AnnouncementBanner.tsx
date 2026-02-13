@@ -7,18 +7,63 @@ import { AlertCircle, Info, CheckCircle, XCircle, X } from 'lucide-react';
 export function AnnouncementBanner() {
     const [announcement, setAnnouncement] = useState<AppAnnouncement | null>(null);
     const [visible, setVisible] = useState(true);
+    const [lastSeenText, setLastSeenText] = useState<string | null>(null);
+
+    const playSound = () => {
+        try {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log("Auto-play blocked by browser:", e));
+        } catch (error) {
+            console.error("Error playing sound:", error);
+        }
+    };
 
     useEffect(() => {
+        // Carga inicial
         const fetchAnnouncement = async () => {
             const data = await obtenerAnuncio();
-            if (data && data.active) {
+            if (data) {
                 setAnnouncement(data);
+                // No sonar en carga inicial para evitar molestias al navegar
+                setLastSeenText(data.text);
             }
         };
         fetchAnnouncement();
-    }, []);
 
-    if (!announcement || !visible) return null;
+        // Suscripción Realtime para avisos instantáneos con sonido
+        const channel = supabase
+            .channel('public:configuraciones')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'configuraciones',
+                    filter: 'key=eq.app_announcement'
+                },
+                (payload: any) => {
+                    const newValue = payload.new.value as AppAnnouncement;
+                    if (newValue) {
+                        setAnnouncement(newValue);
+                        setVisible(true);
+
+                        // Solo sonar si el texto cambió (es un anuncio nuevo)
+                        if (newValue.active && newValue.text !== lastSeenText) {
+                            playSound();
+                            setLastSeenText(newValue.text);
+                        }
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [lastSeenText]);
+
+    if (!announcement || !visible || !announcement.active) return null;
 
     const styles = {
         info: 'bg-blue-50 border-blue-200 text-blue-800',
