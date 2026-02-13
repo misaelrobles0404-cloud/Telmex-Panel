@@ -47,8 +47,17 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
         const init = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                const { data: profile } = await supabase.from('perfiles').select('*').eq('id', user.id).single();
-                setCurrentUser(profile);
+                const { data: profile } = await supabase.from('perfiles').select('*').eq('id', user.id).maybeSingle();
+                if (profile) {
+                    setCurrentUser(profile);
+                } else {
+                    // Fallback si el perfil no existe todavía
+                    setCurrentUser({
+                        id: user.id,
+                        email: user.email || '',
+                        nombre_completo: user.email?.split('@')[0] || 'Usuario'
+                    } as any);
+                }
             }
 
             const { data: profiles } = await supabase.from('perfiles').select('*');
@@ -85,7 +94,10 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
     };
 
     const toggleUso = async (keyId: string, tipo: 'siac' | 'portal') => {
-        if (!currentUser) return;
+        if (!currentUser) {
+            mostrarToast('Cargando sesión...');
+            return;
+        }
 
         const currentUsage = usage[keyId];
         const fieldName = tipo === 'siac' ? 'siac_user_id' : 'portal_user_id';
