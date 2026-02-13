@@ -50,7 +50,7 @@ export function eliminarRecordatorio(id: string): void {
 // ============================================
 
 export async function guardarCliente(cliente: Cliente): Promise<void> {
-    const { documentos, ...datosParaGuardar } = cliente;
+    const { documentos, actividades, ...datosParaGuardar } = cliente;
 
     /*
     console.log('Guardando cliente:', {
