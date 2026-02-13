@@ -47,8 +47,7 @@ export default function DashboardPage() {
 
             // Lógica de Perfiles: Súper Boss (Ruiz) y Administrador (Misael)
             const esBoss = user?.email === 'ruizmosinfinitum2025@gmail.com';
-            const esMisael = user?.email === 'misaelrobles0404@gmail.com';
-            const esAdmin = esBoss || esMisael;
+            const esAdmin = esBoss;
 
             if (esAdmin) {
                 const { data: perfilesData, error: pfError } = await supabase.from('perfiles').select('*');
@@ -67,13 +66,7 @@ export default function DashboardPage() {
             }
 
             let clientesFiltrados = clientesData;
-            // Si es Misael, aunque tenga rango de admin para ver alertas, su panel muestra solo sus clientes
-            if (esMisael) {
-                clientesFiltrados = clientesData.filter(c =>
-                    c.usuario === user.email ||
-                    c.user_id === user.id
-                );
-            } else if (!esAdmin && user?.email) {
+            if (!esAdmin && user?.email) {
                 clientesFiltrados = clientesData.filter(c =>
                     c.usuario === user.email ||
                     c.user_id === user.id
@@ -105,8 +98,8 @@ export default function DashboardPage() {
                     }
                 });
 
-                // Misael Robles quiere ver empleados con 8 o más instalaciones (umbral 8)
-                const umbralSuperVendedor = esMisael ? 8 : 7;
+                // Umbral Super Vendedor: 7 instalaciones por semana
+                const umbralSuperVendedor = 7;
 
                 const sv = Object.entries(ventasPorUsuario)
                     .filter(([_, total]) => total >= umbralSuperVendedor)
