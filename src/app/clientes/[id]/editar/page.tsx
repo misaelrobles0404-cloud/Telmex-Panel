@@ -504,9 +504,23 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     </CardContent>
                 </Card>
 
-                <div className="flex gap-4 justify-end">
-                    <Button type="button" variant="secondary" onClick={() => router.back()}>Cancelar</Button>
-                    <Button type="submit" variant="primary"><Save size={20} className="mr-2" /> Actualizar Cliente</Button>
+                <div className="flex gap-1.5 sm:gap-4 justify-end items-center mt-6">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => router.back()}
+                        className="text-gray-500 hover:text-gray-700 text-[11px] sm:text-sm px-2 sm:px-4"
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        className="text-[10px] sm:text-sm px-2 sm:px-4 py-2"
+                    >
+                        <Save size={14} className="sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                        ACTUALIZAR CLIENTE
+                    </Button>
                 </div>
             </form>
         </div>

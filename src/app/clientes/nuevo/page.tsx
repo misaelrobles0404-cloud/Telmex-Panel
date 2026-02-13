@@ -829,12 +829,12 @@ export default function NuevoClientePage() {
                         </Card>
 
                         {/* Botones */}
-                        <div className="flex gap-4 justify-end">
+                        <div className="flex gap-1.5 sm:gap-4 justify-end items-center mt-6">
                             <Button
                                 type="button"
                                 variant="ghost"
                                 onClick={() => router.back()}
-                                className="text-gray-500 hover:text-gray-700"
+                                className="text-gray-500 hover:text-gray-700 text-[11px] sm:text-sm px-2 sm:px-4"
                             >
                                 Cancelar
                             </Button>
@@ -842,15 +842,19 @@ export default function NuevoClientePage() {
                             <Button
                                 type="button"
                                 onClick={() => handleGuardarProspecto()}
-                                className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
+                                className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-[10px] sm:text-sm px-2 sm:px-4 py-2"
                             >
-                                <UserPlus size={20} className="mr-2" />
-                                Guardar como Prospecto
+                                <UserPlus size={14} className="sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                                GUARDAR PROSPECTO
                             </Button>
 
-                            <Button type="submit" variant="primary">
-                                <Save size={20} className="mr-2" />
-                                Guardar Cliente Completo
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                className="text-[10px] sm:text-sm px-2 sm:px-4 py-2"
+                            >
+                                <Save size={14} className="sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                                GUARDAR CLIENTE
                             </Button>
                         </div>
                     </form>
