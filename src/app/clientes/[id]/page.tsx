@@ -275,7 +275,7 @@ CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
 ESTADO: ${cliente.estado.toUpperCase()}
 —————————————————
-PAQUETE: ${cliente.paquete} - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
+PAQUETE: ${cliente.velocidad} Mbps - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
 —————————————————
 GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
@@ -307,7 +307,7 @@ CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
 ESTADO: ${cliente.estado.toUpperCase()}
 —————————————————
-PAQUETE: ${cliente.paquete} - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
+PAQUETE: ${cliente.velocidad} Mbps - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
 —————————————————
 GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
