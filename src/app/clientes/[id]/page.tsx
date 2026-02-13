@@ -427,10 +427,19 @@ Solo necesito que me confirmes para agendar.
         });
     };
 
-    const solicitarReferidos = () => {
-        if (!cliente) return;
-        setModalReferidosOpen(true);
+    const obtenerPartesNombre = () => {
+        if (!cliente) return { nombres: '', paterno: '', materno: '' };
+        const partes = cliente.nombre.trim().split(/\s+/);
+        if (partes.length === 1) return { nombres: partes[0], paterno: '', materno: '' };
+        if (partes.length === 2) return { nombres: partes[0], paterno: partes[1], materno: '' };
+
+        const m = partes.pop() || '';
+        const p = partes.pop() || '';
+        const n = partes.join(' ');
+        return { nombres: n, paterno: p, materno: m };
     };
+
+    const { nombres, paterno, materno } = obtenerPartesNombre();
 
     return (
         <div className="p-4 md:p-6 max-w-6xl mx-auto overflow-hidden">
@@ -452,8 +461,28 @@ Solo necesito que me confirmes para agendar.
             {/* Encabezado del Cliente */}
             <div className="flex flex-col mb-6 gap-4">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 break-words leading-tight">
-                        {cliente.nombre}
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 break-words leading-tight flex flex-wrap gap-2">
+                        <span
+                            onClick={() => copiarAlPortapapeles(nombres, 'Nombre(s)')}
+                            className="cursor-pointer hover:text-telmex-blue transition-colors underline decoration-transparent hover:decoration-telmex-blue decoration-dotted"
+                            title="Copiar Nombres"
+                        >
+                            {nombres}
+                        </span>
+                        <span
+                            onClick={() => copiarAlPortapapeles(paterno, 'Apellido Paterno')}
+                            className="cursor-pointer hover:text-telmex-blue transition-colors underline decoration-transparent hover:decoration-telmex-blue decoration-dotted"
+                            title="Copiar Apellido Paterno"
+                        >
+                            {paterno}
+                        </span>
+                        <span
+                            onClick={() => copiarAlPortapapeles(materno, 'Apellido Materno')}
+                            className="cursor-pointer hover:text-telmex-blue transition-colors underline decoration-transparent hover:decoration-telmex-blue decoration-dotted"
+                            title="Copiar Apellido Materno"
+                        >
+                            {materno}
+                        </span>
                     </h1>
                     <div className="flex flex-wrap items-center gap-3">
                         <span className={`badge ${cliente.tipo_servicio === 'linea_nueva' ? 'badge-blue' :
@@ -623,64 +652,54 @@ Solo necesito que me confirmes para agendar.
                             </div>
                             <div className="flex items-start gap-3 p-2">
                                 <MapPin className="text-gray-400 mt-1 flex-shrink-0" size={18} />
-                                <div className="space-y-2 w-full">
-                                    <p className="text-sm text-gray-500">Dirección (Click para copiar)</p>
+                                <div className="space-y-1 w-full">
+                                    <p className="text-sm text-gray-500 mb-1">Dirección (Click en partes para copiar)</p>
 
-                                    <div className="flex flex-wrap gap-2 text-sm">
-                                        {/* Calle y Números */}
-                                        <div
+                                    <p className="text-lg font-medium text-gray-900 leading-relaxed">
+                                        <span
                                             onClick={() => copiarAlPortapapeles(`${cliente.calle} ${cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''} ${cliente.numero_interior ? `Int. ${cliente.numero_interior}` : ''}`, 'Calle')}
-                                            className="px-2 py-1 bg-gray-50 border border-gray-200 rounded text-gray-700 hover:border-telmex-blue hover:text-telmex-blue cursor-pointer transition-all flex items-center gap-1.5"
+                                            className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
+                                            title="Copiar Calle"
                                         >
-                                            <span className="font-bold underline decoration-dotted">Calle:</span> {cliente.calle} {cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''} {cliente.numero_interior ? `Int. ${cliente.numero_interior}` : ''}
-                                            <Copy size={10} className="text-gray-400" />
-                                        </div>
-
-                                        {/* Colonia */}
-                                        <div
+                                            {cliente.calle} {cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''} {cliente.numero_interior ? `Int. ${cliente.numero_interior}` : ''}
+                                        </span>, <span
                                             onClick={() => copiarAlPortapapeles(cliente.colonia, 'Colonia')}
-                                            className="px-2 py-1 bg-gray-50 border border-gray-200 rounded text-gray-700 hover:border-telmex-blue hover:text-telmex-blue cursor-pointer transition-all flex items-center gap-1.5"
+                                            className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
+                                            title="Copiar Colonia"
                                         >
-                                            <span className="font-bold underline decoration-dotted">Col:</span> {cliente.colonia}
-                                            <Copy size={10} className="text-gray-400" />
-                                        </div>
-
-                                        {/* CP */}
-                                        <div
+                                            {cliente.colonia}
+                                        </span>, <span
                                             onClick={() => copiarAlPortapapeles(cliente.cp, 'CP')}
-                                            className="px-2 py-1 bg-gray-50 border border-gray-200 rounded text-gray-700 hover:border-telmex-blue hover:text-telmex-blue cursor-pointer transition-all flex items-center gap-1.5"
+                                            className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
+                                            title="Copiar Código Postal"
                                         >
-                                            <span className="font-bold underline decoration-dotted">CP:</span> {cliente.cp}
-                                            <Copy size={10} className="text-gray-400" />
-                                        </div>
-
-                                        {/* Ciudad */}
-                                        <div
+                                            {cliente.cp}
+                                        </span>
+                                        <br />
+                                        <span
                                             onClick={() => copiarAlPortapapeles(cliente.cd, 'Ciudad')}
-                                            className="px-2 py-1 bg-gray-50 border border-gray-200 rounded text-gray-700 hover:border-telmex-blue hover:text-telmex-blue cursor-pointer transition-all flex items-center gap-1.5"
+                                            className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
+                                            title="Copiar Ciudad"
                                         >
-                                            <span className="font-bold underline decoration-dotted">Ciudad:</span> {cliente.cd}
-                                            <Copy size={10} className="text-gray-400" />
-                                        </div>
-
-                                        {/* Estado */}
-                                        <div
+                                            {cliente.cd}
+                                        </span>, <span
                                             onClick={() => copiarAlPortapapeles(cliente.estado, 'Estado')}
-                                            className="px-2 py-1 bg-gray-50 border border-gray-200 rounded text-gray-700 hover:border-telmex-blue hover:text-telmex-blue cursor-pointer transition-all flex items-center gap-1.5"
+                                            className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
+                                            title="Copiar Estado"
                                         >
-                                            <span className="font-bold underline decoration-dotted">Edo:</span> {cliente.estado}
-                                            <Copy size={10} className="text-gray-400" />
-                                        </div>
-                                    </div>
+                                            {cliente.estado}
+                                        </span>
+                                    </p>
 
                                     {(cliente.entre_calle_1 || cliente.entre_calle_2) && (
-                                        <div
+                                        <p
                                             onClick={() => copiarAlPortapapeles(`Entre ${cliente.entre_calle_1} y ${cliente.entre_calle_2}`, 'Entre Calles')}
                                             className="text-xs text-gray-500 mt-1 cursor-pointer hover:text-telmex-blue transition-colors flex items-center gap-1 italic"
+                                            title="Copiar Entre Calles"
                                         >
                                             Entre: {cliente.entre_calle_1} y {cliente.entre_calle_2}
                                             <Copy size={10} />
-                                        </div>
+                                        </p>
                                     )}
                                 </div>
                             </div>
