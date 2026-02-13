@@ -700,7 +700,7 @@ export default function NuevoClientePage() {
                                         })
                                         .map(p => ({
                                             value: p.id,
-                                            label: p.nombre || `${p.velocidad} Mbps - $${p.precio}/mes`
+                                            label: p.nombre || `${p.velocidad} Mbps${p.llamadasIlimitadas ? ' - INTERNET Y TELEFONÍA' : ''} - $${p.precio}/mes`
                                         }))}
                                     required
                                 />

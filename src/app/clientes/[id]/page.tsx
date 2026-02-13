@@ -268,7 +268,6 @@ ${cliente.nombre.toUpperCase()}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
-MANZ:    LOT:    EDF:    DPTO:
 ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
@@ -276,7 +275,7 @@ CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
 ESTADO: ${cliente.estado.toUpperCase()}
 —————————————————
-PAQUETE: ${cliente.paquete}
+PAQUETE: ${cliente.paquete} - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
 —————————————————
 GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
@@ -301,7 +300,6 @@ ${cliente.nombre.toUpperCase()}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
-MANZ:    LOT:    EDF:    DPTO:
 ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
@@ -309,7 +307,7 @@ CP: ${cliente.cp}
 CIUDAD: ${cliente.cd.toUpperCase()}
 ESTADO: ${cliente.estado.toUpperCase()}
 —————————————————
-PAQUETE: ${cliente.paquete}
+PAQUETE: ${cliente.paquete} - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
 —————————————————
 GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
