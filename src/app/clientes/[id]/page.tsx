@@ -172,7 +172,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                     id: generarId(),
                     clienteId: cliente.id,
                     tipo: 'cambio_estado',
-                    descripcion: `Folio SIAC asignado: ${folioSiacInput}. Estado actualizado a CIERRE PROGRAMADO.`,
+                    descripcion: `Folio SIAC asignado: ${folioSiacInput}. Estado actualizado a CAPTURADO.`,
                     fecha: new Date().toISOString()
                 },
                 ...cliente.actividades || []
@@ -571,22 +571,23 @@ Solo necesito que me confirmes para agendar.
                         <CardContent className="p-6">
                             <label className="label mb-2">Estado del Pipeline</label>
                             <div className="flex flex-wrap gap-2">
-                                {['prospecto', 'pendiente_captura', 'capturado', 'posteado', 'sin_cobertura'].map((estado) => (
+                                {['prospecto', 'pendiente_captura', 'capturado', 'posteado', 'sin_cobertura', 'cancelado'].map((estado) => (
                                     <button
                                         key={estado}
                                         onClick={() => actualizarEstado(estado as EstadoPipeline)}
                                         className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${cliente.estado_pipeline === estado
                                             ? 'bg-telmex-blue text-white border-telmex-blue'
-                                            : estado === 'sin_cobertura' ? 'bg-red-50 text-red-600 border-red-200 hover:border-red-400' :
+                                            : estado === 'sin_cobertura' || estado === 'cancelado' ? 'bg-red-50 text-red-600 border-red-200 hover:border-red-400' :
                                                 'bg-white text-gray-600 border-gray-300 hover:border-telmex-blue'
                                             }`}
                                     >
                                         {estado === 'prospecto' ? 'PROSPECTO' :
-                                            estado === 'pendiente_captura' ? 'INTERESADO' :
-                                                estado === 'capturado' ? 'CIERRE PROGRAMADO' :
-                                                    estado === 'posteado' ? 'INSTALADO' :
+                                            estado === 'pendiente_captura' ? 'PENDIENTE CAPTURA' :
+                                                estado === 'capturado' ? 'CAPTURADO' :
+                                                    estado === 'posteado' ? 'POSTEADO' :
                                                         estado === 'sin_cobertura' ? 'SIN COBERTURA' :
-                                                            estado.toUpperCase()}
+                                                            estado === 'cancelado' ? 'CANCELADO' :
+                                                                estado.toUpperCase()}
                                     </button>
                                 ))}
                             </div>
