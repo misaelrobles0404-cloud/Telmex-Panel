@@ -423,6 +423,22 @@ Solo necesito que me confirmes para agendar.
         });
     };
 
+    const copiarFormatoMOS = () => {
+        if (!cliente) return;
+
+        const curp = cliente.curp || 'PENDIENTE';
+        const tt = cliente.no_tt || 'PENDIENTE';
+
+        const formato = `(CURP ${curp.toUpperCase()} EMPRESA MOS PROYECTOS CLIENTE SOLICITA SE COMUNIQUE AL NUMERO TT ${tt})`;
+
+        navigator.clipboard.writeText(formato).then(() => {
+            mostrarToast('Formato MOS copiado');
+        }).catch(err => {
+            console.error('Error al copiar:', err);
+            alert('Error al copiar el formato');
+        });
+    };
+
     const obtenerPartesNombre = () => {
         if (!cliente) return { nombres: '', paterno: '', materno: '' };
         const partes = cliente.nombre.trim().split(/\s+/);
@@ -523,6 +539,14 @@ Solo necesito que me confirmes para agendar.
                             <Copy size={16} className="mr-1" /> Copiar Formato
                         </Button>
                     )}
+
+                    <Button
+                        variant="secondary"
+                        onClick={copiarFormatoMOS}
+                        className="bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200 flex-1 md:flex-none"
+                    >
+                        <Copy size={16} className="mr-1" /> Formato MOS
+                    </Button>
 
                     <Button variant="secondary" onClick={() => router.push(`/clientes/${cliente.id}/editar`)} className="flex-1 md:flex-none">
                         <Edit size={16} className="mr-1" /> Editar
