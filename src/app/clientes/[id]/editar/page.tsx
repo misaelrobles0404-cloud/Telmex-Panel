@@ -373,7 +373,15 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     <CardHeader><CardTitle>Documentación</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Input label="INE" value={formData.ine} onChange={(e) => setFormData({ ...formData, ine: e.target.value })} />
+                            <Input
+                                label="INE"
+                                value={formData.ine}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '');
+                                    setFormData({ ...formData, ine: val });
+                                }}
+                                placeholder="Solo números"
+                            />
                             <Input label="CURP" value={formData.curp} onChange={(e) => setFormData({ ...formData, curp: e.target.value })} required />
                             <Input label="Usuario" value={formData.usuario} onChange={(e) => setFormData({ ...formData, usuario: e.target.value })} />
                             <Input label="Folio SIAC" value={formData.folioSiac} onChange={(e) => setFormData({ ...formData, folioSiac: e.target.value })} />

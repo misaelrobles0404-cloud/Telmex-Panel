@@ -605,7 +605,11 @@ export default function NuevoClientePage() {
                                     <Input
                                         label="INE"
                                         value={formData.ine}
-                                        onChange={(e) => setFormData({ ...formData, ine: e.target.value })}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, '');
+                                            setFormData({ ...formData, ine: val });
+                                        }}
+                                        placeholder="Solo números"
                                     />
 
                                     <Input

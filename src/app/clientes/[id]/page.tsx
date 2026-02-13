@@ -822,10 +822,17 @@ Solo necesito que me confirmes para agendar.
                             <CardTitle>Documentación</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                            <div className="flex items-center justify-between p-2 rounded bg-gray-50">
+                            <div
+                                className="flex items-center justify-between p-2 rounded bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors group"
+                                onClick={() => cliente.ine && copiarAlPortapapeles(cliente.ine, 'INE')}
+                                title="Click para copiar INE"
+                            >
                                 <span className="text-sm font-medium">INE/Identificación</span>
                                 {cliente.ine ? (
-                                    <span className="text-success text-xs flex items-center gap-1"><CheckCircle size={12} /> OK</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-success text-xs font-bold leading-none">{cliente.ine}</span>
+                                        <Copy size={12} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
                                 ) : (
                                     <span className="text-error text-xs">Pendiente</span>
                                 )}
