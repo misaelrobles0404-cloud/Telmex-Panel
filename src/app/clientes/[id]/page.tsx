@@ -209,6 +209,9 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const generarFormatoSIAC = () => {
         if (!cliente) return;
 
+        let formato = '';
+        const nombrePromotor = perfilUsuario?.nombre_completo || "PROMOTOR NO REGISTRADO";
+        const promotorLine = `NOMBRE DE PROMOTOR: ${nombrePromotor.toUpperCase()}`;
         const identificacion = cliente.ine ? `INE: ${cliente.ine}` : `CURP: ${cliente.curp || 'PENDIENTE'}`;
 
         if (cliente.tipo_cliente === 'pyme') {
@@ -361,6 +364,14 @@ GASTOS DE INSTALACION
         }).catch(err => {
             console.error('Error al copiar:', err);
             alert('Error al copiar el formato');
+        });
+    };
+
+    const copiarFormatoMOS = () => {
+        if (!cliente) return;
+        const texto = `CURP ${cliente.curp || 'PENDIENTE'} EMPRESA MOS PROYECTOS CLIENTE SOLICITA SE COMUNIQUE AL NUMERO TT ${cliente.no_tt}`;
+        navigator.clipboard.writeText(texto).then(() => {
+            mostrarToast('Formato MOS copiado');
         });
     };
 
