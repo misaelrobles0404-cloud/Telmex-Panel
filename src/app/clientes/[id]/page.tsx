@@ -209,12 +209,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const generarFormatoSIAC = () => {
         if (!cliente) return;
 
-        let formato = '';
-
-        // Automatización: Usar el nombre del perfil del usuario logueado
-        // Automatización: Usar el nombre del perfil del usuario logueado
-        const nombrePromotor = perfilUsuario?.nombre_completo || "PROMOTOR NO REGISTRADO";
-        const promotorLine = `NOMBRE DE PROMOTOR: ${nombrePromotor.toUpperCase()}`;
+        const identificacion = cliente.ine ? `INE: ${cliente.ine}` : `CURP: ${cliente.curp || 'PENDIENTE'}`;
 
         if (cliente.tipo_cliente === 'pyme') {
             formato = `PLANTILLA PARA CLIENTE PYME
@@ -226,6 +221,8 @@ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
 —————————————————
 NOMBRE DE CLIENTE: 
 ${cliente.nombre.toUpperCase()}
+—————————————————
+IDENTIFICACIÓN: ${identificacion}
 —————————————————
 ■ NUM. TITULAR:  ${cliente.no_tt}
 ■ NUM. REFERENCIA 1: ${cliente.no_ref}
@@ -253,13 +250,16 @@ ${promotorLine}
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
 FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
-${cliente.tipo_servicio === 'portabilidad' ? `**PORTABILIDAD**
+—————————————————
+**PORTABILIDAD**
 NIP: ${cliente.nip_portabilidad || 'SOLICITADO'}
 NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
 ((COMPETIDOR)): ${cliente.proveedor_actual?.toUpperCase() || 'OTRO'}
 —————————————————
-` : ''}NOMBRE DE CLIENTE: 
+NOMBRE DE CLIENTE: 
 ${cliente.nombre.toUpperCase()}
+—————————————————
+IDENTIFICACIÓN: ${identificacion}
 —————————————————
 ■ NUM. TITULAR:  ${cliente.no_tt}
 ■ NUM. REFERENCIA 1: ${cliente.no_ref}
@@ -293,6 +293,8 @@ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
 NOMBRE DE CLIENTE: 
 ${cliente.nombre.toUpperCase()}
 —————————————————
+IDENTIFICACIÓN: ${identificacion}
+—————————————————
 ■ NUM. TITULAR:  ${cliente.no_tt}
 ■ NUM. REFERENCIA 1: ${cliente.no_ref}
 ■ NUM. REFERENCIA 2: ${cliente.no_ref_2 || ''}
@@ -322,11 +324,11 @@ GASTOS DE INSTALACION
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
 FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
-
 —————————————————
 NOMBRE DE CLIENTE: 
 ${cliente.nombre.toUpperCase()}
-
+—————————————————
+IDENTIFICACIÓN: ${identificacion}
 —————————————————
 NUM. TITULAR:  
 ${cliente.no_tt}
@@ -811,6 +813,23 @@ Solo necesito que me confirmes para agendar.
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Notas de Captura */}
+                    {cliente.notas && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <FileText size={18} className="text-amber-500" />
+                                    Notas de Captura
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="bg-amber-50 p-4 rounded-lg border border-amber-100 text-sm text-gray-800 italic whitespace-pre-wrap shadow-inner">
+                                    "{cliente.notas}"
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
 
                 {/* Columna Derecha: Documentos y Datos Adicionales */}

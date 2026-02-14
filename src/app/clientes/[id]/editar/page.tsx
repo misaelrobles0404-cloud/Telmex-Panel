@@ -220,6 +220,12 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                 if (formData.folioSiac && formData.folioSiac.trim() !== '' && estadoPipeline !== 'posteado') {
                     return 'capturado';
                 }
+
+                // Si es un prospecto y se está editando, enviarlo a pendiente de captura
+                if (estadoPipeline === 'prospecto') {
+                    return 'pendiente_captura';
+                }
+
                 // Sanitizar estados obsoletos
                 if (estadoPipeline === 'contactado') return 'prospecto';
                 if (estadoPipeline === 'interesado') return 'prospecto';
