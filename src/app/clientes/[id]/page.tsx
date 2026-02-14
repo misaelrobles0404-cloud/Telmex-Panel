@@ -280,14 +280,15 @@ PAQUETE: ${cliente.velocidad} Mbps - INTERNET Y TELEFONÍA - $${cliente.precio_m
 GASTOS DE INSTALACION
 ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
         } else if (cliente.tipo_servicio === 'winback') {
-            formato = `PLANTILLA PARA WIN-BACK (ALTA INTERNET RECUPERADO)
+            formato = `PLANTILLA PARA WIN-BACK (PORTABILIDAD)
 ${promotorLine}
 —————————————————
 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
 —————————————————
 FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
 —————————————————
-**ALTAN INTERNET RECUPERADO: WIN-BACK**
+**PORTABILIDAD: WIN-BACK**
+NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
 ((COMPETIDOR)): ${cliente.proveedor_actual ? cliente.proveedor_actual.toUpperCase() : ''}
 —————————————————
 NOMBRE DE CLIENTE: 
