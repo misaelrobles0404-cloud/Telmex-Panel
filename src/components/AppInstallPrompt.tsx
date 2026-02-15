@@ -83,7 +83,7 @@ export function AppInstallPrompt() {
                         <Download size={24} />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-bold text-gray-900 truncate">Instalar RUIZ TELMEX</h3>
+                        <h3 className="text-sm font-bold text-gray-900 truncate">Instalar INFINITUM CONNECT</h3>
                         <p className="text-xs text-gray-500 mt-1 leading-tight">
                             {platform === 'ios'
                                 ? 'Agrégala a tu pantalla de inicio para un acceso más rápido.'

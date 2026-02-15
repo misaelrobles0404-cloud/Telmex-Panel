@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'RUIZ TELMEX',
-        short_name: 'RUIZ TELMEX',
+        name: 'INFINITUM CONNECT',
+        short_name: 'INFINITUM CONNECT',
         description: 'Panel de ventas y gestión para agentes TELMEX',
         start_url: '/',
         display: 'browser',

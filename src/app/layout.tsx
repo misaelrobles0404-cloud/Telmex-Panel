@@ -13,13 +13,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    title: 'RUIZ TELMEX',
+    title: 'INFINITUM CONNECT',
     description: 'Sistema de gestión de ventas TELMEX',
     manifest: '/manifest.webmanifest',
     appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
-        title: 'RUIZ TELMEX',
+        title: 'INFINITUM CONNECT',
     },
 };
 
