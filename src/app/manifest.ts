@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'INFINITUM CONNECT',
-        short_name: 'INFINITUM CONNECT',
+        name: 'INFINITUM',
+        short_name: 'INFINITUM',
         description: 'Panel de ventas y gestión para agentes TELMEX',
         start_url: '/',
         display: 'browser',

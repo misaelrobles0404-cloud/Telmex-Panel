@@ -76,7 +76,7 @@ export function PerfilOnboarding() {
                     <div className="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-2">
                         <UserCheck size={32} />
                     </div>
-                    <CardTitle className="text-2xl">¡Bienvenido a INFINITUM CONNECT!</CardTitle>
+                    <CardTitle className="text-2xl">¡Bienvenido a INFINITUM!</CardTitle>
                 </CardHeader>
                 <CardContent className="p-8 space-y-6">
                     <p className="text-gray-600">
