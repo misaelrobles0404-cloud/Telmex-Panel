@@ -367,14 +367,6 @@ GASTOS DE INSTALACION
         });
     };
 
-    const copiarFormatoMOS = () => {
-        if (!cliente) return;
-        const texto = `CURP ${cliente.curp || 'PENDIENTE'} EMPRESA MOS PROYECTOS CLIENTE SOLICITA SE COMUNIQUE AL NUMERO TT ${cliente.no_tt}`;
-        navigator.clipboard.writeText(texto).then(() => {
-            mostrarToast('Formato MOS copiado');
-        });
-    };
-
     const copiarAlPortapapeles = (texto: string, label: string) => {
         navigator.clipboard.writeText(texto).then(() => {
             mostrarToast(`${label} copiado`);
