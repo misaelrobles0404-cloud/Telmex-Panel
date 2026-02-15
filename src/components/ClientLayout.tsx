@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { MobileHeader } from '@/components/MobileHeader';
 import { FacebookPixelWrapper } from '@/components/FacebookPixelWrapper';
 import { PerfilOnboarding } from '@/components/PerfilOnboarding';
+import { AppInstallPrompt } from '@/components/AppInstallPrompt';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -39,6 +40,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
             </div>
             <FacebookPixelWrapper />
             <PerfilOnboarding />
+            <AppInstallPrompt />
         </div>
     );
 }

@@ -16,7 +16,8 @@ import {
     ClipboardCheck,
     ShieldCheck,
     Menu,
-    Package
+    Package,
+    Download
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -147,9 +148,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         <div className="px-3 pb-2">
                             <button
                                 onClick={handleInstallClick}
-                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white bg-telmex-blue hover:bg-telmex-blue/80 transition-all duration-200 shadow-lg"
+                                className="w-full flex items-center justify-center gap-3 px-3 py-3 rounded-xl text-sm font-bold text-white bg-telmex-blue hover:bg-telmex-blue/80 transition-all duration-200 shadow-lg border-none"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <Download size={20} />
                                 Instalar App
                             </button>
                         </div>
