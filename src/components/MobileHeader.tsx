@@ -18,7 +18,7 @@ export function MobileHeader({ onMenuClick }: MobileHeaderProps) {
                     <Menu size={24} />
                 </button>
                 <h1 className="text-xl font-bold tracking-tight">
-                    TELMEX Panel
+                    RUIZ TELMEX
                 </h1>
             </div>
         </header>

@@ -61,7 +61,7 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-telmex-darkblue p-4">
             <div className="max-w-md w-full animate-in fade-in zoom-in duration-500">
                 <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-white mb-2">TELMEX Panel</h1>
+                    <h1 className="text-4xl font-bold text-white mb-2">RUIZ TELMEX</h1>
                     <p className="text-blue-200">Ingresa para gestionar tus ventas en la nube</p>
                 </div>
 
@@ -131,7 +131,7 @@ export default function LoginPage() {
                 </Card>
 
                 <p className="text-center text-blue-300/50 text-xs mt-8">
-                    &copy; 2026 Misael Robles - Panel de Ventas Pro
+                    &copy; 2026 RUIZ TELMEX - Panel de Ventas Pro
                 </p>
             </div>
         </div>
