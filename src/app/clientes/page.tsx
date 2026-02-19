@@ -288,10 +288,18 @@ export default function ClientesPage() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 text-xs md:text-sm">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 text-xs md:text-sm">
                                         <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
                                             <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Teléfono (TT)</p>
                                             <p className="font-medium text-gray-900 break-all">{cliente.no_tt}</p>
+                                        </div>
+                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Dirección</p>
+                                            <p className="font-medium text-gray-900 truncate">
+                                                {cliente.calle} {cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''}
+                                                {cliente.mz ? ` Mz ${cliente.mz}` : ''} {cliente.lt ? ` Lt ${cliente.lt}` : ''}
+                                                <span className="block text-[10px] text-gray-500">{cliente.colonia}</span>
+                                            </p>
                                         </div>
                                         <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
                                             <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Referencias</p>
@@ -301,18 +309,12 @@ export default function ClientesPage() {
                                             )}
                                         </div>
                                         <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
-                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Correo</p>
-                                            <p className="font-medium text-gray-900 break-all">{cliente.correo}</p>
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Paquete</p>
+                                            <p className="font-medium text-gray-900 truncate">{cliente.paquete}</p>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-2 sm:block sm:bg-transparent sm:p-0">
-                                            <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
-                                                <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Paquete</p>
-                                                <p className="font-medium text-gray-900 truncate">{cliente.paquete}</p>
-                                            </div>
-                                            <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
-                                                <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Comisión</p>
-                                                <p className="font-black text-telmex-blue text-base">{formatearMoneda(cliente.comision)}</p>
-                                            </div>
+                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Comisión</p>
+                                            <p className="font-black text-telmex-blue text-base">{formatearMoneda(cliente.comision)}</p>
                                         </div>
                                     </div>
 

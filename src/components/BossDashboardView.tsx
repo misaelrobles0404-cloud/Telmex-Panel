@@ -170,6 +170,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                             <thead>
                                                 <tr className="bg-gray-50 text-gray-500 text-[10px] uppercase tracking-widest font-black">
                                                     <th className="px-6 py-4">Cliente / Contacto</th>
+                                                    <th className="px-6 py-4">Dirección</th>
                                                     <th className="px-6 py-4">Fecha Mov.</th>
                                                     <th className="px-6 py-4">Datos Portal</th>
                                                     <th className="px-6 py-4">Servicio / Paquete</th>
@@ -187,6 +188,14 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                             <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-0.5">
                                                                 <Phone size={10} />
                                                                 {cliente.no_tt}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="text-[11px] text-gray-700 font-medium">
+                                                                {cliente.calle} {cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''}
+                                                            </div>
+                                                            <div className="text-[10px] text-gray-500 mt-0.5 font-bold uppercase">
+                                                                {cliente.mz ? `Mz ${cliente.mz}` : ''} {cliente.lt ? `Lt ${cliente.lt}` : ''} {cliente.colonia}
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
