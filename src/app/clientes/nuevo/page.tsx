@@ -28,6 +28,8 @@ export default function NuevoClientePage() {
         calle: '',
         numeroExterior: '',
         numeroInterior: '',
+        mz: '',
+        lt: '',
         colonia: '',
         cp: '',
         cd: '',
@@ -138,6 +140,8 @@ export default function NuevoClientePage() {
             calle: formData.calle || 'PENDIENTE',
             numero_exterior: formData.numeroExterior,
             numero_interior: formData.numeroInterior,
+            mz: formData.mz,
+            lt: formData.lt,
             colonia: formData.colonia || 'PENDIENTE',
             cp: formData.cp || '00000',
             cd: formData.cd || 'PENDIENTE',
@@ -194,6 +198,8 @@ export default function NuevoClientePage() {
             calle: '',
             numeroExterior: '',
             numeroInterior: '',
+            mz: '',
+            lt: '',
             colonia: '',
             cp: '',
             cd: '',
@@ -253,6 +259,8 @@ export default function NuevoClientePage() {
             calle: formData.calle,
             numero_exterior: formData.numeroExterior,
             numero_interior: formData.numeroInterior,
+            mz: formData.mz,
+            lt: formData.lt,
             colonia: formData.colonia,
             cp: formData.cp,
             cd: formData.cd,
@@ -549,6 +557,20 @@ export default function NuevoClientePage() {
                                         label="Número Interior"
                                         value={formData.numeroInterior}
                                         onChange={(e) => setFormData({ ...formData, numeroInterior: e.target.value })}
+                                        placeholder="Opcional"
+                                    />
+
+                                    <Input
+                                        label="Manzana (Mz)"
+                                        value={formData.mz}
+                                        onChange={(e) => setFormData({ ...formData, mz: e.target.value })}
+                                        placeholder="Opcional"
+                                    />
+
+                                    <Input
+                                        label="Lote (Lt)"
+                                        value={formData.lt}
+                                        onChange={(e) => setFormData({ ...formData, lt: e.target.value })}
                                         placeholder="Opcional"
                                     />
 

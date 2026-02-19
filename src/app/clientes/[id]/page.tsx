@@ -234,7 +234,7 @@ IDENTIFICACIÓN: ${identificacion}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
-MANZ:    LOT:    EDF:    DPTO:
+MZ: ${cliente.mz || ''}    LT: ${cliente.lt || ''}
 ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
@@ -271,6 +271,7 @@ IDENTIFICACIÓN: ${identificacion}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
+MZ: ${cliente.mz || ''}    LT: ${cliente.lt || ''}
 ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
@@ -306,6 +307,7 @@ IDENTIFICACIÓN: ${identificacion}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
+MZ: ${cliente.mz || ''}    LT: ${cliente.lt || ''}
 ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
 COLONIA: ${cliente.colonia.toUpperCase()}
@@ -344,6 +346,7 @@ CORREO:
 ${cliente.correo}
 —————————————————
 CALLE: ${cliente.calle.toUpperCase()}
+MZ: ${cliente.mz || ''}    LT: ${cliente.lt || ''}
 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} 
 ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
 ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
@@ -416,7 +419,7 @@ Te escribo para dar seguimiento a tu trámite de internet TELMEX. 🚀
 Tenemos estos datos registrados:
 📦 Paquete: ${paquete}
 💰 Precio: $${cliente.precio_mensual}/mes
-📍 Dirección: ${direccion}
+📍 Dirección: ${direccion}${cliente.mz ? ` Mz ${cliente.mz}` : ''}${cliente.lt ? ` Lt ${cliente.lt}` : ''}
 
 ¿Te gustaría que procedamos con la instalación/validación? 🤔
 Solo necesito que me confirmes para agendar.
@@ -716,6 +719,18 @@ Solo necesito que me confirmes para agendar.
                                                     title="Copiar Número Interior"
                                                 >
                                                     Int. {cliente.numero_interior}
+                                                </span>
+                                            </>
+                                        )}
+                                        {(cliente.mz || cliente.lt) && (
+                                            <>
+                                                ,{" "}
+                                                <span
+                                                    onClick={() => copiarAlPortapapeles(`Mz ${cliente.mz || ''} Lt ${cliente.lt || ''}`, 'Mz y Lt')}
+                                                    className="cursor-pointer hover:text-telmex-blue transition-colors hover:underline decoration-dotted"
+                                                    title="Copiar Manzana y Lote"
+                                                >
+                                                    {cliente.mz ? `Mz ${cliente.mz}` : ''} {cliente.lt ? `Lt ${cliente.lt}` : ''}
                                                 </span>
                                             </>
                                         )}
