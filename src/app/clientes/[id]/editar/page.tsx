@@ -370,8 +370,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                             <Input label="Calle" value={formData.calle} onChange={(e) => setFormData({ ...formData, calle: e.target.value })} required />
                             <Input label="Número Exterior" value={formData.numeroExterior} onChange={(e) => setFormData({ ...formData, numeroExterior: e.target.value })} placeholder="Opcional" />
                             <Input label="Número Interior" value={formData.numeroInterior} onChange={(e) => setFormData({ ...formData, numeroInterior: e.target.value })} placeholder="Opcional" />
-                            <Input label="Manzana (Mz)" value={formData.mz} onChange={(e) => setFormData({ ...formData, mz: e.target.value })} placeholder="Opcional" />
-                            <Input label="Lote (Lt)" value={formData.lt} onChange={(e) => setFormData({ ...formData, lt: e.target.value })} placeholder="Opcional" />
+                            <Input label="Manzana (Mz) (Opcional)" value={formData.mz} onChange={(e) => setFormData({ ...formData, mz: e.target.value })} placeholder="Ej: 15" />
+                            <Input label="Lote (Lt) (Opcional)" value={formData.lt} onChange={(e) => setFormData({ ...formData, lt: e.target.value })} placeholder="Ej: 02" />
                             <Input label="Colonia" value={formData.colonia} onChange={(e) => setFormData({ ...formData, colonia: e.target.value })} required />
                             <Input label="CP" value={formData.cp} onChange={(e) => setFormData({ ...formData, cp: e.target.value })} required />
                             <Input label="Ciudad" value={formData.cd} onChange={(e) => setFormData({ ...formData, cd: e.target.value })} required />

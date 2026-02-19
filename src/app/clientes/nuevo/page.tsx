@@ -561,17 +561,17 @@ export default function NuevoClientePage() {
                                     />
 
                                     <Input
-                                        label="Manzana (Mz)"
+                                        label="Manzana (Mz) (Opcional)"
                                         value={formData.mz}
                                         onChange={(e) => setFormData({ ...formData, mz: e.target.value })}
-                                        placeholder="Opcional"
+                                        placeholder="Ej: 15"
                                     />
 
                                     <Input
-                                        label="Lote (Lt)"
+                                        label="Lote (Lt) (Opcional)"
                                         value={formData.lt}
                                         onChange={(e) => setFormData({ ...formData, lt: e.target.value })}
-                                        placeholder="Opcional"
+                                        placeholder="Ej: 02"
                                     />
 
                                     <Input
