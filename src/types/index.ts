@@ -78,7 +78,7 @@ export interface Cliente {
     fecha_instalacion?: string; // Fecha cuando se marcó como vendido (para corte de comisiones)
 
     // Comisión
-    comision: number; // 250 o 300
+    comision: number; // Fija en 300 pesos por venta
 
     // Notas
     notas: string;

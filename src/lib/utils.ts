@@ -29,15 +29,7 @@ export function clasificarServicio(
 // ============================================
 
 export function calcularComision(tipoServicio: TipoServicio): number {
-    switch (tipoServicio) {
-        case 'linea_nueva':
-            return 250;
-        case 'portabilidad':
-        case 'winback':
-            return 300;
-        default:
-            return 0;
-    }
+    return 300;
 }
 
 // ============================================

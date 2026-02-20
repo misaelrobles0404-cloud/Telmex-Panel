@@ -163,15 +163,6 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                     <Key className="h-5 w-5 text-telmex-blue" />
                     {ciudad ? `Claves para ${clavesFiltradas[0]?.ciudad}` : 'Claves de Acceso Portal'}
                 </CardTitle>
-                {!ciudad && (
-                    <input
-                        type="text"
-                        placeholder="Buscar ciudad..."
-                        className="w-full mt-2 px-3 py-1 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-telmex-blue"
-                        value={filtro}
-                        onChange={(e) => setFiltro(e.target.value)}
-                    />
-                )}
                 {bloqueado && (
                     <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100">
                         <Lock size={12} />
