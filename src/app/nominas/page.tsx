@@ -113,7 +113,7 @@ export default function NominasPage() {
 
     const calcularComision = (tipo: string) => {
         if (tipo === 'portabilidad' || tipo === 'winback') return 300;
-        return 250;
+        return 300;
     };
 
     const generarNomina = async () => {

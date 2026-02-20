@@ -264,7 +264,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                                     ? formatearMoneda(
                                                                         (cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback')
                                                                             ? 300
-                                                                            : 250
+                                                                            : 300
                                                                     )
                                                                     : formatearMoneda(0)
                                                                 }

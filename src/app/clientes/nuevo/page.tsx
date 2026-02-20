@@ -417,7 +417,7 @@ export default function NuevoClientePage() {
                             <p className="text-sm text-gray-500">
                                 Cliente sin servicio actual o instalación nueva.
                             </p>
-                            <p className="text-telmex-blue font-bold mt-2 text-lg">$250 MXN</p>
+                            <p className="text-telmex-blue font-bold mt-2 text-lg">$300 MXN</p>
                         </div>
 
                         <div
