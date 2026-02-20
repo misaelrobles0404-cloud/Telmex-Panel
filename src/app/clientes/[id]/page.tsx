@@ -425,19 +425,24 @@ Solo necesito que me confirmes para agendar.
         });
     };
 
-    const copiarFormatoMOS = () => {
+    const copiarMensajeAlta = () => {
         if (!cliente) return;
 
-        const curp = cliente.curp || 'PENDIENTE';
-        const tt = cliente.no_tt || 'PENDIENTE';
+        const nombre = cliente.nombre.toUpperCase();
+        const descripcionServicio = !cliente.incluye_telefono ? 'internet' : 'internet y telefonía';
+        const precio = cliente.precio_mensual;
 
-        const formato = `CURP ${curp.toUpperCase()} EMPRESA MOS PROYECTOS CLIENTE SOLICITA SE COMUNIQUE AL NUMERO TT ${tt}`;
+        const mensaje = `Buenas tardes
+Estamos dando de alta un servicio de telmex para ${nombre}
+Un favor para continuar con la solicitud se está solicitando un servicio de (${descripcionServicio} de ${precio})
+Con gastos de instalación de 1600 qué se difieren a 1200 a 12 meses de 100 y un pago inicial de 400 qué puede pagar en su primer recibo
+Acepta el servicio?`;
 
-        navigator.clipboard.writeText(formato).then(() => {
-            mostrarToast('Formato MOS copiado');
+        navigator.clipboard.writeText(mensaje).then(() => {
+            mostrarToast('Mensaje de Alta copiado');
         }).catch(err => {
             console.error('Error al copiar:', err);
-            alert('Error al copiar el formato');
+            alert('Error al copiar el mensaje');
         });
     };
 
@@ -544,10 +549,10 @@ Solo necesito que me confirmes para agendar.
 
                     <Button
                         variant="secondary"
-                        onClick={copiarFormatoMOS}
+                        onClick={copiarMensajeAlta}
                         className="bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200 flex-1 md:flex-none"
                     >
-                        <Copy size={16} className="mr-1" /> Formato MOS
+                        <Copy size={16} className="mr-1" /> Confirmar Alta
                     </Button>
 
                     <Button variant="secondary" onClick={() => router.push(`/clientes/${cliente.id}/editar`)} className="flex-1 md:flex-none">
