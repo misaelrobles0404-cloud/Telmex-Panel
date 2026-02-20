@@ -223,7 +223,6 @@ DATOS PERSONALES:
 🔹 REFERENCIA 1: ${cliente.no_ref}
 🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
 🔹 CORREO: ${cliente.correo}
-🔹 IDENTIFICACIÓN: ${identificacion}
 
 DOMICILIO:
 🔹 CALLE: ${cliente.calle.toUpperCase()}
@@ -254,7 +253,6 @@ DATOS PERSONALES (PORTABILIDAD):
 🔹 REFERENCIA 1: ${cliente.no_ref}
 🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
 🔹 CORREO: ${cliente.correo}
-🔹 IDENTIFICACIÓN: ${identificacion}
 
 DATOS DE PORTABILIDAD:
 🔹 NIP: ${cliente.nip_portabilidad || 'SOLICITADO'}
@@ -290,7 +288,6 @@ DATOS PERSONALES (WIN-BACK):
 🔹 REFERENCIA 1: ${cliente.no_ref}
 🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
 🔹 CORREO: ${cliente.correo}
-🔹 IDENTIFICACIÓN: ${identificacion}
 
 DATOS DE PORTABILIDAD:
 🔹 NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
@@ -330,7 +327,6 @@ DATOS PERSONALES:
 🔹 REFERENCIA 1: ${cliente.no_ref}
 🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
 🔹 CORREO: ${cliente.correo}
-🔹 IDENTIFICACIÓN: ${identificacion}
 
 DOMICILIO:
 🔹 CALLE: ${cliente.calle.toUpperCase()}
