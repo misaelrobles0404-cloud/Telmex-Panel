@@ -214,9 +214,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         // Función para aplicar negritas tipo WhatsApp
         const b = (text: string) => `*${text}*`;
 
-        const formato = `${b(nombrePromotor.toUpperCase())}
-
-🔹 ${b('FACILIDADES:')}
+        const formato = `🔹 ${b('NOMBRE DEL PROMOTOR:')} ${b(nombrePromotor.toUpperCase())}
 
 ${b('DATOS PERSONALES')}
 🔹 ${b('NOMBRE DEL CLIENTE:')} ${cliente.nombre.toUpperCase()}
