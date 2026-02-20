@@ -209,147 +209,38 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const generarFormatoSIAC = () => {
         if (!cliente) return;
 
-        let formato = '';
         const nombrePromotor = perfilUsuario?.nombre_completo || "PROMOTOR NO REGISTRADO";
-        const promotorLine = `NOMBRE DE PROMOTOR: ${nombrePromotor.toUpperCase()}`;
-        const identificacion = cliente.ine ? `INE: ${cliente.ine}` : `CURP: ${cliente.curp || 'PENDIENTE'}`;
 
-        if (cliente.tipo_cliente === 'pyme') {
-            formato = `PROMOTOR: ${nombrePromotor.toUpperCase()}
+        // Función para aplicar negritas tipo WhatsApp
+        const b = (text: string) => `*${text}*`;
 
-DATOS PERSONALES:
-🔹 ${cliente.nombre.toUpperCase()}
-🔹 TITULAR: ${cliente.no_tt}
-🔹 REFERENCIA 1: ${cliente.no_ref}
-🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
-🔹 CORREO: ${cliente.correo}
+        const formato = `${b(nombrePromotor.toUpperCase())}
 
-DOMICILIO:
-🔹 CALLE: ${cliente.calle.toUpperCase()}
-🔹 MZ Y LT: ${cliente.mz || ''} ${cliente.lt || ''}
-🔹 N. EXT: ${cliente.numero_exterior || ''}
-🔹 N. INT: ${cliente.numero_interior || ''}
-🔹 ENTRE CALLES: ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
-🔹 COLONIA: ${cliente.colonia.toUpperCase()}
-🔹 CIUDAD: ${cliente.cd.toUpperCase()}
-🔹 ESTADO: ${cliente.estado.toUpperCase()}
-🔹 CP: ${cliente.cp}
+🔹 ${b('FACILIDADES:')}
 
-PAQUETE A CONTRATAR:
-🔹 ${cliente.paquete} ($${cliente.precio_mensual + 100})
-🏷️ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
+${b('DATOS PERSONALES')}
+🔹 ${b('NOMBRE DEL CLIENTE:')} ${cliente.nombre.toUpperCase()}
+🔹 ${b('NUMERO TELEFONICO:')} ${cliente.no_tt}
+🔹 ${b('NUMERO DE REFERENCIA:')} ${cliente.no_ref}
+🔹 ${b('CORREO ELECTRÓNICO:')} ${cliente.correo}
 
-🔹 GASTOS DE INSTALACIÓN:
-$400 INICIALES Y 12 MESES DE $100 (TOTAL $1,600)
+${b('DOMICILIO')}
+🔹 ${b('CALLE:')} ${cliente.calle.toUpperCase()}
+🔹 ${b('MZ Y LT:')} ${cliente.mz || ''} ${cliente.lt || ''}
+🔹 ${b('N. EXT:')} ${cliente.numero_exterior || ''}
+🔹 ${b('N. INT:')} ${cliente.numero_interior || ''}
+🔹 ${b('ENTRE CALLES:')} ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
+🔹 ${b('COLONIA:')} ${cliente.colonia.toUpperCase()}
+🔹 ${b('DELEGACIÓN:')} ${cliente.cd.toUpperCase()}
+🔹 ${b('CODIGO POSTAL:')} ${cliente.cp}
 
-🔹 HORARIO SUGERIDO:
-🔹 FECHA SUGERIDA:`;
-        } else if (cliente.tipo_servicio === 'portabilidad') {
-            formato = `PROMOTOR: ${nombrePromotor.toUpperCase()}
+${b('PAQUETE A CONTRATAR')}
+🔹 ${b('PAQUETE:')} ${cliente.paquete.toUpperCase()} CON ${cliente.velocidad} MEGAS DE VELOCIDAD
 
-DATOS PERSONALES (PORTABILIDAD):
-🔹 ${cliente.nombre.toUpperCase()}
-🔹 TITULAR: ${cliente.no_tt}
-🔹 REFERENCIA 1: ${cliente.no_ref}
-🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
-🔹 CORREO: ${cliente.correo}
+🔹️ ${b('GASTOS DE INSTALACIÓN:')} 400 INICIALES Y 1200 DIFERIDOS A CARGO A SU RECIBO TELMEX
 
-DATOS DE PORTABILIDAD:
-🔹 NIP: ${cliente.nip_portabilidad || 'SOLICITADO'}
-🔹 NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
-🔹 COMPETIDOR: ${cliente.proveedor_actual?.toUpperCase() || 'OTRO'}
-
-DOMICILIO:
-🔹 CALLE: ${cliente.calle.toUpperCase()}
-🔹 MZ Y LT: ${cliente.mz || ''} ${cliente.lt || ''}
-🔹 N. EXT: ${cliente.numero_exterior || ''}
-🔹 N. INT: ${cliente.numero_interior || ''}
-🔹 ENTRE CALLES: ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
-🔹 COLONIA: ${cliente.colonia.toUpperCase()}
-🔹 CIUDAD: ${cliente.cd.toUpperCase()}
-🔹 ESTADO: ${cliente.estado.toUpperCase()}
-🔹 CP: ${cliente.cp}
-
-PAQUETE A CONTRATAR:
-🔹 ${cliente.velocidad} Mbps - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
-🏷️ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
-
-🔹 GASTOS DE INSTALACIÓN:
-SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION
-
-🔹 HORARIO SUGERIDO:
-🔹 FECHA SUGERIDA:`;
-        } else if (cliente.tipo_servicio === 'winback') {
-            formato = `PROMOTOR: ${nombrePromotor.toUpperCase()}
-
-DATOS PERSONALES (WIN-BACK):
-🔹 ${cliente.nombre.toUpperCase()}
-🔹 TITULAR: ${cliente.no_tt}
-🔹 REFERENCIA 1: ${cliente.no_ref}
-🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
-🔹 CORREO: ${cliente.correo}
-
-DATOS DE PORTABILIDAD:
-🔹 NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
-🔹 COMPETIDOR: ${cliente.proveedor_actual ? cliente.proveedor_actual.toUpperCase() : ''}
-
-DOMICILIO:
-🔹 CALLE: ${cliente.calle.toUpperCase()}
-🔹 MZ Y LT: ${cliente.mz || ''} ${cliente.lt || ''}
-🔹 N. EXT: ${cliente.numero_exterior || ''}
-🔹 N. INT: ${cliente.numero_interior || ''}
-🔹 ENTRE CALLES: ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
-🔹 COLONIA: ${cliente.colonia.toUpperCase()}
-🔹 CIUDAD: ${cliente.cd.toUpperCase()}
-🔹 ESTADO: ${cliente.estado.toUpperCase()}
-🔹 CP: ${cliente.cp}
-
-PAQUETE A CONTRATAR:
-🔹 ${cliente.velocidad} Mbps - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
-🏷️ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
-
-🔹 GASTOS DE INSTALACIÓN:
-SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION
-
-🔹 HORARIO SUGERIDO:
-🔹 FECHA SUGERIDA:`;
-        } else {
-            // Formato para Línea Nueva
-            // Usamos el campo dinámico incluye_telefono
-            const esSoloInternet = !cliente.incluye_telefono;
-            const descripcionServicio = esSoloInternet ? 'SOLO INTERNET' : 'INTERNET Y TELEFONÍA';
-
-            formato = `PROMOTOR: ${nombrePromotor.toUpperCase()}
-
-DATOS PERSONALES:
-🔹 ${cliente.nombre.toUpperCase()}
-🔹 TITULAR: ${cliente.no_tt}
-🔹 REFERENCIA 1: ${cliente.no_ref}
-🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
-🔹 CORREO: ${cliente.correo}
-
-DOMICILIO:
-🔹 CALLE: ${cliente.calle.toUpperCase()}
-🔹 MZ Y LT: ${cliente.mz || ''} ${cliente.lt || ''}
-🔹 N. EXT: ${cliente.numero_exterior || ''}
-🔹 N. INT: ${cliente.numero_interior || ''}
-🔹 ENTRE CALLES: ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
-🔹 COLONIA: ${cliente.colonia.toUpperCase()}
-🔹 CIUDAD: ${cliente.cd.toUpperCase()}
-🔹 ESTADO: ${cliente.estado.toUpperCase()}
-🔹 CP: ${cliente.cp}
-
-PAQUETE A CONTRATAR:
-🔹 ${cliente.paquete} ($${cliente.precio_mensual + 100})
-📡 ${descripcionServicio}
-🏷️ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
-
-🔹 GASTOS DE INSTALACIÓN:
-$400 INICIALES Y 12 MESES DE $100 (TOTAL $1,600)
-
-🔹 HORARIO SUGERIDO:
-🔹 FECHA SUGERIDA:`;
-        }
+🔹 ${b('HORARIO SUGERIDO:')}
+🔹 ${b('FECHA SUGERIDA:')} INSTALACIÓN INMEDIATA`;
 
         navigator.clipboard.writeText(formato).then(() => {
             mostrarToast('¡Formato copiado!');
