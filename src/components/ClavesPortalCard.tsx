@@ -159,9 +159,9 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
     return (
         <Card className={`h-full ${modo === 'detalle' ? 'bg-indigo-50 border-indigo-200' : ''}`}>
             <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                    <Key className="h-5 w-5 text-telmex-blue" />
-                    {ciudad ? `Claves para ${clavesFiltradas[0]?.ciudad}` : 'Claves de Acceso Portal'}
+                <CardTitle className="text-md flex items-center gap-2">
+                    <Key className="h-4 w-4 text-telmex-blue" />
+                    Clave Universal de Captura
                 </CardTitle>
                 {bloqueado && (
                     <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100">

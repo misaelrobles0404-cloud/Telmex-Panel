@@ -1018,6 +1018,35 @@ Solo necesito que me confirmes para agendar.
                                 </div>
                             )}
 
+                            {/* Claves del Portal */}
+                            <div className="pt-4 border-t border-gray-100">
+                                <ClavesPortalCard
+                                    modo="detalle"
+                                    claveSeleccionada={cliente.usuario_portal_asignado}
+                                    bloqueado={!!cliente.folio_siac}
+                                    onSeleccionar={async (usuarioId) => {
+                                        if (!cliente) return;
+
+                                        // Si ya está seleccionado, deseleccionar (opcional) o no hacer nada
+                                        if (cliente.usuario_portal_asignado === usuarioId) return;
+
+                                        const clienteActualizado = {
+                                            ...cliente,
+                                            usuario_portal_asignado: usuarioId,
+                                            actualizado_en: new Date().toISOString()
+                                        };
+
+                                        try {
+                                            await guardarCliente(clienteActualizado);
+                                            setCliente(clienteActualizado);
+                                        } catch (error: any) {
+                                            console.error('Error al guardar selección:', error);
+                                            alert(`Error al guardar selección: ${error.message || JSON.stringify(error)}`);
+                                        }
+                                    }}
+                                />
+                            </div>
+
                             {(cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback') && (
                                 <>
                                     <div className="pt-2 border-t border-gray-100">
@@ -1038,35 +1067,7 @@ Solo necesito que me confirmes para agendar.
                 </div>
             </div>
 
-            {/* Claves del Portal (Si aplica) */}
-            <div className="mt-6">
-                <ClavesPortalCard
-                    ciudad={cliente.cd}
-                    modo="detalle"
-                    claveSeleccionada={cliente.usuario_portal_asignado}
-                    bloqueado={!!cliente.folio_siac}
-                    onSeleccionar={async (usuarioId) => {
-                        if (!cliente) return;
 
-                        // Si ya está seleccionado, deseleccionar (opcional) o no hacer nada
-                        if (cliente.usuario_portal_asignado === usuarioId) return;
-
-                        const clienteActualizado = {
-                            ...cliente,
-                            usuario_portal_asignado: usuarioId,
-                            actualizado_en: new Date().toISOString()
-                        };
-
-                        try {
-                            await guardarCliente(clienteActualizado);
-                            setCliente(clienteActualizado);
-                        } catch (error: any) {
-                            console.error('Error al guardar selección:', error);
-                            alert(`Error al guardar selección: ${error.message || JSON.stringify(error)}`);
-                        }
-                    }}
-                />
-            </div>
 
             {/* Modal de Documentos */}
             <Modal

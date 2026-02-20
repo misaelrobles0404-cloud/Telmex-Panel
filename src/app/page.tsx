@@ -25,6 +25,7 @@ import { BossDashboardView } from '@/components/BossDashboardView';
 import { PerfilUsuario } from '@/types';
 import { InstalacionAlert } from '@/components/InstalacionAlert';
 import { AnnouncementBanner } from '@/components/AnnouncementBanner';
+import { ClavesPortalCard } from '@/components/ClavesPortalCard';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -316,6 +317,13 @@ export default function DashboardPage() {
                     </>
                 )}
             </div>
+
+            {/* Acceso a Claves de Portal (Solo para empleados) */}
+            {user?.email !== 'ruizmosinfinitum2025@gmail.com' && (
+                <div className="w-full">
+                    <ClavesPortalCard modo="detalle" />
+                </div>
+            )}
 
             {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Súper Boss */}
             <div>
