@@ -215,152 +215,144 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         const identificacion = cliente.ine ? `INE: ${cliente.ine}` : `CURP: ${cliente.curp || 'PENDIENTE'}`;
 
         if (cliente.tipo_cliente === 'pyme') {
-            formato = `🏢 **PLANTILLA PARA CLIENTE PYME**
-👤 ${promotorLine}
-—————————————————
-📅 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
-—————————————————
+            formato = `PROMOTOR: ${nombrePromotor.toUpperCase()}
+
+DATOS PERSONALES:
+🔹 ${cliente.nombre.toUpperCase()}
+🔹 TITULAR: ${cliente.no_tt}
+🔹 REFERENCIA 1: ${cliente.no_ref}
+🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
+🔹 CORREO: ${cliente.correo}
+🔹 IDENTIFICACIÓN: ${identificacion}
+
+DOMICILIO:
+🔹 CALLE: ${cliente.calle.toUpperCase()}
+🔹 MZ Y LT: ${cliente.mz || ''} ${cliente.lt || ''}
+🔹 N. EXT: ${cliente.numero_exterior || ''}
+🔹 N. INT: ${cliente.numero_interior || ''}
+🔹 ENTRE CALLES: ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
+🔹 COLONIA: ${cliente.colonia.toUpperCase()}
+🔹 CIUDAD: ${cliente.cd.toUpperCase()}
+🔹 ESTADO: ${cliente.estado.toUpperCase()}
+🔹 CP: ${cliente.cp}
+
+PAQUETE A CONTRATAR:
+🔹 ${cliente.paquete} ($${cliente.precio_mensual + 100})
 🏷️ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
-—————————————————
-👤 NOMBRE DE CLIENTE: 
-${cliente.nombre.toUpperCase()}
-—————————————————
-🆔 IDENTIFICACIÓN: ${identificacion}
-—————————————————
-📱 NUM. TITULAR:  ${cliente.no_tt}
-📞 NUM. REFERENCIA 1: ${cliente.no_ref}
-📞 NUM. REFERENCIA 2: ${cliente.no_ref_2 || ''}
-📧 CORREO: ${cliente.correo}
-—————————————————
-📍 CALLE: ${cliente.calle.toUpperCase()}
-🏠 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
-🧱 MZ: ${cliente.mz || ''}    🧱 LT: ${cliente.lt || ''}
-🛣️ ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
-🛣️ ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
-🏘️ COLONIA: ${cliente.colonia.toUpperCase()}
-📮 CP: ${cliente.cp}
-🏙️ CIUDAD: ${cliente.cd.toUpperCase()}
-🌍 ESTADO: ${cliente.estado.toUpperCase()}
-—————————————————
-📦 PAQUETE COMERCIAL: ${cliente.paquete} ($${cliente.precio_mensual + 100})
-—————————————————
-💰 GASTOS DE INSTALACION
-☐ $400 DE PAGO INICIAL & 12 MESES DE $100 (TOTAL) $1,600`;
+
+🔹 GASTOS DE INSTALACIÓN:
+$400 INICIALES Y 12 MESES DE $100 (TOTAL $1,600)
+
+🔹 HORARIO SUGERIDO:
+🔹 FECHA SUGERIDA:`;
         } else if (cliente.tipo_servicio === 'portabilidad') {
-            formato = `📲 **PLANTILLA PARA PORTABILIDAD**
-👤 ${promotorLine}
-—————————————————
-📅 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
-—————————————————
+            formato = `PROMOTOR: ${nombrePromotor.toUpperCase()}
+
+DATOS PERSONALES (PORTABILIDAD):
+🔹 ${cliente.nombre.toUpperCase()}
+🔹 TITULAR: ${cliente.no_tt}
+🔹 REFERENCIA 1: ${cliente.no_ref}
+🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
+🔹 CORREO: ${cliente.correo}
+🔹 IDENTIFICACIÓN: ${identificacion}
+
+DATOS DE PORTABILIDAD:
+🔹 NIP: ${cliente.nip_portabilidad || 'SOLICITADO'}
+🔹 NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
+🔹 COMPETIDOR: ${cliente.proveedor_actual?.toUpperCase() || 'OTRO'}
+
+DOMICILIO:
+🔹 CALLE: ${cliente.calle.toUpperCase()}
+🔹 MZ Y LT: ${cliente.mz || ''} ${cliente.lt || ''}
+🔹 N. EXT: ${cliente.numero_exterior || ''}
+🔹 N. INT: ${cliente.numero_interior || ''}
+🔹 ENTRE CALLES: ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
+🔹 COLONIA: ${cliente.colonia.toUpperCase()}
+🔹 CIUDAD: ${cliente.cd.toUpperCase()}
+🔹 ESTADO: ${cliente.estado.toUpperCase()}
+🔹 CP: ${cliente.cp}
+
+PAQUETE A CONTRATAR:
+🔹 ${cliente.velocidad} Mbps - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
 🏷️ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
-—————————————————
-🔄 **PORTABILIDAD**
-🔑 NIP: ${cliente.nip_portabilidad || 'SOLICITADO'}
-📱 NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
-🏢 ((COMPETIDOR)): ${cliente.proveedor_actual?.toUpperCase() || 'OTRO'}
-—————————————————
-👤 NOMBRE DE CLIENTE: 
-${cliente.nombre.toUpperCase()}
-—————————————————
-🆔 IDENTIFICACIÓN: ${identificacion}
-—————————————————
-📱 NUM. TITULAR:  ${cliente.no_tt}
-📞 NUM. REFERENCIA 1: ${cliente.no_ref}
-📞 NUM. REFERENCIA 2: ${cliente.no_ref_2 || ''}
-📧 CORREO: ${cliente.correo}
-—————————————————
-📍 CALLE: ${cliente.calle.toUpperCase()}
-🏠 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
-🧱 MZ: ${cliente.mz || ''}    🧱 LT: ${cliente.lt || ''}
-🛣️ ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
-🛣️ ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
-🏘️ COLONIA: ${cliente.colonia.toUpperCase()}
-📮 CP: ${cliente.cp}
-🏙️ CIUDAD: ${cliente.cd.toUpperCase()}
-🌍 ESTADO: ${cliente.estado.toUpperCase()}
-—————————————————
-📦 PAQUETE: ${cliente.velocidad} Mbps - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
-—————————————————
-💰 GASTOS DE INSTALACION
-✅ ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
+
+🔹 GASTOS DE INSTALACIÓN:
+SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION
+
+🔹 HORARIO SUGERIDO:
+🔹 FECHA SUGERIDA:`;
         } else if (cliente.tipo_servicio === 'winback') {
-            formato = `🔄 **PLANTILLA PARA WIN-BACK (PORTABILIDAD)**
-👤 ${promotorLine}
-—————————————————
-📅 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
-—————————————————
+            formato = `PROMOTOR: ${nombrePromotor.toUpperCase()}
+
+DATOS PERSONALES (WIN-BACK):
+🔹 ${cliente.nombre.toUpperCase()}
+🔹 TITULAR: ${cliente.no_tt}
+🔹 REFERENCIA 1: ${cliente.no_ref}
+🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
+🔹 CORREO: ${cliente.correo}
+🔹 IDENTIFICACIÓN: ${identificacion}
+
+DATOS DE PORTABILIDAD:
+🔹 NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
+🔹 COMPETIDOR: ${cliente.proveedor_actual ? cliente.proveedor_actual.toUpperCase() : ''}
+
+DOMICILIO:
+🔹 CALLE: ${cliente.calle.toUpperCase()}
+🔹 MZ Y LT: ${cliente.mz || ''} ${cliente.lt || ''}
+🔹 N. EXT: ${cliente.numero_exterior || ''}
+🔹 N. INT: ${cliente.numero_interior || ''}
+🔹 ENTRE CALLES: ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
+🔹 COLONIA: ${cliente.colonia.toUpperCase()}
+🔹 CIUDAD: ${cliente.cd.toUpperCase()}
+🔹 ESTADO: ${cliente.estado.toUpperCase()}
+🔹 CP: ${cliente.cp}
+
+PAQUETE A CONTRATAR:
+🔹 ${cliente.velocidad} Mbps - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
 🏷️ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
-—————————————————
-🔄 **PORTABILIDAD: WIN-BACK**
-📱 NUMERO A SER PORTADO: ${cliente.numero_a_portar || 'PENDIENTE'}
-🏢 ((COMPETIDOR)): ${cliente.proveedor_actual ? cliente.proveedor_actual.toUpperCase() : ''}
-—————————————————
-👤 NOMBRE DE CLIENTE: 
-${cliente.nombre.toUpperCase()}
-—————————————————
-🆔 IDENTIFICACIÓN: ${identificacion}
-—————————————————
-📱 NUM. TITULAR:  ${cliente.no_tt}
-📞 NUM. REFERENCIA 1: ${cliente.no_ref}
-📞 NUM. REFERENCIA 2: ${cliente.no_ref_2 || ''}
-📧 CORREO: ${cliente.correo}
-—————————————————
-📍 CALLE: ${cliente.calle.toUpperCase()}
-🏠 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} ${cliente.numero_interior ? `INT ${cliente.numero_interior}` : ''} 
-🧱 MZ: ${cliente.mz || ''}    🧱 LT: ${cliente.lt || ''}
-🛣️ ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
-🛣️ ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
-🏘️ COLONIA: ${cliente.colonia.toUpperCase()}
-📮 CP: ${cliente.cp}
-🏙️ CIUDAD: ${cliente.cd.toUpperCase()}
-🌍 ESTADO: ${cliente.estado.toUpperCase()}
-—————————————————
-📦 PAQUETE: ${cliente.velocidad} Mbps - INTERNET Y TELEFONÍA - $${cliente.precio_mensual}/mes
-—————————————————
-💰 GASTOS DE INSTALACION
-✅ ***SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION***`;
+
+🔹 GASTOS DE INSTALACIÓN:
+SIN GASTO DE INSTALACION, NO APLICA POR PROMOCION
+
+🔹 HORARIO SUGERIDO:
+🔹 FECHA SUGERIDA:`;
         } else {
             // Formato para Línea Nueva
             // Usamos el campo dinámico incluye_telefono
             const esSoloInternet = !cliente.incluye_telefono;
             const descripcionServicio = esSoloInternet ? 'SOLO INTERNET' : 'INTERNET Y TELEFONÍA';
 
-            formato = `✨ **PLANTILLA PARA LÍNEA NUEVA**
-👤 ${promotorLine}
-—————————————————
-📅 FECHA DE CAPTURA: ${new Date().toLocaleDateString('es-MX')}
-—————————————————
+            formato = `PROMOTOR: ${nombrePromotor.toUpperCase()}
+
+DATOS PERSONALES:
+🔹 ${cliente.nombre.toUpperCase()}
+🔹 TITULAR: ${cliente.no_tt}
+🔹 REFERENCIA 1: ${cliente.no_ref}
+🔹 REFERENCIA 2: ${cliente.no_ref_2 || ''}
+🔹 CORREO: ${cliente.correo}
+🔹 IDENTIFICACIÓN: ${identificacion}
+
+DOMICILIO:
+🔹 CALLE: ${cliente.calle.toUpperCase()}
+🔹 MZ Y LT: ${cliente.mz || ''} ${cliente.lt || ''}
+🔹 N. EXT: ${cliente.numero_exterior || ''}
+🔹 N. INT: ${cliente.numero_interior || ''}
+🔹 ENTRE CALLES: ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
+🔹 COLONIA: ${cliente.colonia.toUpperCase()}
+🔹 CIUDAD: ${cliente.cd.toUpperCase()}
+🔹 ESTADO: ${cliente.estado.toUpperCase()}
+🔹 CP: ${cliente.cp}
+
+PAQUETE A CONTRATAR:
+🔹 ${cliente.paquete} ($${cliente.precio_mensual + 100})
+📡 ${descripcionServicio}
 🏷️ FOLIO SIAC: ${cliente.folio_siac || 'PENDIENTE'}
-—————————————————
-👤 NOMBRE DE CLIENTE: 
-${cliente.nombre.toUpperCase()}
-—————————————————
-🆔 IDENTIFICACIÓN: ${identificacion}
-—————————————————
-📱 NUM. TITULAR:  
-${cliente.no_tt}
-📞 NUM. REFERENCIA 1:
-${cliente.no_ref}
-📞 NUM. REFERENCIA 2:
-${cliente.no_ref_2 || ''}
-📧 CORREO:
-${cliente.correo}
-—————————————————
-📍 CALLE: ${cliente.calle.toUpperCase()}
-🧱 MZ: ${cliente.mz || ''}    🧱 LT: ${cliente.lt || ''}
-🏠 NÚMERO: ${cliente.numero_exterior ? cliente.numero_exterior : ''} 
-🛣️ ENTRE 1: ${cliente.entre_calle_1 ? cliente.entre_calle_1.toUpperCase() : ''}
-🛣️ ENTRE 2: ${cliente.entre_calle_2 ? cliente.entre_calle_2.toUpperCase() : ''}
-🏘️ COLONIA: ${cliente.colonia.toUpperCase()}
-📮 CP: ${cliente.cp}
-🏙️ CIUDAD: ${cliente.cd.toUpperCase()}
-🌍 ESTADO: ${cliente.estado.toUpperCase()}
-—————————————————
-📦 PAQUETE: ${cliente.paquete} ($${cliente.precio_mensual + 100})
-📡 ${descripcionServicio} 
-—————————————————
-💰 GASTOS DE INSTALACION
-☐ $400 DE PAGO INICIAL & 12 MESES DE $100 (TOTAL) $1,600`;
+
+🔹 GASTOS DE INSTALACIÓN:
+$400 INICIALES Y 12 MESES DE $100 (TOTAL $1,600)
+
+🔹 HORARIO SUGERIDO:
+🔹 FECHA SUGERIDA:`;
         }
 
         navigator.clipboard.writeText(formato).then(() => {
