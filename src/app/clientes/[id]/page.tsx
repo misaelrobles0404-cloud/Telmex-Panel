@@ -263,7 +263,7 @@ ${b('DOMICILIO')}
 🔹 ${b('N. INT:')} ${cliente.numero_interior || ''}
 🔹 ${b('ENTRE CALLES:')} ${cliente.entre_calle_1 || ''} Y ${cliente.entre_calle_2 || ''}
 🔹 ${b('COLONIA:')} ${cliente.colonia.toUpperCase()}
-🔹 ${b('DELEGACIÓN:')} ${cliente.cd.toUpperCase()}
+🔹 ${b('DELEGACIÓN:')} ${cliente.cd.toUpperCase()}, ${cliente.estado.toUpperCase()}
 🔹 ${b('CODIGO POSTAL:')} ${cliente.cp}
 
 ${b('PAQUETE A CONTRATAR')}
