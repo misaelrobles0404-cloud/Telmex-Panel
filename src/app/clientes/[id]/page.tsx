@@ -217,10 +217,11 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         const line = "———————————————————";
         let formato = "";
 
-        if (cliente.tipo_servicio === 'portabilidad') {
+        if (cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback') {
+            const esWinback = cliente.tipo_servicio === 'winback';
             formato = `${b('PROMOTOR=')} ${b(nombrePromotor.toUpperCase())}
 ${line}
-(${b('PORTABILIDAD')}) 
+(${b(esWinback ? 'WINBACK' : 'PORTABILIDAD')}) 
 ${line}
 ${b('NIP-')} ${cliente.nip_portabilidad || 'GENÉRICO'}
 ${b('VIG-')}
