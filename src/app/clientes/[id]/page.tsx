@@ -233,7 +233,8 @@ ${b('DOMICILIO')}
 🔹 ${b('CODIGO POSTAL:')} ${cliente.cp}
 
 ${b('PAQUETE A CONTRATAR')}
-🔹 ${b('PAQUETE:')} ${cliente.paquete.toUpperCase()} CON ${cliente.velocidad} MEGAS DE VELOCIDAD
+🔹 ${b('PAQUETE:')} ${cliente.paquete.toUpperCase()} CON ${cliente.velocidad} MEGAS ($${cliente.precio_mensual}/mes)
+📡 ${b('SERVICIO:')} ${!cliente.incluye_telefono ? 'SOLO INTERNET' : 'INTERNET Y TELEFONÍA'}
 
 🔹️ ${b('GASTOS DE INSTALACIÓN:')} 400 INICIALES Y 1200 DIFERIDOS A CARGO A SU RECIBO TELMEX
 
