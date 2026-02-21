@@ -214,7 +214,41 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         // Función para aplicar negritas tipo WhatsApp
         const b = (text: string) => `*${text}*`;
 
-        const formato = `🔹 ${b('NOMBRE DEL PROMOTOR:')} ${b(nombrePromotor.toUpperCase())}
+        const line = "———————————————————";
+        let formato = "";
+
+        if (cliente.tipo_servicio === 'portabilidad') {
+            formato = `${b('PROMOTOR=')} ${b(nombrePromotor.toUpperCase())}
+${line}
+(${b('PORTABILIDAD')}) 
+${line}
+${b('NIP-')} ${cliente.nip_portabilidad || 'GENÉRICO'}
+${b('VIG-')}
+${b('#')} ${cliente.numero_a_portar || ''}
+${b('((COMPETIDOR))=')} ${cliente.proveedor_actual?.toUpperCase() || ''}
+${line}
+${b('FECHA - -')}  (${b(formatearFecha(new Date().toISOString()).toUpperCase())})
+${line}
+
+■${b('NUMERO TITULAR-')} ${cliente.no_tt}
+■${b('NUMERO REFERENCIA-')} ${cliente.no_ref}
+■${b('CORREO ELECTRONICO-')} ${cliente.correo}
+${line}
+${b('CALLE-')} ${cliente.calle.toUpperCase()} ${cliente.numero_exterior || ''} ${cliente.mz ? `MZ ${cliente.mz}` : ''} ${cliente.lt ? `LT ${cliente.lt}` : ''}
+${b('ENTRE-')} ${cliente.entre_calle_1?.toUpperCase() || ''}
+${b('ENTRE-')} ${cliente.entre_calle_2?.toUpperCase() || ''}
+${b('C.P-')} ${cliente.cp}
+${b('COL-')} ${cliente.colonia.toUpperCase()}
+${b('C.D-')} ${cliente.cd.toUpperCase()}
+${line}
+${b('PAQUETE-')} $${cliente.precio_mensual} ${cliente.velocidad} MEGAS ${!cliente.incluye_telefono ? 'INTERNET' : 'INTERNET Y TELEFONIA'}.
+
+${line}
+${b('GASTOS DE INSTALACIÓN')} 
+$0
+${b('((NO APLICA POR PROMOCION))')}`;
+        } else {
+            formato = `🔹 ${b('NOMBRE DEL PROMOTOR:')} ${b(nombrePromotor.toUpperCase())}
 
 ${b('DATOS PERSONALES')}
 🔹 ${b('NOMBRE DEL CLIENTE:')} ${cliente.nombre.toUpperCase()}
@@ -239,6 +273,7 @@ ${b('PAQUETE A CONTRATAR')}
 
 🔹 ${b('HORARIO SUGERIDO:')}
 🔹 ${b('FECHA SUGERIDA:')} INSTALACIÓN INMEDIATA`;
+        }
 
         navigator.clipboard.writeText(formato).then(() => {
             mostrarToast('¡Formato copiado!');
