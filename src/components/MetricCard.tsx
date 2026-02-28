@@ -26,23 +26,23 @@ export function MetricCard({ title, value, icon: Icon, trend, color = 'blue', su
     return (
         <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-                        <p className="text-3xl font-bold text-gray-900">{value}</p>
-                        {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-600 mb-1 truncate">{title}</p>
+                        <p className="text-3xl font-bold text-gray-900 truncate" title={String(value)}>{value}</p>
+                        {subtitle && <p className="text-xs text-gray-500 mt-1 truncate">{subtitle}</p>}
 
                         {trend && (
                             <div className="mt-2 flex items-center gap-1">
                                 <span className={`text-sm font-medium ${trend.isPositive ? 'text-success' : 'text-error'}`}>
                                     {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
                                 </span>
-                                <span className="text-xs text-gray-500">vs semana pasada</span>
+                                <span className="text-xs text-gray-500 truncate mt-0.5">vs semana pasada</span>
                             </div>
                         )}
                     </div>
 
-                    <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
+                    <div className={`p-3 rounded-xl shadow-sm shrink-0 flex items-center justify-center ${colorClasses[color]}`}>
                         <Icon size={24} />
                     </div>
                 </div>
