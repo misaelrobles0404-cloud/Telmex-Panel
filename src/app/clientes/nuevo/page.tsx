@@ -11,7 +11,6 @@ import { clasificarServicio, calcularComision, generarId } from '@/lib/utils';
 import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
 import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { ClavesPortalCard } from '@/components/ClavesPortalCard';
 import { obtenerConfiguracion } from '@/lib/admin';
 
 export default function NuevoClientePage() {
@@ -40,7 +39,7 @@ export default function NuevoClientePage() {
         // Documentación
         ine: '',
         curp: '',
-        usuario: '',
+        usuario: '337595', // Clave universal auto-asignada
 
         // Tipo de cliente y paquete
         tipoCliente: 'residencial' as TipoCliente,
@@ -88,9 +87,6 @@ export default function NuevoClientePage() {
             setLoadingPaquetes(true);
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
-            if (user?.email) {
-                setFormData(prev => ({ ...prev, usuario: user.email || '' }));
-            }
 
             // Cargar paquetes dinámicos
             const pqData = await obtenerConfiguracion<any[]>('catalogo_paquetes');
@@ -206,7 +202,7 @@ export default function NuevoClientePage() {
             entreCalle2: '',
             ine: '',
             curp: '',
-            usuario: user?.email || '',
+            usuario: '337595',
             tipoCliente: 'residencial',
             paqueteId: '',
             tieneInternet: false,
@@ -333,19 +329,9 @@ export default function NuevoClientePage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* Sidebar Izquierda - Claves Portal */}
-                <div className="hidden lg:block lg:col-span-1">
-                    <div className="sticky top-6">
-                        <ClavesPortalCard
-                            ciudad={formData.cd}
-                            onSeleccionar={(usuarioId) => setFormData(prev => ({ ...prev, usuario: usuarioId }))}
-                        />
-                    </div>
-                </div>
-
+            <div className="grid grid-cols-1 gap-6">
                 {/* Contenido Principal - Formulario */}
-                <div className="lg:col-span-3">
+                <div className="col-span-1">
                     {/* Advertencia de Requisitos para Comisión */}
                     <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r shadow-sm">
                         <div className="flex items-start">
