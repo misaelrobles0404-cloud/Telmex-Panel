@@ -42,7 +42,7 @@ export default function AdminCatalogoPage() {
     useEffect(() => {
         const checkAdmin = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            if (user?.email === 'ruizmosinfinitum2025@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') {
+            if (user?.email === 'carrillomarjory7@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') {
                 cargarPaquetes();
             } else {
                 router.push('/');

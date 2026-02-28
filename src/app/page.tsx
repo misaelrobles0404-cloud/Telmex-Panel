@@ -47,7 +47,7 @@ export default function DashboardPage() {
             const clientesData = await obtenerClientes();
 
             // Lógica de Perfiles: Súper Boss (Ruiz) y Administrador (Misael)
-            const esBoss = user?.email === 'ruizmosinfinitum2025@gmail.com';
+            const esBoss = user?.email === 'carrillomarjory7@gmail.com';
             const esAdmin = esBoss;
 
             if (esAdmin) {
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                     cargarDatos(true);
 
                     // Alerta específica para instalaciones (solo si es Boss)
-                    if (user?.email === 'ruizmosinfinitum2025@gmail.com') {
+                    if (user?.email === 'carrillomarjory7@gmail.com') {
                         const { new: newRow, old: oldRow } = payload;
                         if (newRow && newRow.estado_pipeline === 'posteado' && (!oldRow || oldRow.estado_pipeline !== 'posteado')) {
                             setNuevaAlerta({
@@ -195,56 +195,72 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
             )}
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                    <p className="text-gray-600 mt-1">
-                        Bienvenido, <span className="font-semibold text-telmex-blue">{perfilActual?.nombre_completo || user?.email?.split('@')[0] || 'Usuario'}</span>
-                    </p>
-                </div>
+            {/* Header Rediseñado Premium */}
+            <div className="relative mb-6">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-3xl blur-xl" />
+                <div className="relative bg-white/60 backdrop-blur-xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Dashboard Central</h1>
+                            {user?.email === 'carrillomarjory7@gmail.com' && (
+                                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg shadow-blue-500/30">
+                                    Súper Admin
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-gray-500 font-medium">
+                            Bienvenido, <span className="font-bold text-telmex-blue text-lg">{perfilActual?.nombre_completo || user?.email?.split('@')[0] || 'Usuario'}</span>
+                        </p>
+                    </div>
 
-                <div className="flex items-center gap-3">
-                    {user?.email === 'ruizmosinfinitum2025@gmail.com' && (
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        {user?.email === 'carrillomarjory7@gmail.com' && (
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className="flex-1 sm:flex-none border-blue-200 text-blue-700 bg-white/50 backdrop-blur-md hover:bg-blue-50 hover:border-blue-300 shadow-sm transition-all"
+                                onClick={() => router.push('/nominas')}
+                            >
+                                <DollarSign size={20} className="mr-2" />
+                                Nóminas
+                            </Button>
+                        )}
                         <Button
-                            variant="outline"
+                            variant="primary"
                             size="lg"
-                            className="border-telmex-blue text-telmex-blue hover:bg-blue-50"
-                            onClick={() => router.push('/nominas')}
+                            className="flex-1 sm:flex-none bg-gradient-to-r from-telmex-blue to-blue-600 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all hover:-translate-y-0.5"
+                            onClick={() => router.push('/clientes/nuevo')}
                         >
-                            <DollarSign size={20} />
-                            Nóminas
+                            <Plus size={20} className="mr-2" />
+                            Nuevo Cliente
                         </Button>
-                    )}
-                    <Button
-                        variant="primary"
-                        size="lg"
-                        onClick={() => router.push('/clientes/nuevo')}
-                    >
-                        <Plus size={20} />
-                        Nuevo Cliente
-                    </Button>
+                    </div>
                 </div>
             </div>
 
-            {/* Alerta de Productividad (Solo Boss) */}
+            {/* Alerta de Productividad (Solo Boss) - Premium */}
             {superVendedores.length > 0 && (
-                <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="grid grid-cols-1 gap-4 mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
                     {superVendedores.map((v) => (
-                        <Card key={v.email} className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 overflow-hidden relative">
-                            <div className="absolute -right-4 -top-4 text-yellow-200/50 rotate-12">
-                                <Trophy size={100} />
+                        <Card key={v.email} className="bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 border-0 overflow-hidden relative shadow-[0_8px_30px_rgb(251,191,36,0.2)]">
+                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                            <div className="absolute -right-4 -top-8 text-white/20 rotate-12 scale-150 blur-sm mix-blend-overlay pointer-events-none">
+                                <Trophy size={160} />
                             </div>
-                            <CardContent className="p-5 flex items-center gap-4 relative z-10">
-                                <div className="p-3 bg-yellow-400 text-white rounded-full shadow-lg animate-bounce">
-                                    <Star size={24} fill="currentColor" />
+                            <CardContent className="p-6 md:p-8 flex items-center gap-6 relative z-10">
+                                <div className="p-4 bg-white/20 backdrop-blur-md text-white border border-white/30 rounded-2xl shadow-xl animate-bounce">
+                                    <Star size={32} fill="currentColor" />
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-yellow-800">¡Alerta de Meta Superada! 🏆</h3>
-                                    <p className="text-yellow-700">
-                                        El empleado <span className="font-bold underline">{perfiles.find(p => p.email === v.email)?.nombre_completo || v.email.split('@')[0]}</span> ha realizado <span className="text-2xl font-black">{v.total}</span> instalaciones esta semana.
+                                <div className="text-white">
+                                    <h3 className="text-2xl font-black mb-1 drop-shadow-sm flex items-center gap-2">
+                                        ¡Meta Superada! <Trophy size={24} className="text-yellow-200" />
+                                    </h3>
+                                    <p className="text-white/90 text-sm md:text-base font-medium">
+                                        El asesor <span className="font-extrabold bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm">{perfiles.find(p => p.email === v.email)?.nombre_completo || v.email.split('@')[0]}</span> ha alcanzado <span className="text-2xl font-black mx-1 drop-shadow-md">{v.total}</span> instalaciones esta semana.
                                     </p>
-                                    <p className="text-xs text-yellow-600 mt-1 uppercase tracking-wider font-semibold">Excelente rendimiento detectado</p>
+                                    <div className="inline-block mt-3 px-3 py-1 bg-black/10 backdrop-blur-sm rounded-full text-xs font-black uppercase tracking-widest border border-white/10">
+                                        Rendimiento Extraordinario
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -255,7 +271,7 @@ export default function DashboardPage() {
 
             {/* Métricas Principales */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-                {user?.email === 'ruizmosinfinitum2025@gmail.com' ? (
+                {user?.email === 'carrillomarjory7@gmail.com' ? (
                     <>
                         <MetricCard
                             title="Ventas Programadas Hoy"
@@ -319,7 +335,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Acceso a Claves de Portal (Solo para empleados) */}
-            {user?.email !== 'ruizmosinfinitum2025@gmail.com' && (
+            {user?.email !== 'carrillomarjory7@gmail.com' && (
                 <div className="w-full">
                     <ClavesPortalCard modo="detalle" />
                 </div>
@@ -327,7 +343,7 @@ export default function DashboardPage() {
 
             {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Súper Boss */}
             <div>
-                {user?.email === 'ruizmosinfinitum2025@gmail.com' ? (
+                {user?.email === 'carrillomarjory7@gmail.com' ? (
                     <BossDashboardView
                         clientes={clientes}
                         perfiles={perfiles}

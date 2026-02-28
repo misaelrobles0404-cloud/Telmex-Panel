@@ -43,7 +43,7 @@ export default function AdminConfigPage() {
     useEffect(() => {
         const checkAdmin = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            if (user?.email === 'ruizmosinfinitum2025@gmail.com') {
+            if (user?.email === 'carrillomarjory7@gmail.com') {
                 setIsAdmin(true);
                 cargarConfiguraciones();
             } else {

@@ -115,7 +115,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
                         {navigation.map((item) => {
                             // Restricción para Auditoría y Administración (Sólo Ruiz Boss)
-                            const isAdmin = user?.email === 'ruizmosinfinitum2025@gmail.com';
+                            const isAdmin = user?.email === 'carrillomarjory7@gmail.com';
                             if ((item.name === 'Auditoría' || item.adminOnly) && !isAdmin) {
                                 return null;
                             }

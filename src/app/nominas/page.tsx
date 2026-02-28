@@ -76,7 +76,7 @@ export default function NominasPage() {
         const cargarDatos = async () => {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
-                if (user?.email !== 'ruizmosinfinitum2025@gmail.com') {
+                if (user?.email !== 'carrillomarjory7@gmail.com') {
                     router.push('/');
                     return;
                 }

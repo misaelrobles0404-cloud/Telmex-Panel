@@ -46,7 +46,7 @@ export default function AuditoriaPage() {
         supabase.auth.getUser().then(({ data }) => setUser(data.user));
     });
 
-    const isAdmin = user?.email === 'ruizmosinfinitum2025@gmail.com';
+    const isAdmin = user?.email === 'carrillomarjory7@gmail.com';
 
     if (user && !isAdmin) {
         return (

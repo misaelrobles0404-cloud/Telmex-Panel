@@ -110,23 +110,29 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                     const nombreMostrar = perfilVendedor ? perfilVendedor.nombre_completo : email.split('@')[0];
 
                     return (
-                        <Card key={email} className={`border-l-4 border-l-telmex-blue shadow-sm hover:shadow-md transition-all duration-200 ${!isExpandido ? 'opacity-90' : ''}`}>
+                        <Card key={email} className={`border-0 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 ${!isExpandido ? 'opacity-95 hover:opacity-100' : 'ring-2 ring-telmex-blue/20'}`}>
                             <div
-                                className="bg-white hover:bg-gray-50/50 cursor-pointer transition-colors"
+                                className={`cursor-pointer transition-colors duration-300 ${isExpandido ? 'bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm' : 'bg-white hover:bg-gray-50/80'}`}
                                 onClick={() => toggleExpandir(email)}
                             >
-                                <CardHeader className="px-6 py-4 mb-0">
+                                <CardHeader className="px-6 py-5 mb-0 relative overflow-hidden">
+                                    {isExpandido && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-telmex-blue to-purple-600 shimmer-effect" />}
+                                    {!isExpandido && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-200" />}
+
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                         <div className="flex items-center gap-4 flex-1">
-                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl uppercase shadow-sm transition-transform duration-200 ${isExpandido ? 'scale-110 bg-telmex-blue text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl uppercase shadow-inner transition-all duration-300 ${isExpandido ? 'bg-gradient-to-br from-telmex-blue to-blue-600 text-white rotate-3 scale-110 shadow-blue-500/30' : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-500 hover:rotate-3'}`}>
                                                 {nombreMostrar.charAt(0)}
                                             </div>
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2">
-                                                    <CardTitle className="text-xl text-gray-900 font-bold mb-0">{nombreMostrar}</CardTitle>
-                                                    <ChevronDown size={20} className={`text-gray-400 transition-transform duration-300 ${isExpandido ? 'rotate-180' : ''}`} />
+                                                    <CardTitle className="text-xl md:text-2xl text-gray-900 font-extrabold mb-0 tracking-tight">{nombreMostrar}</CardTitle>
+                                                    <ChevronDown size={20} className={`text-gray-400 transition-transform duration-500 ${isExpandido ? 'rotate-180 text-telmex-blue' : ''}`} />
                                                 </div>
-                                                <p className="text-sm text-gray-500 font-medium">{email}</p>
+                                                <p className="text-sm text-gray-500 font-medium flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                                    {email}
+                                                </p>
                                             </div>
                                         </div>
 
