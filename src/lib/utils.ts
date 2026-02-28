@@ -10,11 +10,6 @@ export function clasificarServicio(
     tieneTelefonoFijo: boolean,
     proveedorActual?: string
 ): TipoServicio {
-    // Winback solo para Megacable
-    if (proveedorActual?.toLowerCase() === 'megacable' && tieneInternet) {
-        return 'winback';
-    }
-
     // Portabilidad: tiene internet + teléfono fijo
     if (tieneInternet && tieneTelefonoFijo) {
         return 'portabilidad';
@@ -28,7 +23,13 @@ export function clasificarServicio(
 // CÁLCULO DE COMISIÓN
 // ============================================
 
-export function calcularComision(tipoServicio: TipoServicio): number {
+export function calcularComision(tipoServicio: TipoServicio, tipoCliente: 'residencial' | 'pyme' = 'residencial'): number {
+    if (tipoServicio === 'portabilidad') {
+        return 380;
+    }
+    if (tipoCliente === 'pyme') {
+        return 350;
+    }
     return 300;
 }
 
@@ -195,10 +196,6 @@ export function validarRequisitos(cliente: Partial<Cliente>): string[] {
     if (cliente.tipo_servicio === 'portabilidad') {
         if (!cliente.numero_a_portar?.trim()) errores.push('Número a portar es requerido');
         if (!cliente.nip_portabilidad?.trim()) errores.push('NIP de portabilidad es requerido');
-    }
-
-    if (cliente.tipo_servicio === 'winback') {
-        if (!cliente.numero_a_portar?.trim()) errores.push('Número a portar es requerido');
     }
 
     return errores;

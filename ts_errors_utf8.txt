@@ -1,0 +1,7 @@
+﻿src/app/clientes/[id]/page.tsx(220,57): error TS2367: This comparison appears to be unintentional because the types '"linea_nueva"' and '"winback"' have no overlap.
+src/app/clientes/[id]/page.tsx(812,75): error TS2367: This comparison appears to be unintentional because the types '"linea_nueva"' and '"winback"' have no overlap.
+src/app/clientes/[id]/page.tsx(975,75): error TS2367: This comparison appears to be unintentional because the types '"linea_nueva"' and '"winback"' have no overlap.
+src/app/clientes/page.tsx(286,50): error TS2367: This comparison appears to be unintentional because the types 'TipoServicio' and '"winback"' have no overlap.
+src/components/BossDashboardView.tsx(244,158): error TS2367: This comparison appears to be unintentional because the types '"linea_nueva"' and '"winback"' have no overlap.
+src/components/BossDashboardView.tsx(247,110): error TS2367: This comparison appears to be unintentional because the types '"linea_nueva"' and '"winback"' have no overlap.
+src/components/BossDashboardView.tsx(265,118): error TS2367: This comparison appears to be unintentional because the types '"linea_nueva"' and '"winback"' have no overlap.

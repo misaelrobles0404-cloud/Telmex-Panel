@@ -160,8 +160,6 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             setFormData(prev => ({ ...prev, tieneInternet: false, tieneTelefonoFijo: false }));
         } else if (nuevoTipo === 'portabilidad') {
             setFormData(prev => ({ ...prev, tieneInternet: true, tieneTelefonoFijo: true }));
-        } else if (nuevoTipo === 'winback') {
-            setFormData(prev => ({ ...prev, tieneInternet: true, proveedorActual: 'megacable', estadoCuentaMegacable: true }));
         }
     };
 
@@ -241,7 +239,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             })(),
             fecha_contacto: fechaCreacion,
             fecha_ultima_actividad: new Date().toISOString(),
-            comision: calcularComision(tipoServicio),
+            comision: calcularComision(tipoServicio, formData.tipoCliente),
             notas: formData.notas,
             creado_en: fechaCreacion,
             actualizado_en: new Date().toISOString(),
@@ -319,7 +317,6 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                         <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'linea_nueva' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'}`} />
                     </div>
                 </div>
-
                 <div
                     onClick={() => handleTipoServicioChange('portabilidad')}
                     className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'portabilidad'
@@ -330,19 +327,6 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     <div className="flex justify-between items-center mb-2">
                         <span className="font-bold text-gray-900">Portabilidad</span>
                         <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'portabilidad' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'}`} />
-                    </div>
-                </div>
-
-                <div
-                    onClick={() => handleTipoServicioChange('winback')}
-                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 ${tipoServicio === 'winback'
-                        ? 'border-telmex-blue bg-blue-50/50 shadow-md'
-                        : 'border-gray-200 hover:border-blue-300 bg-white'
-                        }`}
-                >
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-gray-900">Winback</span>
-                        <div className={`w-4 h-4 rounded-full border-2 ${tipoServicio === 'winback' ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'}`} />
                     </div>
                 </div>
             </div>
@@ -481,40 +465,30 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                 </Card>
 
                 {/* Datos de Portabilidad */}
-                {(tipoServicio === 'portabilidad' || tipoServicio === 'winback') && (
+                {tipoServicio === 'portabilidad' && (
                     <Card>
-                        <CardHeader><CardTitle>Datos de {tipoServicio === 'portabilidad' ? 'Portabilidad' : 'Winback'}</CardTitle></CardHeader>
+                        <CardHeader><CardTitle>Datos de Portabilidad</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Input label="Número a Portar" value={formData.numeroAPortar} onChange={(e) => setFormData({ ...formData, numeroAPortar: e.target.value })} required />
-                                {tipoServicio === 'portabilidad' && (
-                                    <>
-                                        <div className="relative group">
-                                            <Input label="NIP Portabilidad" value={formData.nipPortabilidad} onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })} placeholder="Vacio si no lo tiene" />
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, nipPortabilidad: '0000' })}
-                                                className="absolute right-2 top-8 text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded border border-gray-300 transition-colors"
-                                            >
-                                                Usar Genérico (0000)
-                                            </button>
-                                        </div>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" checked={formData.formatoPortabilidad} onChange={(e) => setFormData({ ...formData, formatoPortabilidad: e.target.checked })} className="w-4 h-4" />
-                                            <span className="text-sm font-medium text-gray-700">Formato de Portabilidad</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" checked={formData.cartaBaja} onChange={(e) => setFormData({ ...formData, cartaBaja: e.target.checked })} className="w-4 h-4" />
-                                            <span className="text-sm font-medium text-gray-700">Carta de Baja</span>
-                                        </label>
-                                    </>
-                                )}
-                                {tipoServicio === 'winback' && (
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" checked={formData.estadoCuentaMegacable} onChange={(e) => setFormData({ ...formData, estadoCuentaMegacable: e.target.checked })} className="w-4 h-4" />
-                                        <span className="text-sm font-medium text-gray-700">Estado de Cuenta Megacable</span>
-                                    </label>
-                                )}
+                                <div className="relative group">
+                                    <Input label="NIP Portabilidad" value={formData.nipPortabilidad} onChange={(e) => setFormData({ ...formData, nipPortabilidad: e.target.value })} placeholder="Vacio si no lo tiene" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, nipPortabilidad: '0000' })}
+                                        className="absolute right-2 top-8 text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded border border-gray-300 transition-colors"
+                                    >
+                                        Usar Genérico (0000)
+                                    </button>
+                                </div>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked={formData.formatoPortabilidad} onChange={(e) => setFormData({ ...formData, formatoPortabilidad: e.target.checked })} className="w-4 h-4" />
+                                    <span className="text-sm font-medium text-gray-700">Formato de Portabilidad</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked={formData.cartaBaja} onChange={(e) => setFormData({ ...formData, cartaBaja: e.target.checked })} className="w-4 h-4" />
+                                    <span className="text-sm font-medium text-gray-700">Carta de Baja</span>
+                                </label>
                             </div>
                         </CardContent>
                     </Card>
@@ -547,6 +521,6 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     </Button>
                 </div>
             </form>
-        </div>
+        </div >
     );
 }

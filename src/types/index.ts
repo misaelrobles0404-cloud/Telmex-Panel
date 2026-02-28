@@ -2,7 +2,7 @@
 // TIPOS DE DATOS PRINCIPALES
 // ============================================
 
-export type TipoServicio = 'linea_nueva' | 'portabilidad' | 'winback';
+export type TipoServicio = 'linea_nueva' | 'portabilidad';
 export type TipoCliente = 'residencial' | 'pyme';
 export type EstadoPipeline = 'prospecto' | 'pendiente_captura' | 'capturado' | 'posteado' | 'sin_cobertura' | 'cancelado';
 export type Proveedor = 'totalplay' | 'izzi' | 'megacable' | 'axtel' | 'dish' | 'otro';
@@ -229,14 +229,6 @@ export const REQUISITOS_SERVICIO: Record<TipoServicio, Requisitos> = {
             'Número de Teléfono a Portar',
             'NIP de Portabilidad (Marcar 051)',
             'Formato de Portabilidad firmado'
-        ]
-    },
-    winback: {
-        tipoServicio: 'winback',
-        documentos: ['Identificación Oficial', 'Comprobante de Domicilio', 'Estado de cuenta Megacable'],
-        campos: [
-            'Número de teléfono a recuperar (Opcional)',
-            'Estado de Cuenta Megacable (Evidencia)'
         ]
     }
 };

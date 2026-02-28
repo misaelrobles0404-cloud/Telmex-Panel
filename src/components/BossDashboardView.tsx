@@ -241,10 +241,10 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                                 {cliente.tipo_servicio.replace('_', ' ')}
                                                             </div>
                                                             <div className="text-[10px] text-gray-500 font-medium">
-                                                                {cliente.paquete} ({cliente.velocidad} Megas) - {cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback' || cliente.incluye_telefono ? 'INTERNET Y TELEFONÍA' : 'SOLO INTERNET'}
+                                                                {cliente.paquete} ({cliente.velocidad} Megas) - {cliente.tipo_servicio === 'portabilidad' || cliente.incluye_telefono ? 'INTERNET Y TELEFONÍA' : 'SOLO INTERNET'}
                                                             </div>
                                                             <div className="text-[9px] text-telmex-blue font-black uppercase mt-0.5">
-                                                                {cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback' || cliente.incluye_telefono ? 'Internet + Telefonía' : 'Solo Internet'}
+                                                                {cliente.tipo_servicio === 'portabilidad' || cliente.incluye_telefono ? 'Internet + Telefonía' : 'Solo Internet'}
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
@@ -261,11 +261,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                         <td className="px-6 py-4 text-right">
                                                             <span className="text-base font-black text-gray-900">
                                                                 {cliente.estado_pipeline === 'posteado'
-                                                                    ? formatearMoneda(
-                                                                        (cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback')
-                                                                            ? 300
-                                                                            : 300
-                                                                    )
+                                                                    ? formatearMoneda(cliente.comision || 0)
                                                                     : formatearMoneda(0)
                                                                 }
                                                             </span>

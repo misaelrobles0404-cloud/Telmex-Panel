@@ -217,7 +217,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         const line = "———————————————————";
         let formato = "";
 
-        if (cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback') {
+        if (cliente.tipo_servicio === 'portabilidad') {
             formato = `${b('PROMOTOR=')} ${b(nombrePromotor.toUpperCase())}
 ${line}
 (${b('PORTABILIDAD')}) 
@@ -429,7 +429,7 @@ Acepta el servicio?`;
                                 'badge-green'
                             }`}>
                             {cliente.tipo_servicio === 'linea_nueva' ? 'Línea Nueva' :
-                                cliente.tipo_servicio === 'portabilidad' ? 'Portabilidad' : 'Winback'}
+                                cliente.tipo_servicio === 'portabilidad' ? 'Portabilidad' : 'Otro'}
                         </span>
                         <span className="text-gray-500 text-sm">
                             Creado: {formatearFechaHora(cliente.creado_en)}
@@ -809,7 +809,7 @@ Acepta el servicio?`;
                                 )}
                             </div>
 
-                            {(cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback') && (
+                            {cliente.tipo_servicio === 'portabilidad' && (
                                 <div className="flex items-center justify-between p-2 rounded bg-gray-50">
                                     <span className="text-sm font-medium">NIP Portabilidad</span>
                                     {cliente.nip_portabilidad ? (
@@ -972,7 +972,7 @@ Acepta el servicio?`;
                                 />
                             </div>
 
-                            {(cliente.tipo_servicio === 'portabilidad' || cliente.tipo_servicio === 'winback') && (
+                            {cliente.tipo_servicio === 'portabilidad' && (
                                 <>
                                     <div className="pt-2 border-t border-gray-100">
                                         <p className="font-semibold text-gray-900 mb-2">Datos de Portabilidad</p>

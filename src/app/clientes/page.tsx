@@ -283,7 +283,6 @@ export default function ClientesPage() {
                                                 }`}>
                                                 {cliente.tipo_servicio === 'linea_nueva' && 'Línea Nueva'}
                                                 {cliente.tipo_servicio === 'portabilidad' && 'Portabilidad'}
-                                                {cliente.tipo_servicio === 'winback' && 'Winback'}
                                             </span>
                                         </div>
                                     </div>
