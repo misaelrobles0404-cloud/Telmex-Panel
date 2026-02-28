@@ -59,6 +59,14 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
         return d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
 
+    const promotoresProductivos = emailsBusqueda.filter(email => {
+        const clientesVendedor = clientes.filter(c =>
+            c.usuario === email ||
+            (c.user_id && perfiles.find(p => p.id === c.user_id)?.email === email)
+        );
+        return clientesVendedor.some(c => c.estado_pipeline === 'capturado' || c.estado_pipeline === 'posteado');
+    });
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
@@ -84,8 +92,8 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                 </div>
             </div>
 
-            {emailsBusqueda.length > 0 ? (
-                emailsBusqueda.map((email) => {
+            {promotoresProductivos.length > 0 ? (
+                promotoresProductivos.map((email) => {
                     const isExpandido = expandidos[email] || false;
                     const filtroActual = filtros[email] || 'todas';
 
@@ -102,7 +110,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                         .filter(c => {
                             if (filtroActual === 'instaladas') return c.estado_pipeline === 'posteado';
                             if (filtroActual === 'programadas') return c.estado_pipeline === 'capturado';
-                            return true; // 'todas' debe devolver todo, incluyendo prospectos
+                            return c.estado_pipeline === 'posteado' || c.estado_pipeline === 'capturado';
                         })
                         .sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
 
