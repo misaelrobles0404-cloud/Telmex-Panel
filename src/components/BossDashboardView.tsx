@@ -6,6 +6,8 @@ import { Cliente, PerfilUsuario } from '@/types';
 import { Copy, Users, Phone, Hash, Key, Clock, CheckCircle2, ChevronDown, FilterX, ListFilter, Search, Calendar } from 'lucide-react';
 import { formatearMoneda } from '@/lib/utils';
 import { Toast } from './ui/Toast';
+import { guardarCliente } from '@/lib/storage';
+import { Edit2, Save as SaveIcon, X as CancelIcon } from 'lucide-react';
 
 interface BossDashboardViewProps {
     clientes: Cliente[];
@@ -20,6 +22,27 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
     // Estado para el buscador de promotores
     const [busqueda, setBusqueda] = React.useState('');
     const [toast, setToast] = React.useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+
+    // Estados para edición inline
+    const [editando, setEditando] = React.useState<{ id: string, campo: 'folio_siac' | 'orden_servicio' } | null>(null);
+    const [valorEditado, setValorEditado] = React.useState('');
+
+    const handleUpdateCliente = async (cliente: Cliente, campo: 'folio_siac' | 'orden_servicio', valor: string) => {
+        try {
+            const clienteActualizado: Cliente = {
+                ...cliente,
+                [campo]: valor,
+                actualizado_en: new Date().toISOString()
+            };
+            await guardarCliente(clienteActualizado);
+            mostrarToast('Datos actualizados');
+        } catch (error) {
+            console.error('Error al actualizar cliente:', error);
+            mostrarToast('Error al guardar');
+        } finally {
+            setEditando(null);
+        }
+    };
 
     const mostrarToast = (message: string) => {
         setToast({ message, isVisible: true });
@@ -197,48 +220,92 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <div className="text-[11px] text-gray-700 font-medium">
-                                                                {cliente.calle} {cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''}
-                                                            </div>
-                                                            <div className="text-[10px] text-gray-500 mt-0.5 font-bold uppercase">
-                                                                {cliente.mz ? `Mz ${cliente.mz}` : ''} {cliente.lt ? `Lt ${cliente.lt}` : ''} {cliente.colonia}
+                                                            <div className="text-[11px] text-gray-700 font-black uppercase tracking-tight">
+                                                                {cliente.cd}, {cliente.estado}
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[10px] text-gray-400 font-bold uppercase leading-none mb-1">
-                                                                    {cliente.estado_pipeline === 'posteado' ? 'Instalación' : 'Registro'}
-                                                                </span>
-                                                                <span className="text-xs font-black text-gray-700 flex items-center gap-1">
-                                                                    <Calendar size={12} className="text-telmex-blue" />
-                                                                    {cliente.estado_pipeline === 'posteado'
-                                                                        ? formatearFechaSimple(cliente.fecha_instalacion)
-                                                                        : formatearFechaSimple(cliente.creado_en)
-                                                                    }
-                                                                </span>
+                                                            <div className="flex flex-col gap-2">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[10px] text-gray-400 font-bold uppercase leading-none mb-1">Registro</span>
+                                                                    <span className="text-xs font-black text-gray-700 flex items-center gap-1">
+                                                                        <Calendar size={12} className="text-telmex-blue" />
+                                                                        {formatearFechaSimple(cliente.creado_en)}
+                                                                    </span>
+                                                                </div>
+                                                                {cliente.estado_pipeline === 'posteado' && (
+                                                                    <div className="flex flex-col border-t pt-1 border-gray-100">
+                                                                        <span className="text-[10px] text-green-500 font-bold uppercase leading-none mb-1">Instalación</span>
+                                                                        <span className="text-xs font-black text-green-700 flex items-center gap-1">
+                                                                            <CheckCircle2 size={12} className="text-green-500" />
+                                                                            {formatearFechaSimple(cliente.fecha_instalacion)}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <div className="space-y-1.5">
-                                                                <div className="flex items-center gap-2 text-[10px]">
-                                                                    <span
-                                                                        className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-gray-200 transition-colors"
-                                                                        onClick={(e) => cliente.folio_siac && copiarAlPortapapeles(e, cliente.folio_siac, 'Folio')}
-                                                                        title="Click para copiar"
-                                                                    >
-                                                                        <Hash size={10} /> SIAC: {cliente.folio_siac || '---'}
-                                                                        {cliente.folio_siac && <Copy size={10} className="ml-1 opacity-50" />}
-                                                                    </span>
+                                                            <div className="space-y-2">
+                                                                {/* SIAC Field */}
+                                                                <div className="flex items-center gap-2 group/field">
+                                                                    {editando?.id === cliente.id && editando?.campo === 'folio_siac' ? (
+                                                                        <div className="flex items-center gap-1">
+                                                                            <input
+                                                                                autoFocus
+                                                                                className="bg-white border-2 border-telmex-blue rounded px-2 py-0.5 text-[10px] font-mono w-24 outline-none"
+                                                                                value={valorEditado}
+                                                                                onChange={(e) => setValorEditado(e.target.value)}
+                                                                                onKeyDown={(e) => {
+                                                                                    if (e.key === 'Enter') handleUpdateCliente(cliente, 'folio_siac', valorEditado);
+                                                                                    if (e.key === 'Escape') setEditando(null);
+                                                                                }}
+                                                                            />
+                                                                            <SaveIcon size={12} className="text-green-500 cursor-pointer" onClick={() => handleUpdateCliente(cliente, 'folio_siac', valorEditado)} />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <span
+                                                                            className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-gray-200 transition-colors"
+                                                                            onClick={() => {
+                                                                                setEditando({ id: cliente.id, campo: 'folio_siac' });
+                                                                                setValorEditado(cliente.folio_siac || '');
+                                                                            }}
+                                                                            title="Click para editar SIAC"
+                                                                        >
+                                                                            <Hash size={10} /> SIAC: {cliente.folio_siac || '---'}
+                                                                            <Edit2 size={8} className="ml-1 opacity-0 group-hover/field:opacity-50" />
+                                                                        </span>
+                                                                    )}
                                                                 </div>
-                                                                <div className="flex items-center gap-2 text-[10px]">
-                                                                    <span
-                                                                        className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-blue-100 transition-colors"
-                                                                        onClick={(e) => cliente.usuario_portal_asignado && copiarAlPortapapeles(e, cliente.usuario_portal_asignado, 'Clave')}
-                                                                        title="Click para copiar"
-                                                                    >
-                                                                        <Key size={10} /> CLAVE: {cliente.usuario_portal_asignado || '---'}
-                                                                        {cliente.usuario_portal_asignado && <Copy size={10} className="ml-1 opacity-50" />}
-                                                                    </span>
+
+                                                                {/* OS Field */}
+                                                                <div className="flex items-center gap-2 group/field">
+                                                                    {editando?.id === cliente.id && editando?.campo === 'orden_servicio' ? (
+                                                                        <div className="flex items-center gap-1">
+                                                                            <input
+                                                                                autoFocus
+                                                                                className="bg-white border-2 border-blue-400 rounded px-2 py-0.5 text-[10px] font-mono w-24 outline-none"
+                                                                                value={valorEditado}
+                                                                                onChange={(e) => setValorEditado(e.target.value)}
+                                                                                onKeyDown={(e) => {
+                                                                                    if (e.key === 'Enter') handleUpdateCliente(cliente, 'orden_servicio', valorEditado);
+                                                                                    if (e.key === 'Escape') setEditando(null);
+                                                                                }}
+                                                                            />
+                                                                            <SaveIcon size={12} className="text-green-500 cursor-pointer" onClick={() => handleUpdateCliente(cliente, 'orden_servicio', valorEditado)} />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <span
+                                                                            className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-blue-100 transition-colors"
+                                                                            onClick={() => {
+                                                                                setEditando({ id: cliente.id, campo: 'orden_servicio' });
+                                                                                setValorEditado(cliente.orden_servicio || '');
+                                                                            }}
+                                                                            title="Click para editar Orden"
+                                                                        >
+                                                                            <Key size={10} /> ORDEN: {cliente.orden_servicio || '---'}
+                                                                            <Edit2 size={8} className="ml-1 opacity-0 group-hover/field:opacity-50" />
+                                                                        </span>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </td>
