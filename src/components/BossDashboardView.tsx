@@ -102,7 +102,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                         .filter(c => {
                             if (filtroActual === 'instaladas') return c.estado_pipeline === 'posteado';
                             if (filtroActual === 'programadas') return c.estado_pipeline === 'capturado';
-                            return c.estado_pipeline === 'posteado' || c.estado_pipeline === 'capturado';
+                            return true; // 'todas' debe devolver todo, incluyendo prospectos
                         })
                         .sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
 
