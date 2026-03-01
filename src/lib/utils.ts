@@ -58,6 +58,13 @@ export function formatearFechaHora(fecha: string | Date): string {
     return format(date, 'dd/MM/yyyy HH:mm');
 }
 
+export function calcularMinutosTranscurridos(fecha: string | Date): number {
+    const date = typeof fecha === 'string' ? new Date(fecha) : fecha;
+    const ahora = new Date();
+    const diferenciaMs = ahora.getTime() - date.getTime();
+    return Math.floor(diferenciaMs / (1000 * 60));
+}
+
 // ============================================
 // GENERACIÓN DE ID ÚNICO
 // ============================================

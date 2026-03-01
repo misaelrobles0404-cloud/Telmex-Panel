@@ -23,7 +23,7 @@ import {
     Trophy
 } from 'lucide-react';
 import { obtenerClientes, guardarCliente, obtenerEstadoPortal, marcarPortalEnUso, liberarPortalGlobal, EstadoPortal } from '@/lib/storage';
-import { calcularMetricas, formatearMoneda, generarId } from '@/lib/utils';
+import { calcularMetricas, formatearMoneda, generarId, calcularMinutosTranscurridos } from '@/lib/utils';
 import { Cliente } from '@/types';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -64,15 +64,27 @@ export default function DashboardPage() {
 
         const yaEstaEnUso = !!estadoPortal.en_uso_por;
         const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuario;
+        const esAdmin = user.email === 'misaelrobles0404@gmail.com' || user.email?.includes('infinitummisael');
 
-        // Solo el que marcó puede liberar
+        const minutosTranscurridos = estadoPortal.en_uso_desde ? calcularMinutosTranscurridos(estadoPortal.en_uso_desde) : 0;
+        const haExpirado = minutosTranscurridos >= 15;
+
+        // Regla: Solo el que marcó puede liberar, A MENOS que sea admin y hayan pasado 15 min
         if (yaEstaEnUso && !esMismoUsuario) {
-            mostrarToast(`🔒 Portal en uso por ${estadoPortal.en_uso_por}. Solo esa persona puede liberarlo.`);
-            setLoading(false);
-            return;
+            if (esAdmin && haExpirado) {
+                // Permitir liberación forzada por admin si ya pasó el tiempo
+                mostrarToast(`⚠️ Forzando liberación del portal (ocupado por ${minutosTranscurridos} min)`);
+            } else {
+                const mensaje = haExpirado
+                    ? `🔒 Ocupado por ${estadoPortal.en_uso_por}. Solo el admin puede liberarlo tras 15 min.`
+                    : `🔒 Ocupado por ${estadoPortal.en_uso_por}. Quedan ${15 - minutosTranscurridos} min para liberación forzada.`;
+                mostrarToast(mensaje);
+                setLoading(false);
+                return;
+            }
         }
 
-        const debeLiberar = yaEstaEnUso && esMismoUsuario;
+        const debeLiberar = yaEstaEnUso && (esMismoUsuario || (esAdmin && haExpirado));
 
         try {
             if (debeLiberar) {
@@ -367,12 +379,16 @@ export default function DashboardPage() {
                             {(() => {
                                 const nombreUsuario = perfilActual?.nombre_completo || user?.email || '';
                                 const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuario;
+                                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email?.includes('infinitummisael');
                                 const estaOcupado = !!estadoPortal.en_uso_por;
+                                const minutos = estadoPortal.en_uso_desde ? calcularMinutosTranscurridos(estadoPortal.en_uso_desde) : 0;
+                                const haExpirado = minutos >= 15;
+                                const puedeLiberar = esMismoUsuario || (esAdmin && haExpirado);
 
                                 return (
                                     <button
                                         onClick={() => marcarUsoPortal()}
-                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !esMismoUsuario
+                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !puedeLiberar
                                                 ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100 active:scale-95'
                                                 : estaOcupado
                                                     ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
@@ -380,12 +396,21 @@ export default function DashboardPage() {
                                             }`}
                                     >
                                         <span className="text-sm">{estaOcupado ? '🔒' : '🌐'}</span>
-                                        <span className="font-black text-[10px] tracking-wide uppercase">
-                                            {estaOcupado
-                                                ? esMismoUsuario
-                                                    ? `LIBERAR (${estadoPortal.en_uso_por!.split(' ')[0]})`
-                                                    : `EN USO: ${estadoPortal.en_uso_por!.split(' ')[0]}`
-                                                : 'Marcar Uso Portal'}
+                                        <span className="font-black text-[10px] tracking-wide uppercase flex flex-col items-start leading-tight">
+                                            <span>
+                                                {estaOcupado
+                                                    ? esMismoUsuario
+                                                        ? `LIBERAR (${estadoPortal.en_uso_por!.split(' ')[0]})`
+                                                        : haExpirado && esAdmin
+                                                            ? `FORZAR (HACE ${minutos}')`
+                                                            : `EN USO: ${estadoPortal.en_uso_por!.split(' ')[0]}`
+                                                    : 'Marcar Uso Portal'}
+                                            </span>
+                                            {estaOcupado && (
+                                                <span className="text-[7px] opacity-60 font-bold">
+                                                    Hace {minutos} min
+                                                </span>
+                                            )}
                                         </span>
                                     </button>
                                 );
