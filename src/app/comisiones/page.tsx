@@ -517,11 +517,6 @@ export default function ComisionesPage() {
                                                 <td className="py-2 px-4 text-green-600 font-medium align-top">{formatearMoneda(cliente.comision)}</td>
                                                 <td className="py-2 px-4 text-right align-top">
                                                     <div className="flex justify-end gap-2">
-                                                        {cliente.en_uso_por && (
-                                                            <div className="flex items-center gap-1.5 px-2 py-1 bg-yellow-50 text-yellow-700 text-[10px] font-black rounded-lg border border-yellow-200 animate-pulse">
-                                                                <span>👤 EN USO POR: {cliente.en_uso_por.toUpperCase()}</span>
-                                                            </div>
-                                                        )}
                                                         <Button size="sm" variant="outline" className="text-telmex-blue border-blue-200 hover:bg-blue-50" onClick={(e) => { e.stopPropagation(); router.push(`/clientes/${cliente.id}`); }} title="Ver Detalle">
                                                             <Search size={14} /> Ver
                                                         </Button>
