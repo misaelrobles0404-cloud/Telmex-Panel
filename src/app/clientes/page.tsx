@@ -84,7 +84,7 @@ export default function ClientesPage() {
 
                 // Lógica de Filtrado: 
                 // Ruiz (Boss) ve todo para gestión.
-                // Todos los demás (incluyendo Misael) ven solo lo SUYO.
+                // Todos los demás ven solo lo SUYO.
                 const esBoss = user?.email === 'carrillomarjory7@gmail.com';
 
                 let clientesFiltradosData = data;

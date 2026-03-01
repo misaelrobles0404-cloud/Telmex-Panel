@@ -31,6 +31,7 @@ import { BossDashboardView } from '@/components/BossDashboardView';
 import { PerfilUsuario } from '@/types';
 import { InstalacionAlert } from '@/components/InstalacionAlert';
 import { AnnouncementBanner } from '@/components/AnnouncementBanner';
+import { obtenerClaveUniversal, obtenerMetaSuperVendedor, ClaveUniversal } from '@/lib/admin';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -46,6 +47,8 @@ export default function DashboardPage() {
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
     const [estadoPortal, setEstadoPortal] = useState<EstadoPortal>({ en_uso_por: null, en_uso_desde: null, alerta_pedida_por: null });
     const [alertaPortalEnviada, setAlertaPortalEnviada] = useState(false);
+    const [claveUniversal, setClaveUniversal] = useState<ClaveUniversal>({ id_usuario: '10000900', clave_captura: '337595', nombres: ['GUSTAVO', 'ACEVEDO', 'ZAMARRON'] });
+    const [metaSuperVendedor, setMetaSuperVendedor] = useState(7);
 
     const mostrarToast = (message: string) => {
         setToast({ message, isVisible: true });
@@ -98,7 +101,7 @@ export default function DashboardPage() {
 
             const clientesData = await obtenerClientes();
 
-            // Lógica de Perfiles: Súper Boss (Ruiz) y Administrador (Misael)
+            // Lógica de Perfiles: Súper Boss (Ruiz)
             const esBoss = user?.email === 'carrillomarjory7@gmail.com';
             const esAdmin = esBoss;
 
@@ -166,8 +169,8 @@ export default function DashboardPage() {
                     }
                 });
 
-                // Umbral Super Vendedor: 7 instalaciones por semana
-                const umbralSuperVendedor = 7;
+                // Umbral Super Vendedor: dinámico desde configuración
+                const umbralSuperVendedor = metaSuperVendedor;
 
                 const sv = Object.entries(ventasPorUsuario)
                     .filter(([_, total]) => total >= umbralSuperVendedor)
@@ -175,6 +178,13 @@ export default function DashboardPage() {
 
                 setSuperVendedores(sv);
             }
+            // Cargar config dinámica (clave universal y meta)
+            const [claveUnivData, metaData] = await Promise.all([
+                obtenerClaveUniversal(),
+                obtenerMetaSuperVendedor()
+            ]);
+            setClaveUniversal(claveUnivData);
+            setMetaSuperVendedor(metaData.ventas_semana);
         } catch (error) {
             console.error("Error al cargar dashboard:", error);
         } finally {
@@ -265,7 +275,7 @@ export default function DashboardPage() {
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Dashboard Central</h1>
-                            {user?.email === 'carrillomarjory7@gmail.com' && (
+                            {(user?.email === 'carrillomarjory7@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') && (
                                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg shadow-blue-500/30">
                                     Súper Admin
                                 </span>
@@ -277,7 +287,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                        {user?.email === 'carrillomarjory7@gmail.com' && (
+                        {(user?.email === 'carrillomarjory7@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') && (
                             <Button
                                 variant="outline"
                                 size="lg"
@@ -322,7 +332,7 @@ export default function DashboardPage() {
                         <div className="bg-white/60 rounded-2xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center">
                             <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Cuenta de Acceso</p>
                             <div className="flex flex-wrap gap-1.5">
-                                {['GUSTAVO', 'ACEVEDO', 'ZAMARRON'].map((nombre, idx) => (
+                                {claveUniversal.nombres.map((nombre, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => copiarAlPortapapeles(nombre, 'Nombre')}
@@ -338,10 +348,10 @@ export default function DashboardPage() {
                         <div className="bg-white/60 rounded-2xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center relative group/id">
                             <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 px-1">ID Usuario</p>
                             <button
-                                onClick={() => copiarAlPortapapeles('10000900', 'ID')}
+                                onClick={() => copiarAlPortapapeles(claveUniversal.id_usuario, 'ID')}
                                 className="flex items-center justify-between bg-white border border-gray-100 px-3 py-1.5 rounded-xl hover:border-blue-200 transition-all active:scale-95 group-hover/id:shadow-sm"
                             >
-                                <span className="text-sm font-black text-gray-800 tracking-widest uppercase">10000900</span>
+                                <span className="text-sm font-black text-gray-800 tracking-widest uppercase">{claveUniversal.id_usuario}</span>
                                 <Copy size={14} className="text-gray-300 group-hover/id:text-blue-500 transition-colors" />
                             </button>
                         </div>
@@ -350,12 +360,12 @@ export default function DashboardPage() {
                         <div className="bg-white/60 rounded-2xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center group/key">
                             <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 px-1">Clave Captura</p>
                             <button
-                                onClick={() => copiarAlPortapapeles('337595', 'Clave')}
+                                onClick={() => copiarAlPortapapeles(claveUniversal.clave_captura, 'Clave')}
                                 className="flex items-center justify-between bg-white/80 border border-yellow-200 px-3 py-1.5 rounded-xl hover:border-yellow-400 transition-all active:scale-95 group-hover/key:shadow-md"
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-base">🔓</span>
-                                    <span className="text-xl font-black text-yellow-700 tracking-[0.15em]">337595</span>
+                                    <span className="text-xl font-black text-yellow-700 tracking-[0.15em]">{claveUniversal.clave_captura}</span>
                                 </div>
                                 <Copy size={16} className="text-yellow-600/30 group-hover/key:text-yellow-600 transition-colors" />
                             </button>
@@ -381,10 +391,10 @@ export default function DashboardPage() {
                                         <button
                                             onClick={() => marcarUsoPortal()}
                                             className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !esMismoUsuario
-                                                    ? 'bg-red-50 border-red-200 text-red-600 active:scale-95 cursor-default'
-                                                    : estaOcupado
-                                                        ? 'bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100 active:scale-95'
-                                                        : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
+                                                ? 'bg-red-50 border-red-200 text-red-600 active:scale-95 cursor-default'
+                                                : estaOcupado
+                                                    ? 'bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100 active:scale-95'
+                                                    : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
                                                 }`}
                                         >
                                             <span className="text-sm">{estaOcupado ? '🔒' : '🌐'}</span>
@@ -457,7 +467,7 @@ export default function DashboardPage() {
 
             {/* Métricas Principales */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                {user?.email === 'carrillomarjory7@gmail.com' ? (
+                {(user?.email === 'carrillomarjory7@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') ? (
                     <>
                         <MetricCard
                             title="Ventas Programadas Hoy"
@@ -524,7 +534,7 @@ export default function DashboardPage() {
 
             {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Súper Boss */}
             <div>
-                {user?.email === 'carrillomarjory7@gmail.com' ? (
+                {(user?.email === 'carrillomarjory7@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') ? (
                     <BossDashboardView
                         clientes={clientes}
                         perfiles={perfiles}

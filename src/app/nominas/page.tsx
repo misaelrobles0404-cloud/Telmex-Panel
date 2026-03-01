@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { formatearMoneda } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { obtenerComisiones, ConfigComisiones } from '@/lib/admin';
 
 interface Nomina {
     id: string;
@@ -36,6 +37,7 @@ export default function NominasPage() {
     const [clientesPendientes, setClientesPendientes] = useState<Cliente[]>([]);
     const [perfiles, setPerfiles] = useState<PerfilUsuario[]>([]);
     const [user, setUser] = useState<any>(null);
+    const [comisiones, setComisiones] = useState<ConfigComisiones>({ linea_nueva: 300, portabilidad: 300, winback: 300 });
 
     // Calcular periodos (Jueves a Miércoles de la semana que acaba de cerrar)
     const getPeriodoSemanaPasada = () => {
@@ -102,6 +104,10 @@ export default function NominasPage() {
 
                 setClientesPendientes(clientesData || []);
 
+                // Cargar comisiones dinámicas
+                const comisionesData = await obtenerComisiones();
+                setComisiones(comisionesData);
+
             } catch (error) {
                 console.error("Error cargando nóminas:", error);
             } finally {
@@ -112,8 +118,9 @@ export default function NominasPage() {
     }, [router]);
 
     const calcularComision = (tipo: string) => {
-        if (tipo === 'portabilidad' || tipo === 'winback') return 300;
-        return 300;
+        if (tipo === 'portabilidad') return comisiones.portabilidad;
+        if (tipo === 'winback') return comisiones.winback;
+        return comisiones.linea_nueva;
     };
 
     const generarNomina = async () => {

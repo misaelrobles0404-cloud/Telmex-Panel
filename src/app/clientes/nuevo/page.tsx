@@ -11,7 +11,7 @@ import { clasificarServicio, calcularComision, generarId } from '@/lib/utils';
 import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
 import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { obtenerConfiguracion } from '@/lib/admin';
+import { obtenerConfiguracion, obtenerRequisitosVenta } from '@/lib/admin';
 
 export default function NuevoClientePage() {
     const router = useRouter();
@@ -81,6 +81,15 @@ export default function NuevoClientePage() {
     };
 
     const [user, setUser] = useState<any>(null);
+    const [requisitosVenta, setRequisitosVenta] = useState<string[]>([
+        'SI O ACEPTO AL MENSAJE DE ALTA',
+        'DATOS Y MAPA EN PORTAL',
+        'PAQUETE ELEGIDO EN PORTAL',
+        'CAPTURA DE FOLIO EN PORTAL',
+        'CAPTURA DE FOLIO SIAC EN CHAT-CLIENTE',
+        'INE POR AMBOS LADOS DEL CLIENTE',
+        'FOTO DE COBERTURA'
+    ]);
 
     useEffect(() => {
         const cargarDatos = async () => {
@@ -101,6 +110,11 @@ export default function NuevoClientePage() {
                 ];
                 setPaquetesDynamicos(initial);
             }
+
+            // Cargar requisitos dinámicos
+            const reqData = await obtenerRequisitosVenta();
+            setRequisitosVenta(reqData);
+
             setLoadingPaquetes(false);
         };
         cargarDatos();
@@ -347,13 +361,9 @@ export default function NuevoClientePage() {
                                 <div className="mt-2 text-sm text-yellow-700">
                                     <p className="font-semibold mb-2">Asegúrate de tener las siguientes capturas:</p>
                                     <ul className="list-decimal list-inside space-y-1 font-medium">
-                                        <li>SI O ACEPTO AL MENSAJE DE ALTA</li>
-                                        <li>DATOS Y MAPA EN PORTAL</li>
-                                        <li>PAQUETE ELEGIDO EN PORTAL</li>
-                                        <li>CAPTURA DE FOLIO EN PORTAL</li>
-                                        <li>CAPTURA DE FOLIO SIAC EN CHAT-CLIENTE</li>
-                                        <li>INE POR AMBOS LADOS DEL CLIENTE</li>
-                                        <li>FOTO DE COBERTURA</li>
+                                        {requisitosVenta.map((req, idx) => (
+                                            <li key={idx}>{req}</li>
+                                        ))}
                                     </ul>
                                 </div>
                             </div>
