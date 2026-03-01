@@ -15,9 +15,9 @@ export interface ClavePortal {
 }
 
 export interface ConfigComisiones {
-    linea_nueva: number;
+    linea_nueva_residencial: number;
+    linea_nueva_pyme: number;
     portabilidad: number;
-    winback: number;
 }
 
 export interface ClaveUniversal {
@@ -97,9 +97,9 @@ export async function obtenerAnuncio(): Promise<AppAnnouncement | null> {
 export async function obtenerComisiones(): Promise<ConfigComisiones> {
     const config = await obtenerConfiguracion<ConfigComisiones>('config_comisiones');
     return config || {
-        linea_nueva: 300,
-        portabilidad: 300,
-        winback: 300
+        linea_nueva_residencial: 300,
+        linea_nueva_pyme: 300,
+        portabilidad: 300
     };
 }
 

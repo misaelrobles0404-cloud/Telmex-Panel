@@ -37,7 +37,7 @@ export default function NominasPage() {
     const [clientesPendientes, setClientesPendientes] = useState<Cliente[]>([]);
     const [perfiles, setPerfiles] = useState<PerfilUsuario[]>([]);
     const [user, setUser] = useState<any>(null);
-    const [comisiones, setComisiones] = useState<ConfigComisiones>({ linea_nueva: 300, portabilidad: 300, winback: 300 });
+    const [comisiones, setComisiones] = useState<ConfigComisiones>({ linea_nueva_residencial: 300, linea_nueva_pyme: 300, portabilidad: 300 });
 
     // Calcular periodos (Jueves a Miércoles de la semana que acaba de cerrar)
     const getPeriodoSemanaPasada = () => {
@@ -117,16 +117,17 @@ export default function NominasPage() {
         cargarDatos();
     }, [router]);
 
-    const calcularComision = (tipo: string) => {
+    const calcularComision = (tipo: string, tipoCliente?: string) => {
         if (tipo === 'portabilidad') return comisiones.portabilidad;
-        if (tipo === 'winback') return comisiones.winback;
-        return comisiones.linea_nueva;
+        // Línea nueva: diferenciar por tipo de cliente
+        if (tipoCliente === 'pyme') return comisiones.linea_nueva_pyme;
+        return comisiones.linea_nueva_residencial;
     };
 
     const generarNomina = async () => {
         if (clientesPendientes.length === 0) return;
 
-        const total = clientesPendientes.reduce((acc, c) => acc + calcularComision(c.tipo_servicio), 0);
+        const total = clientesPendientes.reduce((acc, c) => acc + calcularComision(c.tipo_servicio, c.tipo_cliente), 0);
 
         try {
             // 1. Crear la Nómina

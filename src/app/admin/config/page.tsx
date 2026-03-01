@@ -56,7 +56,7 @@ export default function AdminConfigPage() {
     const [savingPerfiles, setSavingPerfiles] = useState(false);
 
     // --- Comisiones ---
-    const [comisiones, setComisiones] = useState<ConfigComisiones>({ linea_nueva: 300, portabilidad: 300, winback: 300 });
+    const [comisiones, setComisiones] = useState<ConfigComisiones>({ linea_nueva_residencial: 300, linea_nueva_pyme: 300, portabilidad: 300 });
     const [savingComisiones, setSavingComisiones] = useState(false);
 
     // --- Clave Universal ---
@@ -170,12 +170,21 @@ export default function AdminConfigPage() {
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Línea Nueva ($)</label>
+                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Línea Nueva Residencial ($)</label>
                                 <input
                                     type="number"
                                     className="w-full p-3 border-2 border-gray-100 rounded-xl text-lg font-black text-gray-900 focus:border-green-400 outline-none"
-                                    value={comisiones.linea_nueva}
-                                    onChange={(e) => setComisiones({ ...comisiones, linea_nueva: parseFloat(e.target.value) || 0 })}
+                                    value={comisiones.linea_nueva_residencial}
+                                    onChange={(e) => setComisiones({ ...comisiones, linea_nueva_residencial: parseFloat(e.target.value) || 0 })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Línea Nueva PYME ($)</label>
+                                <input
+                                    type="number"
+                                    className="w-full p-3 border-2 border-gray-100 rounded-xl text-lg font-black text-gray-900 focus:border-green-400 outline-none"
+                                    value={comisiones.linea_nueva_pyme}
+                                    onChange={(e) => setComisiones({ ...comisiones, linea_nueva_pyme: parseFloat(e.target.value) || 0 })}
                                 />
                             </div>
                             <div>
@@ -185,15 +194,6 @@ export default function AdminConfigPage() {
                                     className="w-full p-3 border-2 border-gray-100 rounded-xl text-lg font-black text-gray-900 focus:border-green-400 outline-none"
                                     value={comisiones.portabilidad}
                                     onChange={(e) => setComisiones({ ...comisiones, portabilidad: parseFloat(e.target.value) || 0 })}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Winback ($)</label>
-                                <input
-                                    type="number"
-                                    className="w-full p-3 border-2 border-gray-100 rounded-xl text-lg font-black text-gray-900 focus:border-green-400 outline-none"
-                                    value={comisiones.winback}
-                                    onChange={(e) => setComisiones({ ...comisiones, winback: parseFloat(e.target.value) || 0 })}
                                 />
                             </div>
                         </div>
