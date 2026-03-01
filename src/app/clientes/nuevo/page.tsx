@@ -144,7 +144,7 @@ export default function NuevoClientePage() {
             entre_calle_2: formData.entreCalle2,
             ine: formData.ine,
             curp: formData.curp || 'PENDIENTE',
-            usuario: user.email || '',
+            usuario: '337595',
             tipo_servicio: tipoServicio,
             tipo_cliente: formData.tipoCliente,
             paquete: 'POR DEFINIR',
@@ -263,7 +263,7 @@ export default function NuevoClientePage() {
             entre_calle_2: formData.entreCalle2,
             ine: formData.ine,
             curp: formData.curp,
-            usuario: formData.usuario || user.email || '',
+            usuario: '337595',
             tipo_servicio: tipoServicio,
             tipo_cliente: formData.tipoCliente,
             paquete: paqueteSeleccionado.nombre || `${paqueteSeleccionado.velocidad} Mbps`,
@@ -609,11 +609,6 @@ export default function NuevoClientePage() {
                                         required
                                     />
 
-                                    <Input
-                                        label="Usuario"
-                                        value={formData.usuario}
-                                        onChange={(e) => setFormData({ ...formData, usuario: e.target.value })}
-                                    />
                                 </div>
                             </CardContent>
                         </Card>

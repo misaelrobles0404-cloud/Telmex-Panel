@@ -205,7 +205,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             entre_calle_2: formData.entreCalle2,
             ine: formData.ine,
             curp: formData.curp,
-            usuario: formData.usuario,
+            usuario: '337595',
             tipo_servicio: tipoServicio,
             tipo_cliente: formData.tipoCliente,
             paquete: paqueteSeleccionado.nombre || `${paqueteSeleccionado.velocidad} Mbps`,
@@ -381,7 +381,6 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 placeholder="Solo números"
                             />
                             <Input label="CURP" value={formData.curp} onChange={(e) => setFormData({ ...formData, curp: e.target.value })} required />
-                            <Input label="Usuario" value={formData.usuario} onChange={(e) => setFormData({ ...formData, usuario: e.target.value })} />
                             <Input label="Folio SIAC" value={formData.folioSiac} onChange={(e) => setFormData({ ...formData, folioSiac: e.target.value })} />
                         </div>
                     </CardContent>

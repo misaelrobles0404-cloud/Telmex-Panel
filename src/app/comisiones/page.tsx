@@ -96,7 +96,8 @@ export default function ComisionesPage() {
 
             const todos = esSuperAdmin
                 ? data
-                : data.filter(c => c.usuario === user?.email);
+                : data.filter(c => c.usuario === '337595' || c.usuario === user?.email);
+
 
             // 1. Pendientes: Tienen folio SIAC pero no están instalados, rechazados ni cancelados
             const pendientes = todos.filter(c =>
@@ -382,7 +383,7 @@ export default function ComisionesPage() {
                             </div>
                         </div>
 
-                                                {/* Panel de Acción */}
+                        {/* Panel de Acción */}
                         <div className="bg-white rounded-xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center gap-1">
                             {(() => {
                                 const nombreUsuarioActual = perfilActual?.nombre_completo || user?.email || '';
@@ -396,7 +397,7 @@ export default function ComisionesPage() {
                                     <>
                                         {alguienEspera && (
                                             <div className="bg-orange-50 border border-orange-200 rounded-lg px-2 py-1 text-[9px] font-black text-orange-600 text-center animate-pulse">
-                                                 {estadoPortal.alerta_pedida_por} está esperando  libera el portal
+                                                {estadoPortal.alerta_pedida_por} está esperando  libera el portal
                                             </div>
                                         )}
                                         <button
@@ -415,7 +416,7 @@ export default function ComisionesPage() {
                                                 disabled={alertaPortalEnviada || !!estadoPortal.alerta_pedida_por}
                                                 className="rounded-xl py-1.5 px-3 border w-full flex items-center justify-center gap-1 text-[9px] font-black uppercase tracking-wide bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                                 {estadoPortal.alerta_pedida_por ? 'Aviso ya enviado' : 'Avisar que me tardo'}
+                                                {estadoPortal.alerta_pedida_por ? 'Aviso ya enviado' : 'Avisar que me tardo'}
                                             </button>
                                         )}
                                     </>
