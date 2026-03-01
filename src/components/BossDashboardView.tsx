@@ -178,8 +178,9 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                     const filtroActual = filtros[email] || 'todas';
 
                     const clientesVendedor = clientes.filter(c =>
-                        c.usuario === email ||
-                        (c.user_id && perfiles.find(p => p.id === c.user_id)?.email === email)
+                        (c.usuario === email ||
+                            (c.user_id && perfiles.find(p => p.id === c.user_id)?.email === email)) &&
+                        !c.comision_pagada  // Ocultar las ya pagadas — se gestionan desde /admin/pagos
                     );
 
                     const ventasProgramadasCount = clientesVendedor.filter(c => c.estado_pipeline === 'capturado').length;
