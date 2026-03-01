@@ -195,3 +195,64 @@ export function obtenerActividades(): Actividad[] {
     const data = localStorage.getItem(STORAGE_KEYS.ACTIVIDADES);
     return data ? JSON.parse(data) : [];
 }
+
+// ============================================
+// COMISIONES — PAGO (Super Admin)
+// ============================================
+
+/**
+ * Confirma las comisiones de todos los clientes posteados de un promotor.
+ * Solo el Super Admin puede llamar esto.
+ */
+export async function confirmarComisionesByEmail(email: string): Promise<void> {
+    const { error } = await supabase
+        .from('clientes')
+        .update({ comision_confirmada: true })
+        .eq('usuario', email)
+        .eq('estado_pipeline', 'posteado')
+        .eq('comision_confirmada', false);
+
+    if (error) {
+        console.error('Error al confirmar comisiones:', error);
+        throw error;
+    }
+}
+
+/**
+ * Marca una comisión individual como pagada.
+ * Solo el Super Admin puede llamar esto.
+ */
+export async function marcarComisionPagada(clienteId: string): Promise<void> {
+    const { error } = await supabase
+        .from('clientes')
+        .update({
+            comision_pagada: true,
+            fecha_pago: new Date().toISOString()
+        })
+        .eq('id', clienteId);
+
+    if (error) {
+        console.error('Error al marcar comision pagada:', error);
+        throw error;
+    }
+}
+
+/**
+ * Marca todas las comisiones confirmadas de un promotor como pagadas.
+ */
+export async function marcarTodasPagadasByEmail(email: string): Promise<void> {
+    const { error } = await supabase
+        .from('clientes')
+        .update({
+            comision_pagada: true,
+            fecha_pago: new Date().toISOString()
+        })
+        .eq('usuario', email)
+        .eq('comision_confirmada', true)
+        .eq('comision_pagada', false);
+
+    if (error) {
+        console.error('Error al marcar todas como pagadas:', error);
+        throw error;
+    }
+}

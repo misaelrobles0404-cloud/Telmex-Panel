@@ -6,7 +6,7 @@ import { Cliente, PerfilUsuario } from '@/types';
 import { Copy, Users, Phone, Hash, Key, Clock, CheckCircle2, ChevronDown, FilterX, ListFilter, Search, Calendar } from 'lucide-react';
 import { formatearMoneda } from '@/lib/utils';
 import { Toast } from './ui/Toast';
-import { guardarCliente } from '@/lib/storage';
+import { guardarCliente, confirmarComisionesByEmail } from '@/lib/storage';
 import { Edit2, Save as SaveIcon, X as CancelIcon } from 'lucide-react';
 
 interface BossDashboardViewProps {
@@ -26,6 +26,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
     // Estados para edición inline
     const [editando, setEditando] = React.useState<{ id: string, campo: 'folio_siac' | 'orden_servicio' } | null>(null);
     const [valorEditado, setValorEditado] = React.useState('');
+    const [confirmando, setConfirmando] = React.useState<Record<string, boolean>>({});
 
     const handleUpdateCliente = async (cliente: Cliente, campo: 'folio_siac' | 'orden_servicio', valor: string) => {
         try {
@@ -53,6 +54,18 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
         navigator.clipboard.writeText(texto).then(() => {
             mostrarToast(`${label} copiado`);
         });
+    };
+
+    const handleConfirmarComisiones = async (email: string) => {
+        setConfirmando(prev => ({ ...prev, [email]: true }));
+        try {
+            await confirmarComisionesByEmail(email);
+            mostrarToast('✅ Comisiones confirmadas correctamente');
+        } catch {
+            mostrarToast('❌ Error al confirmar comisiones');
+        } finally {
+            setConfirmando(prev => ({ ...prev, [email]: false }));
+        }
     };
 
     // Obtener lista de emails únicos de perfiles para asegurar que todos aparezcan
@@ -215,6 +228,31 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                     <ListFilter size={14} />
                                                 </div>
                                             </div>
+
+                                            {/* Botón Confirmar Comisiones */}
+                                            {(() => {
+                                                const pendientes = clientesVendedor.filter(c => c.estado_pipeline === 'posteado' && !c.comision_confirmada);
+                                                const confirmadas = clientesVendedor.filter(c => c.estado_pipeline === 'posteado' && c.comision_confirmada).length;
+                                                if (ventasInstaladasCount === 0) return null;
+                                                return (
+                                                    <div className="flex flex-col items-center gap-0.5">
+                                                        {confirmadas > 0 && (
+                                                            <span className="text-[8px] font-black text-green-500 uppercase tracking-widest">{confirmadas} confirmadas</span>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleConfirmarComisiones(email)}
+                                                            disabled={confirmando[email] || pendientes.length === 0}
+                                                            className={`relative px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all shadow-sm border ${pendientes.length === 0
+                                                                ? 'bg-green-50 border-green-100 text-green-500 cursor-default'
+                                                                : 'bg-emerald-500 hover:bg-emerald-600 border-emerald-600 text-white cursor-pointer active:scale-95 shadow-emerald-200'
+                                                                } disabled:opacity-70`}
+                                                        >
+                                                            {confirmando[email] ? '⏳' : pendientes.length === 0 ? '✅' : '✔'}
+                                                            {confirmando[email] ? 'Confirmando...' : pendientes.length === 0 ? 'Todo Confirmado' : `Confirmar (${pendientes.length})`}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 </CardHeader>

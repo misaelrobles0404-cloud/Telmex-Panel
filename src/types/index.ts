@@ -78,7 +78,10 @@ export interface Cliente {
     fecha_instalacion?: string; // Fecha cuando se marcó como vendido (para corte de comisiones)
 
     // Comisión
-    comision: number; // Fija en 300 pesos por venta
+    comision: number;
+    comision_confirmada?: boolean; // Super Admin confirmó esta comisión
+    comision_pagada?: boolean;     // Super Admin marcó al promotor como pagado
+    fecha_pago?: string;           // Fecha en que se marcó como pagado
 
     // Notas
     notas: string;

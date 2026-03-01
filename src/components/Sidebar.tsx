@@ -17,7 +17,8 @@ import {
     ShieldCheck,
     Menu,
     Package,
-    Download
+    Download,
+    Banknote
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -29,6 +30,7 @@ const navigation = [
     { name: 'Calculadora', href: '/calculadora', icon: Calculator },
     { name: 'Reportes', href: '/reportes', icon: BarChart3 },
     { name: 'Catálogo', href: '/admin/catalogo', icon: Package, adminOnly: true },
+    { name: 'Pagos', href: '/admin/pagos', icon: Banknote, adminOnly: true },
     { name: 'Administración', href: '/admin/config', icon: ShieldCheck, adminOnly: true },
     { name: 'Configuración', href: '/perfil', icon: Settings },
 ];
