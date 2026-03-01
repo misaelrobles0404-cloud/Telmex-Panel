@@ -6,6 +6,8 @@ import { CLAVES_PORTAL, ClavePortal, obtenerClavePorCiudad } from '@/data/claves
 import { Toast } from '@/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
 import { PortalKeyUsage, PerfilUsuario } from '@/types';
+import { obtenerEstadoPortal, marcarPortalEnUso, liberarPortalGlobal, pedirAlertaPortal, EstadoPortal } from '@/lib/storage';
+import { calcularMinutosTranscurridos } from '@/lib/utils';
 
 // Función para dividir nombres según formato mexicano estándar
 const dividirNombre = (nombreCompleto: string) => {
@@ -41,6 +43,8 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
     const [usage, setUsage] = useState<Record<string, PortalKeyUsage>>({});
     const [currentUser, setCurrentUser] = useState<PerfilUsuario | null>(null);
     const [allProfiles, setAllProfiles] = useState<PerfilUsuario[]>([]);
+    const [estadoPortalGlobal, setEstadoPortalGlobal] = useState<EstadoPortal>({ en_uso_por: null, en_uso_desde: null, alerta_pedida_por: null });
+    const [alertaPortalEnviada, setAlertaPortalEnviada] = useState(false);
 
     useEffect(() => {
         // 1. Obtener usuario actual y perfiles
@@ -73,8 +77,8 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
 
         init();
 
-        // 3. Suscribirse a cambios Realtime
-        const channel = supabase
+        // 3. Suscribirse a cambios Realtime (portal_keys_usage)
+        const channelKeys = supabase
             .channel('portal_keys_usage_changes')
             .on('postgres_changes', { event: '*', table: 'portal_keys_usage', schema: 'public' }, (payload) => {
                 if (payload.new) {
@@ -84,8 +88,22 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
             })
             .subscribe();
 
+        // 4. Suscribirse a cambios Realtime (portal_estado global)
+        const channelGlobal = supabase
+            .channel('portal_estado_changes_card')
+            .on('postgres_changes', { event: '*', table: 'portal_estado', schema: 'public' }, (payload) => {
+                if (payload.new) {
+                    setEstadoPortalGlobal(payload.new as EstadoPortal);
+                }
+            })
+            .subscribe();
+
+        // Cargar estado inicial global
+        obtenerEstadoPortal().then(setEstadoPortalGlobal);
+
         return () => {
-            supabase.removeChannel(channel);
+            supabase.removeChannel(channelKeys);
+            supabase.removeChannel(channelGlobal);
         };
     }, []);
 
@@ -101,6 +119,35 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
 
         const currentUsage = usage[keyId];
         const fieldName = tipo === 'siac' ? 'siac_user_id' : 'portal_user_id';
+        const nombreUsuario = currentUser.nombre_completo || currentUser.email || 'Usuario';
+
+        if (tipo === 'portal') {
+            const yaEstaEnUsoGlobal = !!estadoPortalGlobal.en_uso_por;
+            const esMismoUsuarioGlobal = estadoPortalGlobal.en_uso_por === nombreUsuario;
+
+            if (yaEstaEnUsoGlobal && !esMismoUsuarioGlobal) {
+                mostrarToast(`🔒 Portal ocupado por ${estadoPortalGlobal.en_uso_por}. Solo esa persona puede liberarlo.`);
+                return;
+            }
+
+            try {
+                if (yaEstaEnUsoGlobal && esMismoUsuarioGlobal) {
+                    await liberarPortalGlobal();
+                    setAlertaPortalEnviada(false);
+                    mostrarToast('✅ Portal liberado globalmente.');
+                } else {
+                    await marcarPortalEnUso(nombreUsuario);
+                    mostrarToast(`🌐 Portal marcado por ${nombreUsuario}`);
+                }
+                const nuevoEstado = await obtenerEstadoPortal();
+                setEstadoPortalGlobal(nuevoEstado);
+            } catch (error: any) {
+                mostrarToast(`Error: ${error.message}`);
+            }
+            return;
+        }
+
+        // Lógica original para SIAC (si aún se usa de forma independiente)
         const isOccupiedByMe = currentUsage?.[fieldName] === currentUser.id;
         const isOccupiedByOther = currentUsage?.[fieldName] && currentUsage?.[fieldName] !== currentUser.id;
 
@@ -240,32 +287,58 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                                 <div className="flex items-center w-full justify-center">
                                                     {(() => {
                                                         const keyId = `${clave.identificador}-${u.usuario}`;
-                                                        const keyUsage = usage[keyId];
+                                                        const nombreUsuarioActual = currentUser?.nombre_completo || currentUser?.email || 'Usuario';
+
+                                                        const estaOcupadoGlobal = !!estadoPortalGlobal.en_uso_por;
+                                                        const esMismoUsuarioGlobal = estadoPortalGlobal.en_uso_por === nombreUsuarioActual;
+                                                        const minutos = estadoPortalGlobal.en_uso_desde ? calcularMinutosTranscurridos(estadoPortalGlobal.en_uso_desde) : 0;
+
+                                                        const puedeAvisar = estaOcupadoGlobal && !esMismoUsuarioGlobal && minutos >= 15;
+                                                        const alguienEspera = esMismoUsuarioGlobal && !!estadoPortalGlobal.alerta_pedida_por;
 
                                                         const getStatusStyles = () => {
-                                                            const userId = keyUsage?.portal_user_id;
-                                                            if (!userId) return 'bg-white text-gray-500 border-gray-200 hover:border-telmex-blue hover:shadow-md shadow-sm';
-                                                            if (userId === currentUser?.id) return 'bg-green-600 text-white border-green-700 shadow-sm shadow-green-200 ring-2 ring-green-100';
+                                                            if (!estaOcupadoGlobal) return 'bg-white text-gray-500 border-gray-200 hover:border-telmex-blue hover:shadow-md shadow-sm';
+                                                            if (esMismoUsuarioGlobal) return 'bg-green-600 text-white border-green-700 shadow-sm shadow-green-200 ring-2 ring-green-100';
                                                             return 'bg-red-600 text-white border-red-700 shadow-sm shadow-red-200 ring-2 ring-red-100';
                                                         };
 
                                                         const getUserName = () => {
-                                                            const userId = keyUsage?.portal_user_id;
-                                                            if (!userId) return null;
-                                                            if (userId === currentUser?.id) return 'TÚ';
-                                                            const p = allProfiles.find(p => p.id === userId);
-                                                            return p ? p.nombre_completo.split(' ')[0].toUpperCase() : 'OTRO';
+                                                            if (!estaOcupadoGlobal) return null;
+                                                            return esMismoUsuarioGlobal ? 'TÚ' : estadoPortalGlobal.en_uso_por!.split(' ')[0].toUpperCase();
                                                         };
 
                                                         return (
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'portal'); }}
-                                                                className={`w-full max-w-[220px] flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border text-[11px] font-black transition-all ${getStatusStyles()}`}
-                                                                title={getUserName() ? `Ocupado por ${getUserName()}` : "Marcar como EN USO en PORTAL"}
-                                                            >
-                                                                <Globe size={14} />
-                                                                {getUserName() ? `PORTAL EN USO: ${getUserName()}` : 'MARCAR USO PORTAL'}
-                                                            </button>
+                                                            <div className="flex flex-col gap-1.5 items-center w-full">
+                                                                {alguienEspera && (
+                                                                    <div className="bg-orange-50 border border-orange-200 rounded-lg px-2 py-1 text-[9px] font-black text-orange-600 text-center animate-pulse w-full max-w-[220px]">
+                                                                        ⚡ {estadoPortalGlobal.alerta_pedida_por} está esperando — libera el portal
+                                                                    </div>
+                                                                )}
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); toggleUso(keyId, 'portal'); }}
+                                                                    className={`w-full max-w-[220px] flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border text-[11px] font-black transition-all ${getStatusStyles()}`}
+                                                                    title={getUserName() ? `Ocupado por ${getUserName()}` : "Marcar como EN USO en PORTAL"}
+                                                                >
+                                                                    <Globe size={14} />
+                                                                    {getUserName() ? `PORTAL EN USO: ${getUserName()}` : 'MARCAR USO PORTAL'}
+                                                                </button>
+                                                                {puedeAvisar && (
+                                                                    <button
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            try {
+                                                                                await pedirAlertaPortal(nombreUsuarioActual);
+                                                                                setAlertaPortalEnviada(true);
+                                                                                mostrarToast(`📢 Aviso enviado a ${estadoPortalGlobal.en_uso_por}`);
+                                                                            } catch { mostrarToast('Error al enviar aviso'); }
+                                                                        }}
+                                                                        disabled={alertaPortalEnviada || !!estadoPortalGlobal.alerta_pedida_por}
+                                                                        className="rounded-lg py-1 px-2 border w-full max-w-[220px] flex items-center justify-center gap-1 text-[9px] font-black uppercase tracking-wide bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                    >
+                                                                        📢 {estadoPortalGlobal.alerta_pedida_por ? 'Aviso enviado' : 'Avisar que me tardo'}
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                         );
                                                     })()}
                                                 </div>
@@ -273,8 +346,8 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
 
                                             {(() => {
                                                 const keyId = `${clave.identificador}-${u.usuario}`;
-                                                const keyUsage = usage[keyId];
-                                                const isLocked = keyUsage?.portal_user_id && keyUsage?.portal_user_id !== currentUser?.id;
+                                                // Bloquear si el portal está ocupado por otro usuario GLOBALMENTE
+                                                const isLocked = estadoPortalGlobal.en_uso_por && estadoPortalGlobal.en_uso_por !== (currentUser?.nombre_completo || currentUser?.email);
 
                                                 return (
                                                     <button
