@@ -252,6 +252,23 @@ export default function ComisionesPage() {
                     <h1 className="text-3xl font-bold text-gray-900">Gestión de Comisiones</h1>
                     <p className="text-gray-600 mt-1">Cortes semanales los Miércoles.</p>
                 </div>
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-2xl shadow-lg flex items-center gap-4 animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+                        <Copy size={20} className="text-white" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] uppercase font-black tracking-widest opacity-80">Clave Única de Captura</p>
+                        <p className="text-2xl font-black font-mono">337595</p>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-white hover:bg-white/10 ml-2"
+                        onClick={(e) => copiarAlPortapapeles(e as any, '337595', 'Clave Única')}
+                    >
+                        Copiar
+                    </Button>
+                </div>
             </div>
 
             {/* SECCIÓN 1: PENDIENTES DE INSTALACIÓN */}
@@ -299,10 +316,10 @@ export default function ComisionesPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-gray-200 text-left text-gray-500 font-medium">
+                                    <tr className="border-b border-gray-200 text-left text-gray-500 font-medium whitespace-nowrap">
                                         <th className="py-2 px-4">Fecha</th>
                                         <th className="py-2 px-4">Folio SIAC / OS</th>
-                                        <th className="py-2 px-4">Cliente / Clave Portal</th>
+                                        <th className="py-2 px-4">Cliente</th>
                                         <th className="py-2 px-4">Comisión</th>
                                         <th className="py-2 px-4 text-right">Acción</th>
                                     </tr>
@@ -342,31 +359,6 @@ export default function ComisionesPage() {
                                                 </td>
                                                 <td className="py-2 px-4 align-top">
                                                     <div className="font-medium text-gray-900">{cliente.nombre}</div>
-                                                    {cliente.usuario_portal_asignado && (() => {
-                                                        const detalles = getDetallesClave(cliente.usuario_portal_asignado);
-                                                        return detalles ? (
-                                                            <div
-                                                                className="mt-1 text-xs bg-gray-50 border border-gray-200 rounded p-1.5 w-fit cursor-default"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            >
-                                                                <div className="font-bold text-gray-700 border-b border-gray-200 pb-0.5 mb-0.5">
-                                                                    {detalles.tienda}
-                                                                </div>
-                                                                <div className="text-gray-600 flex flex-col">
-                                                                    <span className="font-mono font-semibold text-blue-600">{detalles.usuario}</span>
-                                                                    <span className="opacity-80 text-[10px] uppercase" title={detalles.nombre}>{detalles.nombre}</span>
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div
-                                                                className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full w-fit mt-1 flex items-center gap-1 cursor-default"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            >
-                                                                <span className="font-normal opacity-70">Clave:</span>
-                                                                <span className="font-mono font-medium">{cliente.usuario_portal_asignado}</span>
-                                                            </div>
-                                                        );
-                                                    })()}
                                                 </td>
                                                 <td className="py-2 px-4 text-green-600 font-medium align-top">{formatearMoneda(cliente.comision)}</td>
                                                 <td className="py-2 px-4 text-right align-top">
