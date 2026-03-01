@@ -27,6 +27,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
     const [editando, setEditando] = React.useState<{ id: string, campo: 'folio_siac' | 'orden_servicio' } | null>(null);
     const [valorEditado, setValorEditado] = React.useState('');
     const [confirmando, setConfirmando] = React.useState<Record<string, boolean>>({});
+    const [marcandoPosteado, setMarcandoPosteado] = React.useState<Record<string, boolean>>({});
 
     const handleUpdateCliente = async (cliente: Cliente, campo: 'folio_siac' | 'orden_servicio', valor: string) => {
         try {
@@ -65,6 +66,29 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
             mostrarToast('❌ Error al confirmar comisiones');
         } finally {
             setConfirmando(prev => ({ ...prev, [email]: false }));
+        }
+    };
+
+    const handleMarcarPosteado = async (cliente: Cliente) => {
+        const confirmar = window.confirm(
+            `¿Marcar como POSTEADO a ${cliente.nombre}?\n\nEsto contabilizará la comisión del promotor.`
+        );
+        if (!confirmar) return;
+
+        setMarcandoPosteado(prev => ({ ...prev, [cliente.id]: true }));
+        try {
+            const clienteActualizado: Cliente = {
+                ...cliente,
+                estado_pipeline: 'posteado',
+                fecha_instalacion: cliente.fecha_instalacion || new Date().toISOString(),
+                actualizado_en: new Date().toISOString()
+            };
+            await guardarCliente(clienteActualizado);
+            mostrarToast(`✅ ${cliente.nombre} marcado como POSTEADO`);
+        } catch {
+            mostrarToast(`❌ Error al actualizar estado`);
+        } finally {
+            setMarcandoPosteado(prev => ({ ...prev, [cliente.id]: false }));
         }
     };
 
@@ -270,6 +294,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                     <th className="px-6 py-4">Datos Portal</th>
                                                     <th className="px-6 py-4">Servicio / Paquete</th>
                                                     <th className="px-6 py-4">Estado</th>
+                                                    <th className="px-6 py-4">Acción</th>
                                                     <th className="px-6 py-4 text-right">Comisión</th>
                                                 </tr>
                                             </thead>
@@ -396,6 +421,20 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                                 {cliente.estado_pipeline === 'posteado' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
                                                                 {cliente.estado_pipeline.replace(/_/g, ' ').toUpperCase()}
                                                             </span>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            {cliente.estado_pipeline === 'capturado' ? (
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); handleMarcarPosteado(cliente); }}
+                                                                    disabled={marcandoPosteado[cliente.id]}
+                                                                    className="bg-green-500 hover:bg-green-600 text-white text-[10px] font-black uppercase tracking-wide px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all active:scale-95 shadow-sm disabled:opacity-60"
+                                                                >
+                                                                    {marcandoPosteado[cliente.id] ? '⏳' : <CheckCircle2 size={12} />}
+                                                                    {marcandoPosteado[cliente.id] ? 'Marcando...' : 'Marcar Posteado'}
+                                                                </button>
+                                                            ) : (
+                                                                <span className="text-[10px] text-gray-400 font-medium">—</span>
+                                                            )}
                                                         </td>
                                                         <td className="px-6 py-4 text-right">
                                                             <span className="text-base font-black text-gray-900">
