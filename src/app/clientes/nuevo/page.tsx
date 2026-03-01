@@ -347,12 +347,12 @@ export default function NuevoClientePage() {
                                 <div className="mt-2 text-sm text-yellow-700">
                                     <p className="font-semibold mb-2">Asegúrate de tener las siguientes capturas:</p>
                                     <ul className="list-decimal list-inside space-y-1 font-medium">
-                                        <li>ACEPTO DEL CLIENTE (Audio o Mensaje)</li>
+                                        <li>SI O ACEPTO AL MENSAJE DE ALTA</li>
                                         <li>DATOS Y MAPA EN PORTAL</li>
                                         <li>PAQUETE ELEGIDO EN PORTAL</li>
                                         <li>CAPTURA DE FOLIO EN PORTAL</li>
                                         <li>CAPTURA DE FOLIO SIAC EN CHAT-CLIENTE</li>
-                                        <li>CAPTURA DEL CURP</li>
+                                        <li>INE POR AMBOS LADOS DEL CLIENTE</li>
                                         <li>FOTO DE COBERTURA</li>
                                     </ul>
                                 </div>
