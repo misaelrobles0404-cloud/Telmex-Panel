@@ -83,6 +83,10 @@ export interface Cliente {
     // Notas
     notas: string;
 
+    // Portal Usage Tracking (Real-time)
+    en_uso_por?: string;
+    en_uso_desde?: string;
+
     // Metadata
     creado_en: string;
     actualizado_en: string;

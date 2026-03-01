@@ -20,6 +20,7 @@ export default function ComisionesPage() {
     const [clientesPagados, setClientesPagados] = useState<Record<string, { clientes: Cliente[], total: number }>>({});
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
 
     const mostrarToast = (message: string) => {
@@ -60,6 +61,11 @@ export default function ComisionesPage() {
                 c.estado_pipeline !== 'cancelado'
             );
             setClientesPendientes(pendientes);
+
+            // Seleccionar el primero por defecto si no hay uno seleccionado
+            if (pendientes.length > 0 && !clienteSeleccionado) {
+                setClienteSeleccionado(pendientes[0]);
+            }
 
             // 1.5 Rechazados / No Instalados: Tienen folio SIAC y estado de rechazo técnico
             const rechazados = todos.filter(c =>
@@ -229,6 +235,50 @@ export default function ComisionesPage() {
         return dias;
     };
 
+    const marcarUsoPortal = async (cliente: Cliente) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        setLoading(true);
+        const hoy = new Date().toISOString();
+
+        // Obtener perfil para el nombre
+        const { data: perfil } = await supabase
+            .from('perfiles')
+            .select('nombre_completo')
+            .eq('id', user.id)
+            .single();
+
+        const nombreUsuario = perfil?.nombre_completo || user.email || 'Usuario';
+
+        const clienteActualizado: Cliente = {
+            ...cliente,
+            en_uso_por: nombreUsuario,
+            en_uso_desde: hoy,
+            actualizado_en: hoy,
+            actividades: [
+                {
+                    id: generarId(),
+                    clienteId: cliente.id,
+                    tipo: 'cambio_estado',
+                    descripcion: `Portal en uso por ${nombreUsuario}`,
+                    fecha: hoy
+                },
+                ...cliente.actividades || []
+            ]
+        };
+
+        try {
+            await guardarCliente(clienteActualizado);
+            mostrarToast(`Marcado como en uso por ${nombreUsuario}`);
+            await cargarClientes();
+            setClienteSeleccionado(clienteActualizado);
+        } catch (error) {
+            alert('Error al marcar uso de portal');
+            setLoading(false);
+        }
+    };
+
     const getDetallesClave = (usuarioId: string) => {
         for (const clave of CLAVES_PORTAL) {
             const usuarioEncontrado = clave.usuarios.find(u => u.usuario === usuarioId);
@@ -252,72 +302,124 @@ export default function ComisionesPage() {
                     <h1 className="text-3xl font-bold text-gray-900">Gestión de Comisiones</h1>
                     <p className="text-gray-600 mt-1">Cortes semanales los Miércoles.</p>
                 </div>
-                {/* Nuevo Banner Estilo Mockup */}
-                <div className="bg-[#f0f4ff] p-6 rounded-[32px] border border-blue-100 flex flex-col items-center gap-4 w-full max-w-md mx-auto shadow-sm transition-all hover:shadow-md">
-                    <div className="flex items-center gap-3 self-start mb-2">
-                        <div className="bg-white p-2 rounded-xl shadow-sm border border-blue-50">
-                            <span className="text-blue-600">🔑</span>
+                {/* Nuevo Banner Estilo Mockup Dinámico y Responsivo */}
+                <div className="bg-[#f0f4ff] p-4 md:p-6 rounded-[32px] border border-blue-100 flex flex-col items-center gap-4 w-full max-w-5xl mx-auto shadow-sm transition-all hover:shadow-md">
+                    <div className="flex flex-wrap items-center justify-between w-full gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white p-2 rounded-xl shadow-sm border border-blue-50">
+                                <span className="text-blue-600">🔑</span>
+                            </div>
+                            <h2 className="text-xl md:text-2xl font-black text-[#001b44] tracking-tight leading-tight">
+                                Clave Universal de <br className="hidden md:block" /> Captura
+                            </h2>
                         </div>
-                        <h2 className="text-2xl font-black text-[#001b44] tracking-tight leading-tight">
-                            Clave Universal de <br /> Captura
-                        </h2>
+
+                        <div className="bg-[#eef2ff] px-4 py-2 rounded-full border border-blue-100 flex items-center gap-3 cursor-pointer hover:bg-blue-100 transition-colors group"
+                            onClick={(e) => copiarAlPortapapeles(e as any, '10000900', 'Acceso Único')}>
+                            <span className="text-[#3b82f6]">👤</span>
+                            <span className="font-mono font-black text-[#3b82f6] text-sm md:text-base">10000900</span>
+                            <Copy size={14} className="text-[#3b82f6] opacity-40 group-hover:opacity-100" />
+                        </div>
                     </div>
 
-                    <div className="w-full bg-[#fffcf0] border border-[#ffecb3] rounded-2xl p-3 flex items-center gap-3 mb-2">
+                    <div className="w-full bg-[#fffcf0] border border-[#ffecb3] rounded-2xl p-3 flex items-center gap-3">
                         <span className="text-[#b45309]">🔒</span>
                         <span className="text-[#b45309] text-[10px] font-black uppercase tracking-widest">
                             Clave vinculada al folio SIAC
                         </span>
                     </div>
 
-                    <div className="w-full bg-white rounded-2xl p-5 border border-blue-50 shadow-sm">
-                        <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-                            <div className="text-left">
-                                <p className="text-[#001b44] font-black text-sm uppercase leading-none">NACIONAL</p>
-                                <p className="text-[#001b44] font-black text-xs opacity-80">(ACCESO ÚNICO)</p>
+                    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {/* Panel de Datos Dinámicos del Cliente */}
+                        <div className="bg-white rounded-2xl p-5 border border-blue-50 shadow-sm flex flex-col gap-4">
+                            <div className="pb-3 border-b border-gray-100">
+                                <p className="text-[#001b44] font-black text-sm uppercase leading-none">DATOS DEL CLIENTE</p>
+                                <p className="text-[#001b44] font-black text-xs opacity-60">Selecciona en la tabla para cargar</p>
                             </div>
-                            <div
-                                className="bg-[#eef2ff] px-3 py-1.5 rounded-full border border-blue-100 flex items-center gap-2 cursor-pointer hover:bg-blue-100 transition-colors group"
-                                onClick={(e) => copiarAlPortapapeles(e as any, '10000900', 'Acceso Único')}
-                            >
-                                <span className="text-[#3b82f6]">👤</span>
-                                <span className="font-mono font-black text-[#3b82f6] text-sm">10000900</span>
-                                <Copy size={12} className="text-[#3b82f6] opacity-40 group-hover:opacity-100" />
+
+                            <div className="bg-[#e3f2ff] rounded-xl p-4 flex flex-col gap-4">
+                                {/* Botones de Nombre */}
+                                <div className="flex items-start gap-2">
+                                    <div className="bg-[#0047b3] p-1.5 rounded-lg shadow-sm mt-1 shrink-0">
+                                        <span className="text-white text-[10px] font-bold">ABC</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {(clienteSeleccionado?.nombre || 'Sin Selección').split(' ').map((word, idx) => (
+                                            <button
+                                                key={`${word}-${idx}`}
+                                                onClick={(e) => copiarAlPortapapeles(e as any, word.toUpperCase(), 'Nombre')}
+                                                className="bg-white px-3 py-1.5 rounded-lg text-[11px] font-black text-[#001b44] shadow-sm border border-white hover:border-blue-300 transition-all active:scale-95 uppercase"
+                                            >
+                                                {word}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Botones de Folio y OS (Punto 2) */}
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="bg-[#0047b3] p-1.5 rounded-lg shadow-sm shrink-0">
+                                            <span className="text-white text-[10px] font-bold">SIAC</span>
+                                        </div>
+                                        <button
+                                            disabled={!clienteSeleccionado?.folio_siac}
+                                            onClick={(e) => clienteSeleccionado?.folio_siac && copiarAlPortapapeles(e as any, clienteSeleccionado.folio_siac, 'Folio')}
+                                            className="bg-white flex-1 px-4 py-1.5 rounded-lg text-sm font-mono font-black text-[#0047b3] shadow-sm border border-white hover:border-blue-300 transition-all flex justify-between items-center group"
+                                        >
+                                            {clienteSeleccionado?.folio_siac || '---'}
+                                            <Copy size={12} className="opacity-40 group-hover:opacity-100" />
+                                        </button>
+                                    </div>
+                                    {clienteSeleccionado?.orden_servicio && (
+                                        <div className="flex items-center gap-2">
+                                            <div className="bg-[#0047b3] p-1.5 rounded-lg shadow-sm shrink-0">
+                                                <span className="text-white text-[10px] font-bold">OS</span>
+                                            </div>
+                                            <button
+                                                onClick={(e) => copiarAlPortapapeles(e as any, clienteSeleccionado.orden_servicio!, 'OS')}
+                                                className="bg-white flex-1 px-4 py-1.5 rounded-lg text-sm font-mono font-black text-[#0047b3] shadow-sm border border-white hover:border-blue-300 transition-all flex justify-between items-center group"
+                                            >
+                                                {clienteSeleccionado.orden_servicio}
+                                                <Copy size={12} className="opacity-40 group-hover:opacity-100" />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        <div className="bg-[#e3f2ff] rounded-xl p-4 flex flex-col gap-4">
-                            <div className="flex items-center gap-2">
-                                <div className="bg-[#0047b3] p-1.5 rounded-lg shadow-sm">
-                                    <span className="text-white text-xs text-center block">🔒</span>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {['GUSTAVO', 'ACEVEDO', 'ZAMARRON'].map((word) => (
-                                        <button
-                                            key={word}
-                                            onClick={(e) => copiarAlPortapapeles(e as any, word, 'Nombre')}
-                                            className="bg-white px-3 py-1 rounded-lg text-[11px] font-black text-[#001b44] shadow-sm border border-white hover:border-blue-300 transition-all active:scale-95 uppercase"
-                                        >
-                                            {word}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
+                        {/* Panel de Acción y Clave */}
+                        <div className="bg-white rounded-2xl p-5 border border-blue-50 shadow-sm flex flex-col justify-between gap-4">
                             <div className="flex flex-col items-center gap-3">
-                                <div className="bg-white rounded-xl py-3 px-6 shadow-sm border border-white w-full flex items-center justify-center gap-3 group cursor-pointer hover:border-blue-100">
-                                    <span className="opacity-60 text-lg">🌐</span>
-                                    <span className="text-[#001b44] font-black text-sm tracking-wide uppercase">Marcar Uso Portal</span>
-                                </div>
+                                <button
+                                    onClick={() => clienteSeleccionado && marcarUsoPortal(clienteSeleccionado)}
+                                    disabled={!clienteSeleccionado || !!clienteSeleccionado.en_uso_por}
+                                    className={`rounded-xl py-3 px-6 shadow-sm border w-full flex items-center justify-center gap-3 transition-all ${clienteSeleccionado?.en_uso_por
+                                        ? 'bg-yellow-50 border-yellow-200 text-yellow-700 cursor-not-allowed'
+                                        : 'bg-white border-gray-100 text-[#001b44] hover:border-blue-100 active:scale-95'
+                                        }`}
+                                >
+                                    <span className="text-lg">{clienteSeleccionado?.en_uso_por ? '👤' : '🌐'}</span>
+                                    <span className="font-black text-sm tracking-wide uppercase">
+                                        {clienteSeleccionado?.en_uso_por
+                                            ? `En uso por ${clienteSeleccionado.en_uso_por}`
+                                            : 'Marcar Uso Portal'}
+                                    </span>
+                                </button>
 
                                 <div
-                                    className="bg-[#fff9f0] border-2 border-[#ffecb3] rounded-2xl py-3 px-8 flex items-center justify-center gap-4 cursor-pointer hover:bg-[#fff4e0] transition-colors group w-full"
+                                    className="bg-[#fff9f0] border-2 border-[#ffecb3] rounded-2xl py-4 px-8 flex items-center justify-center gap-4 cursor-pointer hover:bg-[#fff4e0] transition-colors group w-full"
                                     onClick={(e) => copiarAlPortapapeles(e as any, '337595', 'Clave Captura')}
                                 >
                                     <span className="text-[#d97706] text-xl">🔓</span>
-                                    <span className="font-mono text-2xl font-black text-[#d97706] tracking-widest">337595</span>
+                                    <span className="font-mono text-3xl font-black text-[#d97706] tracking-widest">337595</span>
                                 </div>
                             </div>
+
+                            <p className="text-[10px] text-gray-400 text-center uppercase font-bold tracking-tighter">
+                                {clienteSeleccionado ? `Trabajando con: ${clienteSeleccionado.nombre}` : 'Sin cliente seleccionado'}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -382,8 +484,8 @@ export default function ComisionesPage() {
                                         return (
                                             <tr
                                                 key={cliente.id}
-                                                className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                                                onClick={() => router.push(`/clientes/${cliente.id}`)}
+                                                className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${clienteSeleccionado?.id === cliente.id ? 'bg-blue-50/50' : ''}`}
+                                                onClick={() => setClienteSeleccionado(cliente)}
                                             >
                                                 <td className="py-2 px-4 text-gray-600 align-top">
                                                     {formatearFecha(cliente.creado_en)}
@@ -429,11 +531,16 @@ export default function ComisionesPage() {
                                                 <td className="py-2 px-4 text-green-600 font-medium align-top">{formatearMoneda(cliente.comision)}</td>
                                                 <td className="py-2 px-4 text-right align-top">
                                                     <div className="flex justify-end gap-2">
+                                                        {cliente.en_uso_por && (
+                                                            <div className="flex items-center gap-1.5 px-2 py-1 bg-yellow-50 text-yellow-700 text-[10px] font-black rounded-lg border border-yellow-200 animate-pulse">
+                                                                <span>👤 EN USO POR: {cliente.en_uso_por.toUpperCase()}</span>
+                                                            </div>
+                                                        )}
+                                                        <Button size="sm" variant="outline" className="text-telmex-blue border-blue-200 hover:bg-blue-50" onClick={(e) => { e.stopPropagation(); router.push(`/clientes/${cliente.id}`); }} title="Ver Detalle">
+                                                            <Search size={14} /> Ver
+                                                        </Button>
                                                         <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={(e) => { e.stopPropagation(); reportarCancelacion(cliente); }} title="Cliente Canceló">
                                                             Cancelar
-                                                        </Button>
-                                                        <Button size="sm" variant="danger" onClick={(e) => { e.stopPropagation(); reportarRechazo(cliente); }} title="Sin Cobertura / Rechazo Técnico">
-                                                            Sin Cobertura
                                                         </Button>
                                                         <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={(e) => { e.stopPropagation(); confirmarInstalacion(cliente); }} title="Confirmar">
                                                             <CheckCircle size={16} /> Confirmar
