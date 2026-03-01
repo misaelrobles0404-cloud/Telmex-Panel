@@ -293,18 +293,15 @@ export default function ComisionesPage() {
 
         const yaEstaEnUso = !!estadoPortal.en_uso_por;
         const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuario;
-        // Solo Misael e infinitummisael pueden forzar liberación
-        const esAdmin = user.email === 'misaelrobles0404@gmail.com' ||
-            user.email?.includes('infinitummisael');
 
-        // Si está ocupado por otro y no soy admin: mostrar aviso y salir
-        if (yaEstaEnUso && !esMismoUsuario && !esAdmin) {
-            mostrarToast(`🔒 Portal en uso por ${estadoPortal.en_uso_por}. No puedes usarlo ahora.`);
+        // Solo el que marcó puede liberar
+        if (yaEstaEnUso && !esMismoUsuario) {
+            mostrarToast(`🔒 Portal en uso por ${estadoPortal.en_uso_por}. Solo esa persona puede liberarlo.`);
             setLoading(false);
             return;
         }
 
-        const debeLiberar = yaEstaEnUso && (esMismoUsuario || esAdmin);
+        const debeLiberar = yaEstaEnUso && esMismoUsuario;
 
         try {
             if (debeLiberar) {
@@ -392,15 +389,12 @@ export default function ComisionesPage() {
                                 // Usar estado GLOBAL del portal, no el cliente seleccionado
                                 const nombreUsuarioActual = perfilActual?.nombre_completo || user?.email || '';
                                 const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuarioActual;
-                                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' ||
-                                    user?.email?.includes('infinitummisael');
-                                const puedeLiberar = esMismoUsuario || esAdmin;
                                 const estaOcupado = !!estadoPortal.en_uso_por;
 
                                 return (
                                     <button
                                         onClick={() => marcarUsoPortal({} as any)}
-                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !puedeLiberar
+                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !esMismoUsuario
                                                 ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100 active:scale-95 cursor-not-allowed'
                                                 : estaOcupado
                                                     ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
@@ -410,7 +404,7 @@ export default function ComisionesPage() {
                                         <span className="text-sm">{estaOcupado ? '🔒' : '🌐'}</span>
                                         <span className="font-black text-[11px] tracking-wide uppercase">
                                             {estaOcupado
-                                                ? puedeLiberar
+                                                ? esMismoUsuario
                                                     ? `LIBERAR (EN USO POR ${estadoPortal.en_uso_por!.split(' ')[0]})`
                                                     : `EN USO POR ${estadoPortal.en_uso_por!.split(' ')[0]}`
                                                 : 'Marcar Uso Portal'}
