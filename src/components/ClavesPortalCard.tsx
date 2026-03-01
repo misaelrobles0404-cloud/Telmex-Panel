@@ -240,15 +240,7 @@ export const ClavesPortalCard: React.FC<ClavesPortalCardProps> = ({
                                         } ${claveSeleccionada === u.usuario ? 'bg-blue-100 border border-blue-200' : ''} ${bloqueado && claveSeleccionada !== u.usuario ? 'opacity-50 grayscale' : ''}`}
                                     onClick={() => onSeleccionar && !bloqueado && onSeleccionar(u.usuario)}
                                 >
-                                    {onSeleccionar && (
-                                        <div className={`mt-1 w-4 h-4 rounded-full border flex items-center justify-center ${claveSeleccionada === u.usuario ? 'border-telmex-blue bg-telmex-blue' : 'border-gray-300'
-                                            }`}>
-                                            {claveSeleccionada === u.usuario && (
-                                                bloqueado ? <Lock size={8} className="text-white" /> : <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                                            )}
-                                        </div>
-                                    )}
-                                    <div className="flex-1 min-w-0">
+                                    <div className="flex-1 min-w-0 ml-1">
                                         <div className="flex flex-wrap gap-1 mb-2">
                                             {(() => {
                                                 const d = dividirNombre(u.nombre);

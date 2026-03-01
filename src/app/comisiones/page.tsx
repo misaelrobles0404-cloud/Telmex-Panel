@@ -96,7 +96,7 @@ export default function ComisionesPage() {
 
             const todos = esSuperAdmin
                 ? data
-                : data.filter(c => c.usuario === '337595' || c.usuario === user?.email);
+                : data.filter(c => c.usuario_portal_asignado === '337595' || c.usuario === user?.email);
 
 
             // 1. Pendientes: Tienen folio SIAC pero no están instalados, rechazados ni cancelados

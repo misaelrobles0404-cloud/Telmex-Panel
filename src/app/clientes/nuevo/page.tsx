@@ -39,7 +39,7 @@ export default function NuevoClientePage() {
         // Documentación
         ine: '',
         curp: '',
-        usuario: '337595', // Clave universal auto-asignada
+        usuario: '', // Restaurado para el promotor
 
         // Tipo de cliente y paquete
         tipoCliente: 'residencial' as TipoCliente,
@@ -144,7 +144,8 @@ export default function NuevoClientePage() {
             entre_calle_2: formData.entreCalle2,
             ine: formData.ine,
             curp: formData.curp || 'PENDIENTE',
-            usuario: '337595',
+            usuario: user?.email || '',
+            usuario_portal_asignado: '337595',
             tipo_servicio: tipoServicio,
             tipo_cliente: formData.tipoCliente,
             paquete: 'POR DEFINIR',
@@ -202,7 +203,7 @@ export default function NuevoClientePage() {
             entreCalle2: '',
             ine: '',
             curp: '',
-            usuario: '337595',
+            usuario: '',
             tipoCliente: 'residencial',
             paqueteId: '',
             tieneInternet: false,
@@ -263,7 +264,8 @@ export default function NuevoClientePage() {
             entre_calle_2: formData.entreCalle2,
             ine: formData.ine,
             curp: formData.curp,
-            usuario: '337595',
+            usuario: user?.email || '',
+            usuario_portal_asignado: '337595',
             tipo_servicio: tipoServicio,
             tipo_cliente: formData.tipoCliente,
             paquete: paqueteSeleccionado.nombre || `${paqueteSeleccionado.velocidad} Mbps`,
