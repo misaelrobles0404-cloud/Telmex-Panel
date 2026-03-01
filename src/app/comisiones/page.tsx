@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Cliente, EstadoPipeline } from '@/types';
-import { obtenerClientes, guardarCliente } from '@/lib/storage';
+import { obtenerClientes, guardarCliente, liberarPortalCliente } from '@/lib/storage';
 import { formatearFecha, formatearMoneda, generarId } from '@/lib/utils';
 import { CLAVES_PORTAL } from '@/data/claves';
 import { CheckCircle, XCircle, Search, Calendar, AlertCircle, Copy } from 'lucide-react';
@@ -314,7 +314,13 @@ export default function ComisionesPage() {
         };
 
         try {
-            await guardarCliente(clienteActualizado);
+            if (debeLiberar) {
+                // Liberación: usamos UPDATE directo con null explícito
+                // (el upsert ignora los campos undefined en Supabase)
+                await liberarPortalCliente(cliente.id);
+            } else {
+                await guardarCliente(clienteActualizado);
+            }
             mostrarToast(debeLiberar ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
             await cargarClientes();
         } catch (error: any) {

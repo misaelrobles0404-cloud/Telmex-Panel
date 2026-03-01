@@ -22,7 +22,7 @@ import {
     Star,
     Trophy
 } from 'lucide-react';
-import { obtenerClientes, guardarCliente } from '@/lib/storage';
+import { obtenerClientes, guardarCliente, liberarPortalCliente } from '@/lib/storage';
 import { calcularMetricas, formatearMoneda, generarId } from '@/lib/utils';
 import { Cliente } from '@/types';
 import { useRouter } from 'next/navigation';
@@ -90,7 +90,13 @@ export default function DashboardPage() {
         };
 
         try {
-            await guardarCliente(clienteActualizado);
+            if (debeLiberar) {
+                // Liberación: usamos UPDATE directo con null explícito
+                // (el upsert ignora los campos undefined en Supabase)
+                await liberarPortalCliente(cliente.id);
+            } else {
+                await guardarCliente(clienteActualizado);
+            }
             mostrarToast(debeLiberar ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
             await cargarDatos(true);
             setClienteSeleccionado(clienteActualizado);

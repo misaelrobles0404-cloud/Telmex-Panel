@@ -52,19 +52,29 @@ export function eliminarRecordatorio(id: string): void {
 export async function guardarCliente(cliente: Cliente): Promise<void> {
     const { documentos, actividades, ...datosParaGuardar } = cliente;
 
-    /*
-    console.log('Guardando cliente:', {
-        id: cliente.id,
-        usuario_portal_asignado: cliente.usuario_portal_asignado
-    });
-    */
-
     const { error } = await supabase
         .from('clientes')
         .upsert(datosParaGuardar);
 
     if (error) {
         console.error('Error al guardar cliente en Supabase:', error);
+        throw error;
+    }
+}
+
+// Función dedicada para liberar el portal - usa null EXPLÍCITO, no undefined
+// Supabase ignora los campos undefined en un upsert, pero null sí borra el valor
+export async function liberarPortalCliente(clienteId: string): Promise<void> {
+    const { error } = await supabase
+        .from('clientes')
+        .update({
+            en_uso_por: null,
+            en_uso_desde: null,
+        })
+        .eq('id', clienteId);
+
+    if (error) {
+        console.error('Error al liberar portal en Supabase:', error);
         throw error;
     }
 }
