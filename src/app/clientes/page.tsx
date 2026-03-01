@@ -83,12 +83,9 @@ export default function ClientesPage() {
                 const data = await obtenerClientes();
 
                 // Lógica de Filtrado: 
-                // Ruiz (Boss) ve todo para gestión.
-                // Todos los demás ven solo lo SUYO.
-                const esBoss = user?.email === 'carrillomarjory7@gmail.com';
-
+                // Todos ven solo lo SUYO (incluyendo Boss).
                 let clientesFiltradosData = data;
-                if (!esBoss && user?.email) {
+                if (user?.email) {
                     clientesFiltradosData = data.filter(c =>
                         c.usuario === user.email ||
                         c.user_id === user.id
