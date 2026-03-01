@@ -9,7 +9,6 @@ import {
     obtenerConfiguracion,
     guardarConfiguracion,
     AppAnnouncement,
-    ClavePortal,
     ConfigComisiones,
     ClaveUniversal,
     MetaSuperVendedor
@@ -52,10 +51,6 @@ export default function AdminConfigPage() {
     const [announcement, setAnnouncement] = useState<AppAnnouncement>({ text: '', active: false, type: 'info' });
     const [savingAnn, setSavingAnn] = useState(false);
 
-    // --- Claves de Portal ---
-    const [claves, setClaves] = useState<ClavePortal[]>([]);
-    const [savingClaves, setSavingClaves] = useState(false);
-
     // --- Perfiles ---
     const [perfiles, setPerfiles] = useState<any[]>([]);
     const [savingPerfiles, setSavingPerfiles] = useState(false);
@@ -92,9 +87,8 @@ export default function AdminConfigPage() {
 
     const cargarConfiguraciones = async () => {
         setLoading(true);
-        const [annData, clavesData, perfilesRes, comisionesData, claveUnivData, metaData, reqData] = await Promise.all([
+        const [annData, perfilesRes, comisionesData, claveUnivData, metaData, reqData] = await Promise.all([
             obtenerConfiguracion<AppAnnouncement>('app_announcement'),
-            obtenerConfiguracion<ClavePortal[]>('claves_portal'),
             supabase.from('perfiles').select('*').order('nombre_completo'),
             obtenerConfiguracion<ConfigComisiones>('config_comisiones'),
             obtenerConfiguracion<ClaveUniversal>('clave_universal'),
@@ -103,7 +97,6 @@ export default function AdminConfigPage() {
         ]);
 
         if (annData) setAnnouncement(annData);
-        if (clavesData) setClaves(clavesData);
         if (perfilesRes.data) setPerfiles(perfilesRes.data);
         if (comisionesData) setComisiones(comisionesData);
         if (claveUnivData) setClaveUniversal(claveUnivData);
@@ -132,11 +125,6 @@ export default function AdminConfigPage() {
         } catch { alert('❌ Error al actualizar perfiles'); }
         finally { setSavingPerfiles(false); }
     };
-
-    // --- Handlers de Claves de Portal ---
-    const agregarClave = () => setClaves([...claves, { id: Math.random().toString(36).substr(2, 9), ciudad: '', tienda: '', usuario: '', nombre: '' }]);
-    const eliminarClave = (id: string) => { if (confirm('¿Eliminar esta clave?')) setClaves(claves.filter(c => c.id !== id)); };
-    const actualizarClave = (id: string, campo: keyof ClavePortal, valor: string) => setClaves(claves.map(c => c.id === id ? { ...c, [campo]: valor } : c));
 
     // --- Handlers de Requisitos ---
     const actualizarRequisito = (idx: number, valor: string) => { const r = [...requisitos]; r[idx] = valor; setRequisitos(r); };
@@ -420,44 +408,6 @@ export default function AdminConfigPage() {
                         <div className="flex justify-end">
                             <Button onClick={() => handleSave('app_announcement', announcement, setSavingAnn, 'Anuncio')} disabled={savingAnn} className="bg-indigo-600 hover:bg-indigo-700">
                                 <Save size={16} className="mr-2" /> {savingAnn ? 'Guardando...' : 'Publicar Anuncio'}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* ========== 6. CLAVES DE PORTAL ========== */}
-                <Card className="border-t-4 border-t-teal-500 shadow-md">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle className="flex items-center gap-2 text-xl">
-                                <Key size={22} className="text-teal-500" />
-                                Claves de Portal por Ciudad
-                            </CardTitle>
-                        </div>
-                        <Button variant="secondary" size="sm" onClick={agregarClave}>
-                            <Plus size={16} className="mr-1" /> Agregar Ciudad
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-3">
-                            {claves.length === 0 && <p className="text-center py-4 text-gray-400 italic">No hay claves configuradas.</p>}
-                            {claves.map((c) => (
-                                <div key={c.id} className="p-4 border-2 border-gray-100 rounded-xl bg-gray-50/50 flex flex-col md:flex-row gap-3 items-end">
-                                    <div className="flex-grow grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
-                                        <Input label="Ciudad" value={c.ciudad} onChange={(e) => actualizarClave(c.id, 'ciudad', e.target.value.toUpperCase())} placeholder="HERMOSILLO" />
-                                        <Input label="Tienda" value={c.tienda} onChange={(e) => actualizarClave(c.id, 'tienda', e.target.value.toUpperCase())} placeholder="HL01" />
-                                        <Input label="Usuario" value={c.usuario} onChange={(e) => actualizarClave(c.id, 'usuario', e.target.value.toUpperCase())} placeholder="MX655182" />
-                                        <Input label="Nombre" value={c.nombre} onChange={(e) => actualizarClave(c.id, 'nombre', e.target.value.toUpperCase())} placeholder="MISAEL ROBLES" />
-                                    </div>
-                                    <Button variant="ghost" className="text-red-400 hover:bg-red-50 hover:text-red-600 p-2" onClick={() => eliminarClave(c.id)}>
-                                        <Trash2 size={18} />
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="flex justify-end mt-4">
-                            <Button onClick={() => handleSave('claves_portal', claves, setSavingClaves, 'Claves de Portal')} disabled={savingClaves} className="bg-teal-600 hover:bg-teal-700">
-                                <Save size={16} className="mr-2" /> {savingClaves ? 'Guardando...' : 'Guardar Claves de Portal'}
                             </Button>
                         </div>
                     </CardContent>
