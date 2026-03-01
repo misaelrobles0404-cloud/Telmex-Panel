@@ -28,6 +28,8 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
     const [valorEditado, setValorEditado] = React.useState('');
     const [confirmando, setConfirmando] = React.useState<Record<string, boolean>>({});
     const [marcandoPosteado, setMarcandoPosteado] = React.useState<Record<string, boolean>>({});
+    const [cancelando, setCancelando] = React.useState<Record<string, boolean>>({});
+    const [motivoCancelacion, setMotivoCancelacion] = React.useState<{ clienteId: string; valor: string } | null>(null);
 
     const handleUpdateCliente = async (cliente: Cliente, campo: 'folio_siac' | 'orden_servicio', valor: string) => {
         try {
@@ -92,7 +94,36 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
         }
     };
 
-    // Obtener lista de emails únicos de perfiles para asegurar que todos aparezcan
+    const handleCancelarCliente = async (cliente: Cliente, motivo: string) => {
+        setMotivoCancelacion(null);
+        if (!motivo.trim()) return;
+
+        setCancelando(prev => ({ ...prev, [cliente.id]: true }));
+        try {
+            const clienteActualizado: Cliente = {
+                ...cliente,
+                estado_pipeline: 'sin_cobertura',
+                actualizado_en: new Date().toISOString(),
+                actividades: [
+                    {
+                        id: `act_${Date.now()}`,
+                        clienteId: cliente.id,
+                        tipo: 'cambio_estado' as const,
+                        descripcion: `❌ Cancelado por Super Admin. Razón: ${motivo}`,
+                        fecha: new Date().toISOString()
+                    },
+                    ...(cliente.actividades || [])
+                ]
+            };
+            await guardarCliente(clienteActualizado);
+            mostrarToast(`❌ ${cliente.nombre} cancelado`);
+        } catch {
+            mostrarToast('Error al cancelar la solicitud');
+        } finally {
+            setCancelando(prev => ({ ...prev, [cliente.id]: false }));
+        }
+    };
+
     const todosLosEmails = Array.from(new Set(perfiles.map(p => p.email)));
 
     // Filtrar promotores por búsqueda (nombre o email)
@@ -425,14 +456,62 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             {cliente.estado_pipeline === 'capturado' ? (
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); handleMarcarPosteado(cliente); }}
-                                                                    disabled={marcandoPosteado[cliente.id]}
-                                                                    className="bg-green-500 hover:bg-green-600 text-white text-[10px] font-black uppercase tracking-wide px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all active:scale-95 shadow-sm disabled:opacity-60"
-                                                                >
-                                                                    {marcandoPosteado[cliente.id] ? '⏳' : <CheckCircle2 size={12} />}
-                                                                    {marcandoPosteado[cliente.id] ? 'Marcando...' : 'Marcar Posteado'}
-                                                                </button>
+                                                                <div className="flex flex-col gap-1.5">
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); handleMarcarPosteado(cliente); }}
+                                                                        disabled={marcandoPosteado[cliente.id]}
+                                                                        className="bg-green-500 hover:bg-green-600 text-white text-[10px] font-black uppercase tracking-wide px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all active:scale-95 shadow-sm disabled:opacity-60"
+                                                                    >
+                                                                        {marcandoPosteado[cliente.id] ? '⏳' : <CheckCircle2 size={12} />}
+                                                                        {marcandoPosteado[cliente.id] ? 'Marcando...' : 'Marcar Posteado'}
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); setMotivoCancelacion({ clienteId: cliente.id, valor: '' }); }}
+                                                                        disabled={cancelando[cliente.id]}
+                                                                        className="bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-wide px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all active:scale-95 disabled:opacity-60"
+                                                                    >
+                                                                        {cancelando[cliente.id] ? '⏳' : '❌'} Cancelar
+                                                                    </button>
+                                                                    {/* Modal inline de motivo */}
+                                                                    {motivoCancelacion?.clienteId === cliente.id && (
+                                                                        <div
+                                                                            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center"
+                                                                            onClick={(e) => { e.stopPropagation(); setMotivoCancelacion(null); }}
+                                                                        >
+                                                                            <div
+                                                                                className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 flex flex-col gap-4"
+                                                                                onClick={e => e.stopPropagation()}
+                                                                            >
+                                                                                <div>
+                                                                                    <h3 className="text-base font-black text-gray-900">Razón de cancelación</h3>
+                                                                                    <p className="text-xs text-gray-500 mt-0.5 font-medium">{cliente.nombre}</p>
+                                                                                </div>
+                                                                                <textarea
+                                                                                    autoFocus
+                                                                                    placeholder="Escribe el motivo (ej. Sin cobertura en la zona, instalación rechazada...)"
+                                                                                    className="w-full border-2 border-gray-200 focus:border-red-400 rounded-xl p-3 text-sm resize-none h-24 outline-none transition-colors"
+                                                                                    value={motivoCancelacion.valor}
+                                                                                    onChange={e => setMotivoCancelacion({ clienteId: cliente.id, valor: e.target.value })}
+                                                                                />
+                                                                                <div className="flex gap-2">
+                                                                                    <button
+                                                                                        onClick={() => setMotivoCancelacion(null)}
+                                                                                        className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 transition-all"
+                                                                                    >
+                                                                                        Cancelar
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={() => handleCancelarCliente(cliente, motivoCancelacion.valor)}
+                                                                                        disabled={!motivoCancelacion.valor.trim()}
+                                                                                        className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                                    >
+                                                                                        Confirmar cancelación
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             ) : (
                                                                 <span className="text-[10px] text-gray-400 font-medium">—</span>
                                                             )}
