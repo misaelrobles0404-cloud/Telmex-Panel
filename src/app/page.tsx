@@ -22,7 +22,7 @@ import {
     Star,
     Trophy
 } from 'lucide-react';
-import { obtenerClientes, guardarCliente, liberarPortalCliente } from '@/lib/storage';
+import { obtenerClientes, guardarCliente, obtenerEstadoPortal, marcarPortalEnUso, liberarPortalGlobal, EstadoPortal } from '@/lib/storage';
 import { calcularMetricas, formatearMoneda, generarId } from '@/lib/utils';
 import { Cliente } from '@/types';
 import { useRouter } from 'next/navigation';
@@ -44,6 +44,7 @@ export default function DashboardPage() {
     const [perfilActual, setPerfilActual] = useState<PerfilUsuario | null>(null);
     const [nuevaAlerta, setNuevaAlerta] = useState<any>(null);
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+    const [estadoPortal, setEstadoPortal] = useState<EstadoPortal>({ en_uso_por: null, en_uso_desde: null });
 
     const mostrarToast = (message: string) => {
         setToast({ message, isVisible: true });
@@ -55,54 +56,38 @@ export default function DashboardPage() {
         });
     };
 
-    const marcarUsoPortal = async (cliente: Cliente) => {
+    const marcarUsoPortal = async () => {
         if (!user) return;
 
         setLoading(true);
-        const hoy = new Date().toISOString();
-
         const nombreUsuario = perfilActual?.nombre_completo || user.email || 'Usuario';
 
-        const yaEstaEnUso = !!cliente.en_uso_por;
-        const esMismoUsuario = cliente.en_uso_por === nombreUsuario;
+        const yaEstaEnUso = !!estadoPortal.en_uso_por;
+        const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuario;
         const esAdmin = user.email === 'misaelrobles0404@gmail.com' ||
-            user.email === 'carrillomarjory7@gmail.com' ||
             user.email?.includes('infinitummisael');
 
-        // Liberación: Si está en uso, y soy el dueño O soy admin, lo LIBERAMOS.
-        const debeLiberar = yaEstaEnUso && (esMismoUsuario || esAdmin);
+        if (yaEstaEnUso && !esMismoUsuario && !esAdmin) {
+            mostrarToast(`🔒 Portal en uso por ${estadoPortal.en_uso_por}. No puedes usarlo ahora.`);
+            setLoading(false);
+            return;
+        }
 
-        const clienteActualizado: Cliente = {
-            ...cliente,
-            en_uso_por: debeLiberar ? undefined : nombreUsuario,
-            en_uso_desde: debeLiberar ? undefined : hoy,
-            actualizado_en: hoy,
-            actividades: [
-                {
-                    id: generarId(),
-                    clienteId: cliente.id,
-                    tipo: 'cambio_estado',
-                    descripcion: debeLiberar ? `Portal liberado por ${nombreUsuario}` : `Portal en uso por ${nombreUsuario}`,
-                    fecha: hoy
-                },
-                ...cliente.actividades || []
-            ]
-        };
+        const debeLiberar = yaEstaEnUso && (esMismoUsuario || esAdmin);
 
         try {
             if (debeLiberar) {
-                // Liberación: usamos UPDATE directo con null explícito
-                // (el upsert ignora los campos undefined en Supabase)
-                await liberarPortalCliente(cliente.id);
+                await liberarPortalGlobal();
+                mostrarToast('✅ Portal liberado.');
             } else {
-                await guardarCliente(clienteActualizado);
+                await marcarPortalEnUso(nombreUsuario);
+                mostrarToast(`🌐 Portal marcado por ${nombreUsuario}`);
             }
-            mostrarToast(debeLiberar ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
-            await cargarDatos(true);
-            setClienteSeleccionado(clienteActualizado);
+            const estado = await obtenerEstadoPortal();
+            setEstadoPortal(estado);
         } catch (error: any) {
-            console.error('Error detallado al marcar uso:', error);
-            alert(`Error al marcar uso: ${error.message || 'Verifica la conexión a Supabase'}`);
+            alert(`Error: ${error.message}`);
+        } finally {
             setLoading(false);
         }
     };
@@ -209,34 +194,30 @@ export default function DashboardPage() {
 
         const channel = supabase
             .channel('schema-db-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'clientes'
-                },
-                (payload: any) => {
-                    // Refrescar datos silenciosamente ante cualquier cambio
-                    cargarDatos(true);
-
-                    // Alerta específica para instalaciones (solo si es Boss)
-                    if (user?.email === 'carrillomarjory7@gmail.com') {
-                        const { new: newRow, old: oldRow } = payload;
-                        if (newRow && newRow.estado_pipeline === 'posteado' && (!oldRow || oldRow.estado_pipeline !== 'posteado')) {
-                            setNuevaAlerta({
-                                cliente: newRow.nombre,
-                                promotor: newRow.promotor_nombre || newRow.usuario || 'Promotor',
-                                paquete: newRow.paquete
-                            });
-                        }
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'clientes' }, (payload: any) => {
+                cargarDatos(true);
+                if (user?.email === 'carrillomarjory7@gmail.com') {
+                    const { new: newRow, old: oldRow } = payload;
+                    if (newRow && newRow.estado_pipeline === 'posteado' && (!oldRow || oldRow.estado_pipeline !== 'posteado')) {
+                        setNuevaAlerta({ cliente: newRow.nombre, promotor: newRow.promotor_nombre || newRow.usuario || 'Promotor', paquete: newRow.paquete });
                     }
                 }
-            )
+            })
+            .subscribe();
+
+        // Cargar y suscribir estado global del portal
+        obtenerEstadoPortal().then(setEstadoPortal);
+        const portalChannel = supabase
+            .channel('portal_estado_dashboard')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'portal_estado' }, async () => {
+                const estado = await obtenerEstadoPortal();
+                setEstadoPortal(estado);
+            })
             .subscribe();
 
         return () => {
             supabase.removeChannel(channel);
+            supabase.removeChannel(portalChannel);
         };
     }, [user, cargarDatos]);
 
@@ -386,35 +367,33 @@ export default function DashboardPage() {
                         <div className="bg-white rounded-xl p-2 border border-blue-50 shadow-sm flex flex-col justify-center">
                             {(() => {
                                 const nombreUsuario = perfilActual?.nombre_completo || user?.email || '';
-                                const esMismoUsuario = clienteSeleccionado?.en_uso_por === nombreUsuario;
+                                const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuario;
                                 const esAdmin = user?.email === 'misaelrobles0404@gmail.com' ||
-                                    user?.email === 'carrillomarjory7@gmail.com' ||
                                     user?.email?.includes('infinitummisael');
                                 const puedeLiberar = esMismoUsuario || esAdmin;
+                                const estaOcupado = !!estadoPortal.en_uso_por;
 
                                 return (
                                     <button
-                                        onClick={() => clienteSeleccionado && marcarUsoPortal(clienteSeleccionado)}
-                                        disabled={!clienteSeleccionado || (!!clienteSeleccionado.en_uso_por && !puedeLiberar)}
-                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${clienteSeleccionado?.en_uso_por
-                                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
-                                            : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
+                                        onClick={() => marcarUsoPortal()}
+                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !puedeLiberar
+                                                ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100 active:scale-95'
+                                                : estaOcupado
+                                                    ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
+                                                    : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
                                             }`}
                                     >
-                                        <span className="text-sm">{clienteSeleccionado?.en_uso_por ? '🔒' : '🌐'}</span>
+                                        <span className="text-sm">{estaOcupado ? '🔒' : '🌐'}</span>
                                         <span className="font-black text-[10px] tracking-wide uppercase">
-                                            {clienteSeleccionado?.en_uso_por
-                                                ? `LIBERAR (${clienteSeleccionado.en_uso_por.split(' ')[0]})`
+                                            {estaOcupado
+                                                ? puedeLiberar
+                                                    ? `LIBERAR (${estadoPortal.en_uso_por!.split(' ')[0]})`
+                                                    : `EN USO: ${estadoPortal.en_uso_por!.split(' ')[0]}`
                                                 : 'Marcar Uso Portal'}
                                         </span>
                                     </button>
                                 );
                             })()}
-                            {clienteSeleccionado && (
-                                <p className="text-[8px] text-gray-400 font-bold mt-1 text-center uppercase truncate px-1">
-                                    {clienteSeleccionado.nombre}
-                                </p>
-                            )}
                         </div>
                     </div>
                 </div>

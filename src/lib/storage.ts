@@ -79,6 +79,44 @@ export async function liberarPortalCliente(clienteId: string): Promise<void> {
     }
 }
 
+// ============================================
+// PORTAL ESTADO GLOBAL (tabla portal_estado en Supabase)
+// SQL para crear la tabla:
+// CREATE TABLE portal_estado (id INT PRIMARY KEY DEFAULT 1, en_uso_por TEXT, en_uso_desde TIMESTAMPTZ);
+// INSERT INTO portal_estado (id) VALUES (1) ON CONFLICT DO NOTHING;
+// ============================================
+
+export interface EstadoPortal {
+    en_uso_por: string | null;
+    en_uso_desde: string | null;
+}
+
+export async function obtenerEstadoPortal(): Promise<EstadoPortal> {
+    const { data, error } = await supabase
+        .from('portal_estado')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+    if (error || !data) return { en_uso_por: null, en_uso_desde: null };
+    return { en_uso_por: data.en_uso_por, en_uso_desde: data.en_uso_desde };
+}
+
+export async function marcarPortalEnUso(nombre: string): Promise<void> {
+    const { error } = await supabase
+        .from('portal_estado')
+        .upsert({ id: 1, en_uso_por: nombre, en_uso_desde: new Date().toISOString() });
+    if (error) { console.error('Error al marcar portal:', error); throw error; }
+}
+
+export async function liberarPortalGlobal(): Promise<void> {
+    const { error } = await supabase
+        .from('portal_estado')
+        .update({ en_uso_por: null, en_uso_desde: null })
+        .eq('id', 1);
+    if (error) { console.error('Error al liberar portal:', error); throw error; }
+}
+
 export async function obtenerClientes(): Promise<Cliente[]> {
     const { data, error } = await supabase
         .from('clientes')

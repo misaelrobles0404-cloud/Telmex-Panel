@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Cliente, EstadoPipeline } from '@/types';
-import { obtenerClientes, guardarCliente, liberarPortalCliente } from '@/lib/storage';
+import { obtenerClientes, guardarCliente, obtenerEstadoPortal, marcarPortalEnUso, liberarPortalGlobal, EstadoPortal } from '@/lib/storage';
 import { formatearFecha, formatearMoneda, generarId } from '@/lib/utils';
 import { CLAVES_PORTAL } from '@/data/claves';
 import { CheckCircle, XCircle, Search, Calendar, AlertCircle, Copy } from 'lucide-react';
@@ -22,6 +22,7 @@ export default function ComisionesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+    const [estadoPortal, setEstadoPortal] = useState<EstadoPortal>({ en_uso_por: null, en_uso_desde: null });
 
     const mostrarToast = (message: string) => {
         setToast({ message, isVisible: true });
@@ -54,29 +55,33 @@ export default function ComisionesPage() {
             }
 
             await cargarClientes();
+            // Cargar estado inicial del portal global
+            const estado = await obtenerEstadoPortal();
+            setEstadoPortal(estado);
         };
 
         init();
 
-        // Suscripción en tiempo real para cambios en clientes
+        // Suscripción en tiempo real para clientes
         const channel = supabase
             .channel('clientes_cambio_comisiones')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'clientes'
-                },
-                (payload) => {
-                    // Recargar datos cuando hay cambios externos
-                    cargarClientes();
-                }
-            )
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'clientes' }, () => {
+                cargarClientes();
+            })
+            .subscribe();
+
+        // Suscripción en tiempo real para estado del portal global
+        const portalChannel = supabase
+            .channel('portal_estado_cambios')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'portal_estado' }, async () => {
+                const estado = await obtenerEstadoPortal();
+                setEstadoPortal(estado);
+            })
             .subscribe();
 
         return () => {
             supabase.removeChannel(channel);
+            supabase.removeChannel(portalChannel);
         };
     }, []);
 
@@ -283,49 +288,39 @@ export default function ComisionesPage() {
         if (!user) return;
 
         setLoading(true);
-        const hoy = new Date().toISOString();
 
         const nombreUsuario = perfilActual?.nombre_completo || user.email || 'Usuario';
 
-        const yaEstaEnUso = !!cliente.en_uso_por;
-        const esMismoUsuario = cliente.en_uso_por === nombreUsuario;
+        const yaEstaEnUso = !!estadoPortal.en_uso_por;
+        const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuario;
+        // Solo Misael e infinitummisael pueden forzar liberación
         const esAdmin = user.email === 'misaelrobles0404@gmail.com' ||
-            user.email === 'carrillomarjory7@gmail.com' ||
             user.email?.includes('infinitummisael');
 
-        // Liberación: Si está en uso, y soy el dueño O soy admin, lo LIBERAMOS.
-        const debeLiberar = yaEstaEnUso && (esMismoUsuario || esAdmin);
+        // Si está ocupado por otro y no soy admin: mostrar aviso y salir
+        if (yaEstaEnUso && !esMismoUsuario && !esAdmin) {
+            mostrarToast(`🔒 Portal en uso por ${estadoPortal.en_uso_por}. No puedes usarlo ahora.`);
+            setLoading(false);
+            return;
+        }
 
-        const clienteActualizado: Cliente = {
-            ...cliente,
-            en_uso_por: debeLiberar ? undefined : nombreUsuario,
-            en_uso_desde: debeLiberar ? undefined : hoy,
-            actualizado_en: hoy,
-            actividades: [
-                {
-                    id: generarId(),
-                    clienteId: cliente.id,
-                    tipo: 'cambio_estado',
-                    descripcion: debeLiberar ? `Portal liberado por ${nombreUsuario}` : `Portal en uso por ${nombreUsuario}`,
-                    fecha: hoy
-                },
-                ...cliente.actividades || []
-            ]
-        };
+        const debeLiberar = yaEstaEnUso && (esMismoUsuario || esAdmin);
 
         try {
             if (debeLiberar) {
-                // Liberación: usamos UPDATE directo con null explícito
-                // (el upsert ignora los campos undefined en Supabase)
-                await liberarPortalCliente(cliente.id);
+                await liberarPortalGlobal();
+                mostrarToast('✅ Portal liberado.');
             } else {
-                await guardarCliente(clienteActualizado);
+                await marcarPortalEnUso(nombreUsuario);
+                mostrarToast(`🌐 Portal marcado en uso por ${nombreUsuario}`);
             }
-            mostrarToast(debeLiberar ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
-            await cargarClientes();
+            // El estado se actualiza via Realtime subscription
+            const estado = await obtenerEstadoPortal();
+            setEstadoPortal(estado);
         } catch (error: any) {
-            console.error('Error detallado al marcar uso:', error);
-            alert(`Error al marcar uso: ${error.message || 'Verifica la conexión a Supabase'}`);
+            console.error('Error al marcar/liberar portal:', error);
+            alert(`Error: ${error.message || 'Verifica la conexión a Supabase'}`);
+        } finally {
             setLoading(false);
         }
     };
@@ -394,26 +389,30 @@ export default function ComisionesPage() {
                         <div className="bg-white rounded-xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center">
                             {(() => {
                                 // Lógica robusta de comparación de identidad
+                                // Usar estado GLOBAL del portal, no el cliente seleccionado
                                 const nombreUsuarioActual = perfilActual?.nombre_completo || user?.email || '';
-                                const esMismoUsuario = clienteSeleccionado?.en_uso_por === nombreUsuarioActual;
+                                const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuarioActual;
                                 const esAdmin = user?.email === 'misaelrobles0404@gmail.com' ||
-                                    user?.email === 'carrillomarjory7@gmail.com' ||
                                     user?.email?.includes('infinitummisael');
                                 const puedeLiberar = esMismoUsuario || esAdmin;
+                                const estaOcupado = !!estadoPortal.en_uso_por;
 
                                 return (
                                     <button
-                                        onClick={() => clienteSeleccionado && marcarUsoPortal(clienteSeleccionado)}
-                                        disabled={!clienteSeleccionado || (!!clienteSeleccionado.en_uso_por && !puedeLiberar)}
-                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${clienteSeleccionado?.en_uso_por
-                                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
-                                            : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
+                                        onClick={() => marcarUsoPortal({} as any)}
+                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !puedeLiberar
+                                                ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100 active:scale-95 cursor-not-allowed'
+                                                : estaOcupado
+                                                    ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
+                                                    : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
                                             }`}
                                     >
-                                        <span className="text-sm">{clienteSeleccionado?.en_uso_por ? '🔒' : '🌐'}</span>
+                                        <span className="text-sm">{estaOcupado ? '🔒' : '🌐'}</span>
                                         <span className="font-black text-[11px] tracking-wide uppercase">
-                                            {clienteSeleccionado?.en_uso_por
-                                                ? `LIBERAR (EN USO POR ${clienteSeleccionado.en_uso_por.split(' ')[0]})`
+                                            {estaOcupado
+                                                ? puedeLiberar
+                                                    ? `LIBERAR (EN USO POR ${estadoPortal.en_uso_por!.split(' ')[0]})`
+                                                    : `EN USO POR ${estadoPortal.en_uso_por!.split(' ')[0]}`
                                                 : 'Marcar Uso Portal'}
                                         </span>
                                     </button>
