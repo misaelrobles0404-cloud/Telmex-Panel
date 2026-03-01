@@ -36,12 +36,31 @@ export default function ComisionesPage() {
 
     const router = useRouter();
 
+    const [perfilActual, setPerfilActual] = useState<any>(null);
+    const [user, setUser] = useState<any>(null);
+
     useEffect(() => {
-        cargarClientes();
+        const init = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+
+            if (user?.id) {
+                const { data: perfil } = await supabase
+                    .from('perfiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .maybeSingle();
+                if (perfil) setPerfilActual(perfil);
+            }
+
+            await cargarClientes();
+        };
+
+        init();
 
         // Suscripción en tiempo real para cambios en clientes
         const channel = supabase
-            .channel('clientes_cambios')
+            .channel('clientes_cambio_comisiones')
             .on(
                 'postgres_changes',
                 {
@@ -83,10 +102,14 @@ export default function ComisionesPage() {
             );
             setClientesPendientes(pendientes);
 
-            // Seleccionar el primero por defecto si no hay uno seleccionado
-            if (pendientes.length > 0 && !clienteSeleccionado) {
-                setClienteSeleccionado(pendientes[0]);
-            }
+            // Sincronizar cliente seleccionado con datos frescos
+            setClienteSeleccionado(prev => {
+                if (!prev) {
+                    return pendientes.length > 0 ? pendientes[0] : null;
+                }
+                const actualizado = data.find(c => c.id === prev.id);
+                return actualizado || (pendientes.length > 0 ? pendientes[0] : null);
+            });
 
             // 1.5 Rechazados / No Instalados: Tienen folio SIAC y estado de rechazo técnico
             const rechazados = todos.filter(c =>
@@ -257,23 +280,26 @@ export default function ComisionesPage() {
     };
 
     const marcarUsoPortal = async (cliente: Cliente) => {
-        const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
         setLoading(true);
         const hoy = new Date().toISOString();
 
-        // Obtener perfil para el nombre
-        const { data: perfil } = await supabase
-            .from('perfiles')
-            .select('nombre_completo')
-            .eq('id', user.id)
-            .single();
+        const nombreUsuario = perfilActual?.nombre_completo || user.email || 'Usuario';
 
-        const nombreUsuario = perfil?.nombre_completo || user.email || 'Usuario';
+        // Comprobar si el portal está en uso por otra persona
+        if (cliente.en_uso_por && cliente.en_uso_por !== nombreUsuario) {
+            // Permitir que Misael o SuperAdmin liberen si está trabado
+            const esAdmin = user.email === 'misaelrobles0404@gmail.com' || user.email === 'carrillomarjory7@gmail.com';
+            if (!esAdmin) {
+                mostrarToast(`⚠️ En uso por ${cliente.en_uso_por}`);
+                setLoading(false);
+                return;
+            }
+        }
+
         const esMismoUsuario = cliente.en_uso_por === nombreUsuario;
 
-        // Toggle logic: Si ya está en uso por mí, desmarcar. Si no, marcar.
         const clienteActualizado: Cliente = {
             ...cliente,
             en_uso_por: esMismoUsuario ? undefined : nombreUsuario,
@@ -295,7 +321,6 @@ export default function ComisionesPage() {
             await guardarCliente(clienteActualizado);
             mostrarToast(esMismoUsuario ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
             await cargarClientes();
-            setClienteSeleccionado(clienteActualizado);
         } catch (error: any) {
             console.error('Error detallado al marcar uso:', error);
             alert(`Error al marcar uso: ${error.message || 'Verifica la conexión a Supabase'}`);
@@ -366,16 +391,16 @@ export default function ComisionesPage() {
                         {/* Panel de Acción */}
                         <div className="bg-white rounded-xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center">
                             {(() => {
-                                // Lógica para determinar el texto y estado del botón basado en el usuario actual
-                                // Buscamos si el nombre en 'en_uso_por' coincide con el inicio del nombre del usuario (ej: 'AILTON')
-                                const enUsoPorMismo = clienteSeleccionado?.en_uso_por &&
-                                    (clienteSeleccionado.en_uso_por.toLowerCase().includes('ailton') ||
-                                        clienteSeleccionado.en_uso_por.toLowerCase().includes('misael'));
+                                // Lógica robusta de comparación de identidad
+                                const nombreUsuarioActual = perfilActual?.nombre_completo || user?.email || '';
+                                const esMismoUsuario = clienteSeleccionado?.en_uso_por === nombreUsuarioActual;
+                                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'carrillomarjory7@gmail.com';
+                                const puedeLiberar = esMismoUsuario || esAdmin;
 
                                 return (
                                     <button
                                         onClick={() => clienteSeleccionado && marcarUsoPortal(clienteSeleccionado)}
-                                        disabled={!clienteSeleccionado || (!!clienteSeleccionado.en_uso_por && !enUsoPorMismo)}
+                                        disabled={!clienteSeleccionado || (!!clienteSeleccionado.en_uso_por && !puedeLiberar)}
                                         className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${clienteSeleccionado?.en_uso_por
                                             ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
                                             : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'

@@ -62,6 +62,18 @@ export default function DashboardPage() {
         const hoy = new Date().toISOString();
 
         const nombreUsuario = perfilActual?.nombre_completo || user.email || 'Usuario';
+
+        // Comprobar si el portal está en uso por otra persona
+        if (cliente.en_uso_por && cliente.en_uso_por !== nombreUsuario) {
+            // Permitir que Misael o SuperAdmin liberen si está trabado
+            const esAdmin = user.email === 'misaelrobles0404@gmail.com' || user.email === 'carrillomarjory7@gmail.com';
+            if (!esAdmin) {
+                mostrarToast(`⚠️ En uso por ${cliente.en_uso_por}`);
+                setLoading(false);
+                return;
+            }
+        }
+
         const esMismoUsuario = cliente.en_uso_por === nombreUsuario;
 
         const clienteActualizado: Cliente = {
