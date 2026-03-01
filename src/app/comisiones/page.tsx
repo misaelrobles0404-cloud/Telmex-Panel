@@ -273,8 +273,9 @@ export default function ComisionesPage() {
             mostrarToast(`Marcado como en uso por ${nombreUsuario}`);
             await cargarClientes();
             setClienteSeleccionado(clienteActualizado);
-        } catch (error) {
-            alert('Error al marcar uso de portal');
+        } catch (error: any) {
+            console.error('Error detallado al marcar uso:', error);
+            alert(`Error al marcar uso: ${error.message || 'Verifica que las columnas en_uso_por y en_uso_desde existan en Supabase'}`);
             setLoading(false);
         }
     };
@@ -458,20 +459,26 @@ export default function ComisionesPage() {
                                                     )}
                                                 </td>
                                                 <td className="py-3 px-4 align-top">
-                                                    <div
-                                                        className="flex flex-wrap gap-1.5"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    >
-                                                        {cliente.nombre.split(' ').map((parte, i) => (
-                                                            <button
-                                                                key={i}
-                                                                onClick={(e) => copiarAlPortapapeles(e as any, parte.toUpperCase(), 'Nombre')}
-                                                                className="px-2 py-0.5 bg-gray-50 border border-gray-200 rounded text-xs font-bold text-gray-700 hover:bg-telmex-blue hover:text-white hover:border-telmex-blue transition-all active:scale-95 shadow-sm uppercase"
-                                                                title={`Copiar "${parte}"`}
-                                                            >
-                                                                {parte}
-                                                            </button>
-                                                        ))}
+                                                    <div className="flex flex-col gap-1">
+                                                        <div
+                                                            className="flex flex-wrap gap-1.5"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            {cliente.nombre.split(' ').map((parte, i) => (
+                                                                <button
+                                                                    key={i}
+                                                                    onClick={(e) => copiarAlPortapapeles(e as any, parte.toUpperCase(), 'Nombre')}
+                                                                    className="px-2 py-0.5 bg-gray-50 border border-gray-200 rounded text-xs font-bold text-gray-700 hover:bg-telmex-blue hover:text-white hover:border-telmex-blue transition-all active:scale-95 shadow-sm uppercase"
+                                                                    title={`Copiar "${parte}"`}
+                                                                >
+                                                                    {parte}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                        <div className="text-[10px] text-gray-500 font-bold flex items-center gap-1 mt-0.5 uppercase">
+                                                            <span className="text-telmex-blue">📍</span>
+                                                            {cliente.cd}, {cliente.estado}
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td className="py-2 px-4 text-green-600 font-medium align-top">{formatearMoneda(cliente.comision)}</td>
