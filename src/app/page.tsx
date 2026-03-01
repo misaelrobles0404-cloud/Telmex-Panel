@@ -275,7 +275,7 @@ export default function DashboardPage() {
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Dashboard Central</h1>
-                            {(user?.email === 'carrillomarjory7@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') && (
+                            {(user?.email === 'carrillomarjory7@gmail.com') && (
                                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg shadow-blue-500/30">
                                     Súper Admin
                                 </span>
@@ -287,7 +287,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                        {(user?.email === 'carrillomarjory7@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') && (
+                        {(user?.email === 'carrillomarjory7@gmail.com') && (
                             <Button
                                 variant="outline"
                                 size="lg"
@@ -467,7 +467,7 @@ export default function DashboardPage() {
 
             {/* Métricas Principales */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                {(user?.email === 'carrillomarjory7@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') ? (
+                {(user?.email === 'carrillomarjory7@gmail.com') ? (
                     <>
                         <MetricCard
                             title="Ventas Programadas Hoy"
@@ -534,7 +534,7 @@ export default function DashboardPage() {
 
             {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Súper Boss */}
             <div>
-                {(user?.email === 'carrillomarjory7@gmail.com' || user?.email === 'misaelrobles0404@gmail.com') ? (
+                {(user?.email === 'carrillomarjory7@gmail.com') ? (
                     <BossDashboardView
                         clientes={clientes}
                         perfiles={perfiles}

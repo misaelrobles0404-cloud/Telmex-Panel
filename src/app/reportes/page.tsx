@@ -19,7 +19,7 @@ export default function ReportesPage() {
                 const allClientes = await obtenerClientes();
 
                 // Filtrado: Misael ve todo, los demás solo sus propios datos
-                const esSuperAdmin = user?.email === 'misaelrobles0404@gmail.com';
+                const esSuperAdmin = user?.email === 'carrillomarjory7@gmail.com';
                 const clientes: Cliente[] = (esSuperAdmin || !user?.email)
                     ? allClientes
                     : allClientes.filter((c: Cliente) => c.usuario === user.email);

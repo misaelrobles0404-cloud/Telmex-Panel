@@ -92,7 +92,7 @@ export default function ComisionesPage() {
             const data = await obtenerClientes();
 
             // Filtrado: Misael ve todo, los demás (incluyendo Ruiz) solo lo suyo en esta vista personal
-            const esSuperAdmin = user?.email === 'misaelrobles0404@gmail.com';
+            const esSuperAdmin = user?.email === 'carrillomarjory7@gmail.com';
 
             const todos = esSuperAdmin
                 ? data
