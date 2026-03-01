@@ -91,12 +91,11 @@ export default function ComisionesPage() {
             const { data: { user } } = await supabase.auth.getUser();
             const data = await obtenerClientes();
 
-            // Filtrado: Misael ve todo, los demás (incluyendo Ruiz) solo lo suyo en esta vista personal
-            const esSuperAdmin = user?.email === 'carrillomarjory7@gmail.com';
-
-            const todos = esSuperAdmin
-                ? data
-                : data.filter(c => c.usuario_portal_asignado === '337595' || c.usuario === user?.email);
+            // Filtrado: Todos ven solo lo suyo (incluyendo Boss) en esta vista personal
+            const todos = data.filter(c =>
+                c.usuario === user?.email ||
+                c.user_id === user?.id
+            );
 
 
             // 1. Pendientes: Tienen folio SIAC pero no están instalados, rechazados ni cancelados
