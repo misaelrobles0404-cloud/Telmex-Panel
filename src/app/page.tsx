@@ -50,9 +50,8 @@ export default function DashboardPage() {
             const esBoss = user?.email === 'carrillomarjory7@gmail.com';
             const esAdmin = esBoss;
 
+            const { data: perfilesData } = await supabase.from('perfiles').select('*');
             if (esAdmin) {
-                const { data: perfilesData, error: pfError } = await supabase.from('perfiles').select('*');
-                if (pfError) console.error("Error cargando perfiles:", pfError);
                 setPerfiles(perfilesData || []);
             }
 
@@ -75,7 +74,7 @@ export default function DashboardPage() {
             }
 
             setClientes(clientesFiltrados);
-            setMetricas(calcularMetricas(clientesFiltrados, esAdmin ? perfiles : undefined));
+            setMetricas(calcularMetricas(clientesFiltrados, perfilesData || undefined));
 
             // Si es Admin, calcular Super Vendedores (>7 instalaciones por semana)
             if (esAdmin) {
