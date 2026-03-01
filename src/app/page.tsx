@@ -5,17 +5,8 @@ import { MetricCard } from '@/components/MetricCard';
 import { PipelineView } from '@/components/PipelineView';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import {
-    Users,
-    DollarSign,
-    TrendingUp,
-    Phone,
-    Plus,
-    Calendar,
-    AlertCircle,
-    Star,
-    Trophy
-} from 'lucide-react';
+import { Toast } from '@/components/ui/Toast';
+import { CheckCircle, XCircle, Search, Calendar, AlertCircle, Copy, Key } from 'lucide-react';
 import { obtenerClientes } from '@/lib/storage';
 import { calcularMetricas, formatearMoneda } from '@/lib/utils';
 import { Cliente } from '@/types';
@@ -36,6 +27,17 @@ export default function DashboardPage() {
     const [perfiles, setPerfiles] = useState<PerfilUsuario[]>([]);
     const [perfilActual, setPerfilActual] = useState<PerfilUsuario | null>(null);
     const [nuevaAlerta, setNuevaAlerta] = useState<any>(null);
+    const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+
+    const mostrarToast = (message: string) => {
+        setToast({ message, isVisible: true });
+    };
+
+    const copiarAlPortapapeles = (texto: string, label: string) => {
+        navigator.clipboard.writeText(texto).then(() => {
+            mostrarToast(`${label} copiado`);
+        });
+    };
 
     const cargarDatos = React.useCallback(async (skipLoading = false) => {
         try {
@@ -236,6 +238,69 @@ export default function DashboardPage() {
                 </div>
             </div>
 
+            {/* Banner de Acceso Rápido (Clave Universal) */}
+            <div className="bg-white/40 backdrop-blur-md border border-blue-100 rounded-3xl p-4 md:p-5 shadow-sm overflow-hidden relative group transition-all hover:shadow-md">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-blue-500/10 transition-colors" />
+
+                <div className="relative flex flex-col lg:flex-row items-stretch gap-4">
+                    {/* Título y Badge */}
+                    <div className="flex items-center gap-3 min-w-fit px-2">
+                        <div className="bg-blue-50 p-2.5 rounded-xl text-blue-600">
+                            <Key size={24} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-black text-[#001b44] tracking-tight leading-tight">Clave Universal</h2>
+                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">Acceso Portales</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 flex-1">
+                        {/* Cuenta de Acceso */}
+                        <div className="bg-white/60 rounded-2xl p-3 border border-blue-50 shadow-sm">
+                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Cuenta de Acceso</p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {['GUSTAVO', 'ACEVEDO', 'ZAMARRON'].map((nombre, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => copiarAlPortapapeles(nombre, 'Nombre')}
+                                        className="bg-blue-50/50 hover:bg-blue-100 text-blue-700 font-black text-[10px] px-2.5 py-1 rounded-lg border border-blue-100 transition-all active:scale-95 uppercase"
+                                    >
+                                        {nombre}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* ID de Usuario */}
+                        <div className="bg-white/60 rounded-2xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center relative group/id">
+                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 px-1">ID Usuario</p>
+                            <button
+                                onClick={() => copiarAlPortapapeles('10000900', 'ID')}
+                                className="flex items-center justify-between bg-white border border-gray-100 px-3 py-1.5 rounded-xl hover:border-blue-200 transition-all active:scale-95 group-hover/id:shadow-sm"
+                            >
+                                <span className="text-sm font-black text-gray-800 tracking-widest uppercase">10000900</span>
+                                <Copy size={14} className="text-gray-300 group-hover/id:text-blue-500 transition-colors" />
+                            </button>
+                        </div>
+
+                        {/* Clave de Captura */}
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-3 border border-yellow-100 shadow-sm flex flex-col justify-center group/key">
+                            <p className="text-[9px] font-black text-yellow-600/60 uppercase tracking-widest mb-1.5 px-1">Clave Captura</p>
+                            <button
+                                onClick={() => copiarAlPortapapeles('337595', 'Clave')}
+                                className="flex items-center justify-between bg-white/80 border border-yellow-200 px-3 py-1.5 rounded-xl hover:border-yellow-400 transition-all active:scale-95 group-hover/key:shadow-md"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="text-base">🔓</span>
+                                    <span className="text-xl font-black text-yellow-700 tracking-[0.15em]">337595</span>
+                                </div>
+                                <Copy size={16} className="text-yellow-600/30 group-hover/key:text-yellow-600 transition-colors" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Alerta de Productividad (Solo Boss) - Premium */}
             {superVendedores.length > 0 && (
                 <div className="grid grid-cols-1 gap-4 mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -378,6 +443,11 @@ export default function DashboardPage() {
                 </Card>
 
             </div>
+            <Toast
+                message={toast.message}
+                isVisible={toast.isVisible}
+                onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+            />
         </div >
     );
 }

@@ -38,6 +38,27 @@ export default function ComisionesPage() {
 
     useEffect(() => {
         cargarClientes();
+
+        // Suscripción en tiempo real para cambios en clientes
+        const channel = supabase
+            .channel('clientes_cambios')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'clientes'
+                },
+                (payload) => {
+                    // Recargar datos cuando hay cambios externos
+                    cargarClientes();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     const cargarClientes = async () => {
@@ -250,18 +271,20 @@ export default function ComisionesPage() {
             .single();
 
         const nombreUsuario = perfil?.nombre_completo || user.email || 'Usuario';
+        const esMismoUsuario = cliente.en_uso_por === nombreUsuario;
 
+        // Toggle logic: Si ya está en uso por mí, desmarcar. Si no, marcar.
         const clienteActualizado: Cliente = {
             ...cliente,
-            en_uso_por: nombreUsuario,
-            en_uso_desde: hoy,
+            en_uso_por: esMismoUsuario ? undefined : nombreUsuario,
+            en_uso_desde: esMismoUsuario ? undefined : hoy,
             actualizado_en: hoy,
             actividades: [
                 {
                     id: generarId(),
                     clienteId: cliente.id,
                     tipo: 'cambio_estado',
-                    descripcion: `Portal en uso por ${nombreUsuario}`,
+                    descripcion: esMismoUsuario ? `Portal liberado por ${nombreUsuario}` : `Portal en uso por ${nombreUsuario}`,
                     fecha: hoy
                 },
                 ...cliente.actividades || []
@@ -270,12 +293,12 @@ export default function ComisionesPage() {
 
         try {
             await guardarCliente(clienteActualizado);
-            mostrarToast(`Marcado como en uso por ${nombreUsuario}`);
+            mostrarToast(esMismoUsuario ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
             await cargarClientes();
             setClienteSeleccionado(clienteActualizado);
         } catch (error: any) {
             console.error('Error detallado al marcar uso:', error);
-            alert(`Error al marcar uso: ${error.message || 'Verifica que las columnas en_uso_por y en_uso_desde existan en Supabase'}`);
+            alert(`Error al marcar uso: ${error.message || 'Verifica la conexión a Supabase'}`);
             setLoading(false);
         }
     };
@@ -342,21 +365,31 @@ export default function ComisionesPage() {
 
                         {/* Panel de Acción */}
                         <div className="bg-white rounded-xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center">
-                            <button
-                                onClick={() => clienteSeleccionado && marcarUsoPortal(clienteSeleccionado)}
-                                disabled={!clienteSeleccionado || !!clienteSeleccionado.en_uso_por}
-                                className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${clienteSeleccionado?.en_uso_por
-                                    ? 'bg-yellow-50 border-yellow-200 text-yellow-700 cursor-not-allowed opacity-80'
-                                    : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
-                                    }`}
-                            >
-                                <span className="text-sm">{clienteSeleccionado?.en_uso_por ? '👤' : '🌐'}</span>
-                                <span className="font-black text-[11px] tracking-wide uppercase">
-                                    {clienteSeleccionado?.en_uso_por
-                                        ? `En uso por ${clienteSeleccionado.en_uso_por.split(' ')[0]}`
-                                        : 'Marcar Uso Portal'}
-                                </span>
-                            </button>
+                            {(() => {
+                                // Lógica para determinar el texto y estado del botón basado en el usuario actual
+                                // Buscamos si el nombre en 'en_uso_por' coincide con el inicio del nombre del usuario (ej: 'AILTON')
+                                const enUsoPorMismo = clienteSeleccionado?.en_uso_por &&
+                                    (clienteSeleccionado.en_uso_por.toLowerCase().includes('ailton') ||
+                                        clienteSeleccionado.en_uso_por.toLowerCase().includes('misael'));
+
+                                return (
+                                    <button
+                                        onClick={() => clienteSeleccionado && marcarUsoPortal(clienteSeleccionado)}
+                                        disabled={!clienteSeleccionado || (!!clienteSeleccionado.en_uso_por && !enUsoPorMismo)}
+                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${clienteSeleccionado?.en_uso_por
+                                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
+                                            : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
+                                            }`}
+                                    >
+                                        <span className="text-sm">{clienteSeleccionado?.en_uso_por ? '🔒' : '🌐'}</span>
+                                        <span className="font-black text-[11px] tracking-wide uppercase">
+                                            {clienteSeleccionado?.en_uso_por
+                                                ? `LIBERAR (EN USO POR ${clienteSeleccionado.en_uso_por.split(' ')[0]})`
+                                                : 'Marcar Uso Portal'}
+                                        </span>
+                                    </button>
+                                );
+                            })()}
                         </div>
 
                         {/* Panel de Clave Captura */}
