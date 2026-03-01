@@ -29,7 +29,7 @@ export function MetricCard({ title, value, icon: Icon, trend, color = 'blue', su
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-600 mb-1 truncate">{title}</p>
-                        <p className="text-3xl font-bold text-gray-900 truncate" title={String(value)}>{value}</p>
+                        <p className="text-3xl font-bold text-gray-900 leading-tight" title={String(value)}>{value}</p>
                         {subtitle && <p className="text-xs text-gray-500 mt-1 truncate">{subtitle}</p>}
 
                         {trend && (
