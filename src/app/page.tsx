@@ -22,8 +22,8 @@ import {
     Star,
     Trophy
 } from 'lucide-react';
-import { obtenerClientes } from '@/lib/storage';
-import { calcularMetricas, formatearMoneda } from '@/lib/utils';
+import { obtenerClientes, guardarCliente } from '@/lib/storage';
+import { calcularMetricas, formatearMoneda, generarId } from '@/lib/utils';
 import { Cliente } from '@/types';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -37,6 +37,7 @@ export default function DashboardPage() {
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [metricas, setMetricas] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
 
     const [user, setUser] = useState<any>(null);
     const [perfiles, setPerfiles] = useState<PerfilUsuario[]>([]);
@@ -52,6 +53,44 @@ export default function DashboardPage() {
         navigator.clipboard.writeText(texto).then(() => {
             mostrarToast(`${label} copiado`);
         });
+    };
+
+    const marcarUsoPortal = async (cliente: Cliente) => {
+        if (!user) return;
+
+        setLoading(true);
+        const hoy = new Date().toISOString();
+
+        const nombreUsuario = perfilActual?.nombre_completo || user.email || 'Usuario';
+        const esMismoUsuario = cliente.en_uso_por === nombreUsuario;
+
+        const clienteActualizado: Cliente = {
+            ...cliente,
+            en_uso_por: esMismoUsuario ? undefined : nombreUsuario,
+            en_uso_desde: esMismoUsuario ? undefined : hoy,
+            actualizado_en: hoy,
+            actividades: [
+                {
+                    id: generarId(),
+                    clienteId: cliente.id,
+                    tipo: 'cambio_estado',
+                    descripcion: esMismoUsuario ? `Portal liberado por ${nombreUsuario}` : `Portal en uso por ${nombreUsuario}`,
+                    fecha: hoy
+                },
+                ...cliente.actividades || []
+            ]
+        };
+
+        try {
+            await guardarCliente(clienteActualizado);
+            mostrarToast(esMismoUsuario ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
+            await cargarDatos(true);
+            setClienteSeleccionado(clienteActualizado);
+        } catch (error: any) {
+            console.error('Error detallado al marcar uso:', error);
+            alert(`Error al marcar uso: ${error.message || 'Verifica la conexión a Supabase'}`);
+            setLoading(false);
+        }
     };
 
     const cargarDatos = React.useCallback(async (skipLoading = false) => {
@@ -91,6 +130,22 @@ export default function DashboardPage() {
 
             setClientes(clientesFiltrados);
             setMetricas(calcularMetricas(clientesFiltrados, perfilesData || undefined));
+
+            // Seleccionar cliente por defecto para el banner si hay uno pendiente
+            const pendiente = clientesFiltrados.find(c =>
+                c.folio_siac &&
+                c.folio_siac.trim() !== '' &&
+                c.estado_pipeline !== 'posteado' &&
+                c.estado_pipeline !== 'sin_cobertura' &&
+                c.estado_pipeline !== 'cancelado'
+            );
+            if (pendiente && !clienteSeleccionado) {
+                setClienteSeleccionado(pendiente);
+            } else if (clienteSeleccionado) {
+                // Actualizar el cliente seleccionado con datos frescos si ya hay uno
+                const actualizado = clientesFiltrados.find(c => c.id === clienteSeleccionado.id);
+                if (actualizado) setClienteSeleccionado(actualizado);
+            }
 
             // Si es Admin, calcular Super Vendedores (>7 instalaciones por semana)
             if (esAdmin) {
@@ -269,9 +324,9 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 flex-1">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
                         {/* Cuenta de Acceso */}
-                        <div className="bg-white/60 rounded-2xl p-3 border border-blue-50 shadow-sm">
+                        <div className="bg-white/60 rounded-2xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center">
                             <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Cuenta de Acceso</p>
                             <div className="flex flex-wrap gap-1.5">
                                 {['GUSTAVO', 'ACEVEDO', 'ZAMARRON'].map((nombre, idx) => (
@@ -299,8 +354,8 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Clave de Captura */}
-                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-3 border border-yellow-100 shadow-sm flex flex-col justify-center group/key">
-                            <p className="text-[9px] font-black text-yellow-600/60 uppercase tracking-widest mb-1.5 px-1">Clave Captura</p>
+                        <div className="bg-white/60 rounded-2xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center group/key">
+                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 px-1">Clave Captura</p>
                             <button
                                 onClick={() => copiarAlPortapapeles('337595', 'Clave')}
                                 className="flex items-center justify-between bg-white/80 border border-yellow-200 px-3 py-1.5 rounded-xl hover:border-yellow-400 transition-all active:scale-95 group-hover/key:shadow-md"
@@ -311,6 +366,40 @@ export default function DashboardPage() {
                                 </div>
                                 <Copy size={16} className="text-yellow-600/30 group-hover/key:text-yellow-600 transition-colors" />
                             </button>
+                        </div>
+
+                        {/* Panel de Acción (Marcado) */}
+                        <div className="bg-white rounded-xl p-2 border border-blue-50 shadow-sm flex flex-col justify-center">
+                            {(() => {
+                                const nombreUsuario = perfilActual?.nombre_completo || user?.email || '';
+                                const enUsoPorMismo = clienteSeleccionado?.en_uso_por &&
+                                    (clienteSeleccionado.en_uso_por.toLowerCase().includes('ailton') ||
+                                        clienteSeleccionado.en_uso_por.toLowerCase().includes('misael') ||
+                                        clienteSeleccionado.en_uso_por === nombreUsuario);
+
+                                return (
+                                    <button
+                                        onClick={() => clienteSeleccionado && marcarUsoPortal(clienteSeleccionado)}
+                                        disabled={!clienteSeleccionado || (!!clienteSeleccionado.en_uso_por && !enUsoPorMismo)}
+                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${clienteSeleccionado?.en_uso_por
+                                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
+                                            : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
+                                            }`}
+                                    >
+                                        <span className="text-sm">{clienteSeleccionado?.en_uso_por ? '🔒' : '🌐'}</span>
+                                        <span className="font-black text-[10px] tracking-wide uppercase">
+                                            {clienteSeleccionado?.en_uso_por
+                                                ? `LIBERAR (${clienteSeleccionado.en_uso_por.split(' ')[0]})`
+                                                : 'Marcar Uso Portal'}
+                                        </span>
+                                    </button>
+                                );
+                            })()}
+                            {clienteSeleccionado && (
+                                <p className="text-[8px] text-gray-400 font-bold mt-1 text-center uppercase truncate px-1">
+                                    {clienteSeleccionado.nombre}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
