@@ -6,7 +6,22 @@ import { PipelineView } from '@/components/PipelineView';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Toast } from '@/components/ui/Toast';
-import { CheckCircle, XCircle, Search, Calendar, AlertCircle, Copy, Key } from 'lucide-react';
+import {
+    CheckCircle,
+    XCircle,
+    Search,
+    Calendar,
+    AlertCircle,
+    Copy,
+    Key,
+    Users,
+    DollarSign,
+    TrendingUp,
+    Phone,
+    Plus,
+    Star,
+    Trophy
+} from 'lucide-react';
 import { obtenerClientes } from '@/lib/storage';
 import { calcularMetricas, formatearMoneda } from '@/lib/utils';
 import { Cliente } from '@/types';
