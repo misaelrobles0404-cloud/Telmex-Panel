@@ -94,25 +94,25 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                         <div className="flex flex-col">
                             <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest ml-1 mb-0.5">SIAC Interactivo</span>
                             <a
-                                href="https://siacinteractivo.telmex.com/"
+                                href="https://siac-interac.telmex.com/siac_interactivo"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl text-[10px] font-bold hover:bg-blue-100 transition-all border border-blue-200 flex items-center gap-1.5 shadow-sm group"
                             >
                                 <span className="text-xs group-hover:scale-110 transition-transform">🌐</span>
-                                <span className="underline decoration-blue-200 underline-offset-2 tracking-tight">siacinteractivo.telmex.com</span>
+                                <span className="underline decoration-blue-200 underline-offset-2 tracking-tight">siac-interac.telmex.com/...</span>
                             </a>
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[9px] font-black text-purple-500 uppercase tracking-widest ml-1 mb-0.5">Portal DV</span>
                             <a
-                                href="https://portaldv.telmex.com/"
+                                href="https://portalwcex-2.telmex.com:4200/login"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="bg-purple-50 text-purple-700 px-3 py-1.5 rounded-xl text-[10px] font-bold hover:bg-purple-100 transition-all border border-purple-200 flex items-center gap-1.5 shadow-sm group"
                             >
                                 <span className="text-xs group-hover:scale-110 transition-transform">🔑</span>
-                                <span className="underline decoration-purple-200 underline-offset-2 tracking-tight">portaldv.telmex.com</span>
+                                <span className="underline decoration-purple-200 underline-offset-2 tracking-tight">portalwcex-2.telmex.com...</span>
                             </a>
                         </div>
                     </div>
