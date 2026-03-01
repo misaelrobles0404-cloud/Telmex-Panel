@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Cliente, EstadoPipeline } from '@/types';
-import { obtenerClientes, guardarCliente, obtenerEstadoPortal, marcarPortalEnUso, liberarPortalGlobal, EstadoPortal } from '@/lib/storage';
+import { obtenerClientes, guardarCliente, obtenerEstadoPortal, marcarPortalEnUso, liberarPortalGlobal, pedirAlertaPortal, EstadoPortal } from '@/lib/storage';
 import { formatearFecha, formatearMoneda, generarId, calcularMinutosTranscurridos } from '@/lib/utils';
 import { CLAVES_PORTAL } from '@/data/claves';
 import { CheckCircle, XCircle, Search, Calendar, AlertCircle, Copy } from 'lucide-react';
@@ -22,7 +22,8 @@ export default function ComisionesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
-    const [estadoPortal, setEstadoPortal] = useState<EstadoPortal>({ en_uso_por: null, en_uso_desde: null });
+    const [estadoPortal, setEstadoPortal] = useState<EstadoPortal>({ en_uso_por: null, en_uso_desde: null, alerta_pedida_por: null });
+    const [alertaPortalEnviada, setAlertaPortalEnviada] = useState(false);
 
     const mostrarToast = (message: string) => {
         setToast({ message, isVisible: true });
@@ -293,27 +294,14 @@ export default function ComisionesPage() {
 
         const yaEstaEnUso = !!estadoPortal.en_uso_por;
         const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuario;
-        const esAdmin = user.email === 'misaelrobles0404@gmail.com' || user.email?.includes('infinitummisael');
-
-        const minutosTranscurridos = estadoPortal.en_uso_desde ? calcularMinutosTranscurridos(estadoPortal.en_uso_desde) : 0;
-        const haExpirado = minutosTranscurridos >= 15;
-
-        // Regla: Solo el que marcó puede liberar, A MENOS que sea admin y hayan pasado 15 min
+        // Solo el que marcó puede liberar — sin excepciones
         if (yaEstaEnUso && !esMismoUsuario) {
-            if (esAdmin && haExpirado) {
-                // Permitir liberación forzada por admin si ya pasó el tiempo
-                mostrarToast(`⚠️ Forzando liberación del portal (ocupado por ${minutosTranscurridos} min)`);
-            } else {
-                const mensaje = haExpirado
-                    ? `🔒 Ocupado por ${estadoPortal.en_uso_por}. Solo el admin puede liberarlo tras 15 min.`
-                    : `🔒 Ocupado por ${estadoPortal.en_uso_por}. Quedan ${15 - minutosTranscurridos} min para liberación forzada.`;
-                mostrarToast(mensaje);
-                setLoading(false);
-                return;
-            }
+            mostrarToast(`🔒 Portal en uso por ${estadoPortal.en_uso_por}. Solo esa persona puede liberarlo.`);
+            setLoading(false);
+            return;
         }
 
-        const debeLiberar = yaEstaEnUso && (esMismoUsuario || (esAdmin && haExpirado));
+        const debeLiberar = yaEstaEnUso && esMismoUsuario;
 
         try {
             if (debeLiberar) {
@@ -394,47 +382,43 @@ export default function ComisionesPage() {
                             </div>
                         </div>
 
-                        {/* Panel de Acción */}
-                        <div className="bg-white rounded-xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center">
+                                                {/* Panel de Acción */}
+                        <div className="bg-white rounded-xl p-3 border border-blue-50 shadow-sm flex flex-col justify-center gap-1">
                             {(() => {
-                                // Lógica robusta de comparación de identidad
-                                // Usar estado GLOBAL del portal, no el cliente seleccionado
                                 const nombreUsuarioActual = perfilActual?.nombre_completo || user?.email || '';
                                 const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuarioActual;
-                                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email?.includes('infinitummisael');
                                 const estaOcupado = !!estadoPortal.en_uso_por;
                                 const minutos = estadoPortal.en_uso_desde ? calcularMinutosTranscurridos(estadoPortal.en_uso_desde) : 0;
-                                const haExpirado = minutos >= 15;
-                                const puedeLiberar = esMismoUsuario || (esAdmin && haExpirado);
+                                const puedeAvisar = estaOcupado && !esMismoUsuario && minutos >= 15;
+                                const alguienEspera = esMismoUsuario && !!estadoPortal.alerta_pedida_por;
 
                                 return (
-                                    <button
-                                        onClick={() => marcarUsoPortal({} as any)}
-                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !puedeLiberar
-                                                ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100 active:scale-95 cursor-not-allowed'
-                                                : estaOcupado
-                                                    ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
-                                                    : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
-                                            }`}
-                                    >
-                                        <span className="text-sm">{estaOcupado ? '🔒' : '🌐'}</span>
-                                        <span className="font-black text-[11px] tracking-wide uppercase flex flex-col items-start leading-tight">
-                                            <span>
-                                                {estaOcupado
-                                                    ? esMismoUsuario
-                                                        ? `LIBERAR (EN USO POR ${estadoPortal.en_uso_por!.split(' ')[0]})`
-                                                        : haExpirado && esAdmin
-                                                            ? `FORZAR (HACE ${minutos}')`
-                                                            : `EN USO POR ${estadoPortal.en_uso_por!.split(' ')[0]}`
-                                                    : 'Marcar Uso Portal'}
+                                    <>
+                                        {alguienEspera && (
+                                            <div className="bg-orange-50 border border-orange-200 rounded-lg px-2 py-1 text-[9px] font-black text-orange-600 text-center animate-pulse">
+                                                 {estadoPortal.alerta_pedida_por} está esperando  libera el portal
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={() => marcarUsoPortal({} as any)}
+                                            className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !esMismoUsuario ? 'bg-red-50 border-red-200 text-red-600 active:scale-95 cursor-default' : estaOcupado ? 'bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100 active:scale-95' : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'}`}
+                                        >
+                                            <span className="text-sm">{estaOcupado ? '' : ''}</span>
+                                            <span className="font-black text-[11px] tracking-wide uppercase flex flex-col items-start leading-tight">
+                                                <span>{estaOcupado ? esMismoUsuario ? `LIBERAR (EN USO POR ${estadoPortal.en_uso_por!.split(' ')[0]})` : `EN USO POR ${estadoPortal.en_uso_por!.split(' ')[0]}` : 'Marcar Uso Portal'}</span>
+                                                {estaOcupado && <span className="text-[7px] opacity-60 font-bold">Hace {minutos} min</span>}
                                             </span>
-                                            {estaOcupado && (
-                                                <span className="text-[7px] opacity-60 font-bold">
-                                                    Hace {minutos} min
-                                                </span>
-                                            )}
-                                        </span>
-                                    </button>
+                                        </button>
+                                        {puedeAvisar && (
+                                            <button
+                                                onClick={async () => { try { await pedirAlertaPortal(nombreUsuarioActual); setAlertaPortalEnviada(true); mostrarToast(` Aviso enviado a ${estadoPortal.en_uso_por}.`); } catch { mostrarToast('Error al enviar aviso'); } }}
+                                                disabled={alertaPortalEnviada || !!estadoPortal.alerta_pedida_por}
+                                                className="rounded-xl py-1.5 px-3 border w-full flex items-center justify-center gap-1 text-[9px] font-black uppercase tracking-wide bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                 {estadoPortal.alerta_pedida_por ? 'Aviso ya enviado' : 'Avisar que me tardo'}
+                                            </button>
+                                        )}
+                                    </>
                                 );
                             })()}
                         </div>

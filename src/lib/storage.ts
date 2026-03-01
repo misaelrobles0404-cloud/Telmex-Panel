@@ -89,6 +89,7 @@ export async function liberarPortalCliente(clienteId: string): Promise<void> {
 export interface EstadoPortal {
     en_uso_por: string | null;
     en_uso_desde: string | null;
+    alerta_pedida_por: string | null;
 }
 
 export async function obtenerEstadoPortal(): Promise<EstadoPortal> {
@@ -98,8 +99,16 @@ export async function obtenerEstadoPortal(): Promise<EstadoPortal> {
         .eq('id', 1)
         .single();
 
-    if (error || !data) return { en_uso_por: null, en_uso_desde: null };
-    return { en_uso_por: data.en_uso_por, en_uso_desde: data.en_uso_desde };
+    if (error || !data) return { en_uso_por: null, en_uso_desde: null, alerta_pedida_por: null };
+    return { en_uso_por: data.en_uso_por, en_uso_desde: data.en_uso_desde, alerta_pedida_por: data.alerta_pedida_por ?? null };
+}
+
+export async function pedirAlertaPortal(nombre: string): Promise<void> {
+    const { error } = await supabase
+        .from('portal_estado')
+        .update({ alerta_pedida_por: nombre })
+        .eq('id', 1);
+    if (error) { console.error('Error al pedir alerta:', error); throw error; }
 }
 
 export async function marcarPortalEnUso(nombre: string): Promise<void> {
@@ -112,7 +121,7 @@ export async function marcarPortalEnUso(nombre: string): Promise<void> {
 export async function liberarPortalGlobal(): Promise<void> {
     const { error } = await supabase
         .from('portal_estado')
-        .update({ en_uso_por: null, en_uso_desde: null })
+        .update({ en_uso_por: null, en_uso_desde: null, alerta_pedida_por: null })
         .eq('id', 1);
     if (error) { console.error('Error al liberar portal:', error); throw error; }
 }

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import { MetricCard } from '@/components/MetricCard';
@@ -22,7 +22,7 @@ import {
     Star,
     Trophy
 } from 'lucide-react';
-import { obtenerClientes, guardarCliente, obtenerEstadoPortal, marcarPortalEnUso, liberarPortalGlobal, EstadoPortal } from '@/lib/storage';
+import { obtenerClientes, guardarCliente, obtenerEstadoPortal, marcarPortalEnUso, liberarPortalGlobal, pedirAlertaPortal, EstadoPortal } from '@/lib/storage';
 import { calcularMetricas, formatearMoneda, generarId, calcularMinutosTranscurridos } from '@/lib/utils';
 import { Cliente } from '@/types';
 import { useRouter } from 'next/navigation';
@@ -44,7 +44,8 @@ export default function DashboardPage() {
     const [perfilActual, setPerfilActual] = useState<PerfilUsuario | null>(null);
     const [nuevaAlerta, setNuevaAlerta] = useState<any>(null);
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
-    const [estadoPortal, setEstadoPortal] = useState<EstadoPortal>({ en_uso_por: null, en_uso_desde: null });
+    const [estadoPortal, setEstadoPortal] = useState<EstadoPortal>({ en_uso_por: null, en_uso_desde: null, alerta_pedida_por: null });
+    const [alertaPortalEnviada, setAlertaPortalEnviada] = useState(false);
 
     const mostrarToast = (message: string) => {
         setToast({ message, isVisible: true });
@@ -58,36 +59,20 @@ export default function DashboardPage() {
 
     const marcarUsoPortal = async () => {
         if (!user) return;
-
         setLoading(true);
         const nombreUsuario = perfilActual?.nombre_completo || user.email || 'Usuario';
-
         const yaEstaEnUso = !!estadoPortal.en_uso_por;
         const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuario;
-        const esAdmin = user.email === 'misaelrobles0404@gmail.com' || user.email?.includes('infinitummisael');
 
-        const minutosTranscurridos = estadoPortal.en_uso_desde ? calcularMinutosTranscurridos(estadoPortal.en_uso_desde) : 0;
-        const haExpirado = minutosTranscurridos >= 15;
-
-        // Regla: Solo el que marcó puede liberar, A MENOS que sea admin y hayan pasado 15 min
+        // Solo el que marcó puede liberar — sin excepciones
         if (yaEstaEnUso && !esMismoUsuario) {
-            if (esAdmin && haExpirado) {
-                // Permitir liberación forzada por admin si ya pasó el tiempo
-                mostrarToast(`⚠️ Forzando liberación del portal (ocupado por ${minutosTranscurridos} min)`);
-            } else {
-                const mensaje = haExpirado
-                    ? `🔒 Ocupado por ${estadoPortal.en_uso_por}. Solo el admin puede liberarlo tras 15 min.`
-                    : `🔒 Ocupado por ${estadoPortal.en_uso_por}. Quedan ${15 - minutosTranscurridos} min para liberación forzada.`;
-                mostrarToast(mensaje);
-                setLoading(false);
-                return;
-            }
+            mostrarToast(`🔒 Portal en uso por ${estadoPortal.en_uso_por}. Solo esa persona puede liberarlo.`);
+            setLoading(false);
+            return;
         }
 
-        const debeLiberar = yaEstaEnUso && (esMismoUsuario || (esAdmin && haExpirado));
-
         try {
-            if (debeLiberar) {
+            if (yaEstaEnUso && esMismoUsuario) {
                 await liberarPortalGlobal();
                 mostrarToast('✅ Portal liberado.');
             } else {
@@ -375,198 +360,216 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Panel de Acción (Marcado) */}
-                        <div className="bg-white rounded-xl p-2 border border-blue-50 shadow-sm flex flex-col justify-center">
+                        <div className="bg-white rounded-xl p-2 border border-blue-50 shadow-sm flex flex-col justify-center gap-1">
                             {(() => {
                                 const nombreUsuario = perfilActual?.nombre_completo || user?.email || '';
                                 const esMismoUsuario = estadoPortal.en_uso_por === nombreUsuario;
-                                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email?.includes('infinitummisael');
                                 const estaOcupado = !!estadoPortal.en_uso_por;
                                 const minutos = estadoPortal.en_uso_desde ? calcularMinutosTranscurridos(estadoPortal.en_uso_desde) : 0;
-                                const haExpirado = minutos >= 15;
-                                const puedeLiberar = esMismoUsuario || (esAdmin && haExpirado);
+                                const puedeAvisar = estaOcupado && !esMismoUsuario && minutos >= 15;
+                                const alguienEspera = esMismoUsuario && !!estadoPortal.alerta_pedida_por;
 
                                 return (
-                                    <button
-                                        onClick={() => marcarUsoPortal()}
-                                        className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !puedeLiberar
-                                                ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100 active:scale-95'
+                                    <>
+                                        {alguienEspera && (
+                                            <div className="bg-orange-50 border border-orange-200 rounded-lg px-2 py-1 text-[9px] font-black text-orange-600 text-center animate-pulse">
+                                                ⚡ {estadoPortal.alerta_pedida_por} está esperando — libera el portal
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={() => marcarUsoPortal()}
+                                            className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${estaOcupado && !esMismoUsuario
+                                                ? 'bg-red-50 border-red-200 text-red-600 active:scale-95 cursor-default'
                                                 : estaOcupado
-                                                    ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
+                                                    ? 'bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100 active:scale-95'
                                                     : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
-                                            }`}
-                                    >
-                                        <span className="text-sm">{estaOcupado ? '🔒' : '🌐'}</span>
-                                        <span className="font-black text-[10px] tracking-wide uppercase flex flex-col items-start leading-tight">
-                                            <span>
-                                                {estaOcupado
-                                                    ? esMismoUsuario
-                                                        ? `LIBERAR (${estadoPortal.en_uso_por!.split(' ')[0]})`
-                                                        : haExpirado && esAdmin
-                                                            ? `FORZAR (HACE ${minutos}')`
+                                                }`}
+                                        >
+                                            <span className="text-sm">{estaOcupado ? '🔒' : '🌐'}</span>
+                                            <span className="font-black text-[10px] tracking-wide uppercase flex flex-col items-start leading-tight">
+                                                <span>
+                                                    {estaOcupado
+                                                        ? esMismoUsuario
+                                                            ? `LIBERAR (${estadoPortal.en_uso_por!.split(' ')[0]})`
                                                             : `EN USO: ${estadoPortal.en_uso_por!.split(' ')[0]}`
-                                                    : 'Marcar Uso Portal'}
-                                            </span>
-                                            {estaOcupado && (
-                                                <span className="text-[7px] opacity-60 font-bold">
-                                                    Hace {minutos} min
+                                                        : 'Marcar Uso Portal'}
                                                 </span>
-                                            )}
-                                        </span>
-                                    </button>
+                                                {estaOcupado && (
+                                                    <span className="text-[7px] opacity-60 font-bold">Hace {minutos} min</span>
+                                                )}
+                                            </span>
+                                        </button>
+                                        {puedeAvisar && (
+                                            <button
+                                                onClick={async () => {
+                                                    try {
+                                                        await pedirAlertaPortal(nombreUsuario);
+                                                        setAlertaPortalEnviada(true);
+                                                        mostrarToast(`📢 Aviso enviado a ${estadoPortal.en_uso_por}. Espera que lo libere.`);
+                                                    } catch { mostrarToast('Error al enviar aviso'); }
+                                                }}
+                                                disabled={alertaPortalEnviada || !!estadoPortal.alerta_pedida_por}
+                                                className="rounded-xl py-1.5 px-3 border w-full flex items-center justify-center gap-1 transition-all text-[9px] font-black uppercase tracking-wide bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                📢 {estadoPortal.alerta_pedida_por ? 'Aviso ya enviado' : 'Avisar que me tardo'}
+                                            </button>
+                                        )}
+                                    </>
                                 );
                             })()}
                         </div>
+
+                        {/* Alerta de Productividad (Solo Boss) - Premium */}
+                        {superVendedores.length > 0 && (
+                            <div className="grid grid-cols-1 gap-4 mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                                {superVendedores.map((v) => (
+                                    <Card key={v.email} className="bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 border-0 overflow-hidden relative shadow-[0_8px_30px_rgb(251,191,36,0.2)]">
+                                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                                        <div className="absolute -right-4 -top-8 text-white/20 rotate-12 scale-150 blur-sm mix-blend-overlay pointer-events-none">
+                                            <Trophy size={160} />
+                                        </div>
+                                        <CardContent className="p-6 md:p-8 flex items-center gap-6 relative z-10">
+                                            <div className="p-4 bg-white/20 backdrop-blur-md text-white border border-white/30 rounded-2xl shadow-xl animate-bounce">
+                                                <Star size={32} fill="currentColor" />
+                                            </div>
+                                            <div className="text-white">
+                                                <h3 className="text-2xl font-black mb-1 drop-shadow-sm flex items-center gap-2">
+                                                    ¡Meta Superada! <Trophy size={24} className="text-yellow-200" />
+                                                </h3>
+                                                <p className="text-white/90 text-sm md:text-base font-medium">
+                                                    El asesor <span className="font-extrabold bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm">{perfiles.find(p => p.email === v.email)?.nombre_completo || v.email.split('@')[0]}</span> ha alcanzado <span className="text-2xl font-black mx-1 drop-shadow-md">{v.total}</span> instalaciones esta semana.
+                                                </p>
+                                                <div className="inline-block mt-3 px-3 py-1 bg-black/10 backdrop-blur-sm rounded-full text-xs font-black uppercase tracking-widest border border-white/10">
+                                                    Rendimiento Extraordinario
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )
+                        }
+
+
+                        {/* Métricas Principales */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                            {user?.email === 'carrillomarjory7@gmail.com' ? (
+                                <>
+                                    <MetricCard
+                                        title="Ventas Programadas Hoy"
+                                        value={metricas.ventasProgramadasHoy}
+                                        icon={Calendar}
+                                        color="blue"
+                                    />
+                                    <MetricCard
+                                        title="Ventas de la Semana"
+                                        value={metricas.ventasSemana}
+                                        icon={TrendingUp}
+                                        color="green"
+                                    />
+                                    <MetricCard
+                                        title="Ventas del Mes"
+                                        value={metricas.ventasMes}
+                                        icon={Trophy}
+                                        color="yellow"
+                                    />
+                                    <MetricCard
+                                        title="Promotor Top"
+                                        value={metricas.promotorTop?.nombre || '---'}
+                                        subtitle={metricas.promotorTop ? `${metricas.promotorTop.total} instalaciones` : 'Sin ventas'}
+                                        icon={Star}
+                                        color="purple"
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <MetricCard
+                                        title="Leads del Mes"
+                                        value={metricas.leadsMes}
+                                        icon={Users}
+                                        color="blue"
+                                        trend={{ value: 12, isPositive: true }}
+                                    />
+
+                                    <MetricCard
+                                        title="Ventas del Mes"
+                                        value={metricas.ventasMes}
+                                        icon={TrendingUp}
+                                        color="green"
+                                        trend={{ value: 8, isPositive: true }}
+                                    />
+
+                                    <MetricCard
+                                        title="Comisiones del Mes"
+                                        value={formatearMoneda(metricas.comisionesMes)}
+                                        icon={DollarSign}
+                                        color="yellow"
+                                    />
+
+                                    <MetricCard
+                                        title="Tasa de Conversión"
+                                        value={`${metricas.tasaConversion.toFixed(1)}%`}
+                                        icon={Phone}
+                                        color="purple"
+                                    />
+                                </>
+                            )}
+                        </div>
+
+
+
+                        {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Súper Boss */}
+                        <div>
+                            {user?.email === 'carrillomarjory7@gmail.com' ? (
+                                <BossDashboardView
+                                    clientes={clientes}
+                                    perfiles={perfiles}
+                                />
+                            ) : (
+                                <>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-2xl font-semibold text-gray-900">Pipeline de Ventas</h2>
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => router.push('/clientes')}
+                                        >
+                                            Ver Todos
+                                        </Button>
+                                    </div>
+
+                                    <PipelineView
+                                        clientes={clientes}
+                                        onClienteClick={(cliente) => router.push(`/clientes/${cliente.id}`)}
+                                    />
+                                </>
+                            )}
+                        </div>
+
+
+                        {/* Acciones Rápidas */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Card
+                                className="cursor-pointer hover:shadow-lg transition-shadow"
+                                onClick={() => router.push('/calculadora')}
+                            >
+                                <CardContent className="p-6 text-center">
+                                    <div className="text-4xl mb-3">🧮</div>
+                                    <h3 className="font-semibold text-gray-900">Calculadora</h3>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        Comparar paquetes y generar cotizaciones
+                                    </p>
+                                </CardContent>
+                            </Card>
+
+                        </div>
+                        <Toast
+                            message={toast.message}
+                            isVisible={toast.isVisible}
+                            onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+                        />
                     </div>
                 </div>
             </div>
-
-            {/* Alerta de Productividad (Solo Boss) - Premium */}
-            {superVendedores.length > 0 && (
-                <div className="grid grid-cols-1 gap-4 mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
-                    {superVendedores.map((v) => (
-                        <Card key={v.email} className="bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 border-0 overflow-hidden relative shadow-[0_8px_30px_rgb(251,191,36,0.2)]">
-                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-                            <div className="absolute -right-4 -top-8 text-white/20 rotate-12 scale-150 blur-sm mix-blend-overlay pointer-events-none">
-                                <Trophy size={160} />
-                            </div>
-                            <CardContent className="p-6 md:p-8 flex items-center gap-6 relative z-10">
-                                <div className="p-4 bg-white/20 backdrop-blur-md text-white border border-white/30 rounded-2xl shadow-xl animate-bounce">
-                                    <Star size={32} fill="currentColor" />
-                                </div>
-                                <div className="text-white">
-                                    <h3 className="text-2xl font-black mb-1 drop-shadow-sm flex items-center gap-2">
-                                        ¡Meta Superada! <Trophy size={24} className="text-yellow-200" />
-                                    </h3>
-                                    <p className="text-white/90 text-sm md:text-base font-medium">
-                                        El asesor <span className="font-extrabold bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm">{perfiles.find(p => p.email === v.email)?.nombre_completo || v.email.split('@')[0]}</span> ha alcanzado <span className="text-2xl font-black mx-1 drop-shadow-md">{v.total}</span> instalaciones esta semana.
-                                    </p>
-                                    <div className="inline-block mt-3 px-3 py-1 bg-black/10 backdrop-blur-sm rounded-full text-xs font-black uppercase tracking-widest border border-white/10">
-                                        Rendimiento Extraordinario
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            )}
-
-
-            {/* Métricas Principales */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                {user?.email === 'carrillomarjory7@gmail.com' ? (
-                    <>
-                        <MetricCard
-                            title="Ventas Programadas Hoy"
-                            value={metricas.ventasProgramadasHoy}
-                            icon={Calendar}
-                            color="blue"
-                        />
-                        <MetricCard
-                            title="Ventas de la Semana"
-                            value={metricas.ventasSemana}
-                            icon={TrendingUp}
-                            color="green"
-                        />
-                        <MetricCard
-                            title="Ventas del Mes"
-                            value={metricas.ventasMes}
-                            icon={Trophy}
-                            color="yellow"
-                        />
-                        <MetricCard
-                            title="Promotor Top"
-                            value={metricas.promotorTop?.nombre || '---'}
-                            subtitle={metricas.promotorTop ? `${metricas.promotorTop.total} instalaciones` : 'Sin ventas'}
-                            icon={Star}
-                            color="purple"
-                        />
-                    </>
-                ) : (
-                    <>
-                        <MetricCard
-                            title="Leads del Mes"
-                            value={metricas.leadsMes}
-                            icon={Users}
-                            color="blue"
-                            trend={{ value: 12, isPositive: true }}
-                        />
-
-                        <MetricCard
-                            title="Ventas del Mes"
-                            value={metricas.ventasMes}
-                            icon={TrendingUp}
-                            color="green"
-                            trend={{ value: 8, isPositive: true }}
-                        />
-
-                        <MetricCard
-                            title="Comisiones del Mes"
-                            value={formatearMoneda(metricas.comisionesMes)}
-                            icon={DollarSign}
-                            color="yellow"
-                        />
-
-                        <MetricCard
-                            title="Tasa de Conversión"
-                            value={`${metricas.tasaConversion.toFixed(1)}%`}
-                            icon={Phone}
-                            color="purple"
-                        />
-                    </>
-                )}
-            </div>
-
-
-
-            {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Súper Boss */}
-            <div>
-                {user?.email === 'carrillomarjory7@gmail.com' ? (
-                    <BossDashboardView
-                        clientes={clientes}
-                        perfiles={perfiles}
-                    />
-                ) : (
-                    <>
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-2xl font-semibold text-gray-900">Pipeline de Ventas</h2>
-                            <Button
-                                variant="ghost"
-                                onClick={() => router.push('/clientes')}
-                            >
-                                Ver Todos
-                            </Button>
-                        </div>
-
-                        <PipelineView
-                            clientes={clientes}
-                            onClienteClick={(cliente) => router.push(`/clientes/${cliente.id}`)}
-                        />
-                    </>
-                )}
-            </div>
-
-
-            {/* Acciones Rápidas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card
-                    className="cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => router.push('/calculadora')}
-                >
-                    <CardContent className="p-6 text-center">
-                        <div className="text-4xl mb-3">🧮</div>
-                        <h3 className="font-semibold text-gray-900">Calculadora</h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                            Comparar paquetes y generar cotizaciones
-                        </p>
-                    </CardContent>
-                </Card>
-
-            </div>
-            <Toast
-                message={toast.message}
-                isVisible={toast.isVisible}
-                onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
-            />
-        </div >
+        </div>
     );
 }
