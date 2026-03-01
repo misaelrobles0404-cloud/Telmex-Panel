@@ -25,7 +25,6 @@ import { BossDashboardView } from '@/components/BossDashboardView';
 import { PerfilUsuario } from '@/types';
 import { InstalacionAlert } from '@/components/InstalacionAlert';
 import { AnnouncementBanner } from '@/components/AnnouncementBanner';
-import { ClavesPortalCard } from '@/components/ClavesPortalCard';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -269,7 +268,7 @@ export default function DashboardPage() {
 
 
             {/* Métricas Principales */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {user?.email === 'carrillomarjory7@gmail.com' ? (
                     <>
                         <MetricCard
@@ -333,12 +332,7 @@ export default function DashboardPage() {
                 )}
             </div>
 
-            {/* Acceso a Claves de Portal (Solo para empleados) */}
-            {user?.email !== 'carrillomarjory7@gmail.com' && (
-                <div className="w-full">
-                    <ClavesPortalCard modo="detalle" />
-                </div>
-            )}
+
 
             {/* Contenido Principal: Pipeline para empleados / Tablas por Promotor para Súper Boss */}
             <div>
