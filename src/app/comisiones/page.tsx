@@ -323,14 +323,14 @@ export default function ComisionesPage() {
                     </div>
 
                     <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
-                        {/* Panel de Nombre */}
+                        {/* Panel de Nombre (Dueño de la Cuenta) */}
                         <div className="bg-white rounded-xl p-3 border border-blue-50 shadow-sm flex flex-col gap-2">
-                            <p className="text-[#001b44] font-black text-[10px] uppercase opacity-60 tracking-wider">CLIENTE SELECCIONADO</p>
+                            <p className="text-[#001b44] font-black text-[10px] uppercase opacity-60 tracking-wider">CUENTA DE ACCESO</p>
                             <div className="flex flex-wrap gap-1.5">
-                                {(clienteSeleccionado?.nombre || 'Sin Selección').split(' ').map((word, idx) => (
+                                {['GUSTAVO', 'ACEVEDO', 'ZAMARRON'].map((word, idx) => (
                                     <button
                                         key={`${word}-${idx}`}
-                                        onClick={(e) => copiarAlPortapapeles(e as any, word.toUpperCase(), 'Nombre')}
+                                        onClick={(e) => copiarAlPortapapeles(e as any, word, 'Nombre')}
                                         className="bg-[#e3f2ff] px-2 py-1 rounded-md text-[10px] font-black text-[#001b44] shadow-sm border border-transparent hover:border-blue-300 transition-all active:scale-95 uppercase"
                                     >
                                         {word}
@@ -345,8 +345,8 @@ export default function ComisionesPage() {
                                 onClick={() => clienteSeleccionado && marcarUsoPortal(clienteSeleccionado)}
                                 disabled={!clienteSeleccionado || !!clienteSeleccionado.en_uso_por}
                                 className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${clienteSeleccionado?.en_uso_por
-                                        ? 'bg-yellow-50 border-yellow-200 text-yellow-700 cursor-not-allowed opacity-80'
-                                        : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
+                                    ? 'bg-yellow-50 border-yellow-200 text-yellow-700 cursor-not-allowed opacity-80'
+                                    : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'
                                     }`}
                             >
                                 <span className="text-sm">{clienteSeleccionado?.en_uso_por ? '👤' : '🌐'}</span>
