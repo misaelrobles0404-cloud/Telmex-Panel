@@ -85,9 +85,29 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-                <div className="flex items-center gap-2">
-                    <Users className="text-telmex-blue" />
-                    <h2 className="text-2xl font-bold text-gray-800">Control por Promotor</h2>
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <Users className="text-telmex-blue" />
+                        <h2 className="text-2xl font-bold text-gray-800">Control por Promotor</h2>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <a
+                            href="https://siacinteractivo.telmex.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 transition-all border border-blue-100 flex items-center gap-1.5 shadow-sm"
+                        >
+                            <span className="text-xs">🌐</span> SIAC Interactivo
+                        </a>
+                        <a
+                            href="https://portaldv.telmex.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-purple-50 text-purple-600 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-purple-100 transition-all border border-purple-100 flex items-center gap-1.5 shadow-sm"
+                        >
+                            <span className="text-xs">🔑</span> Portal
+                        </a>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3 flex-1 sm:justify-end">
