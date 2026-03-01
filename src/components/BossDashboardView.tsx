@@ -386,17 +386,25 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                                             <SaveIcon size={12} className="text-green-500 cursor-pointer" onClick={() => handleUpdateCliente(cliente, 'folio_siac', valorEditado)} />
                                                                         </div>
                                                                     ) : (
-                                                                        <span
-                                                                            className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-gray-200 transition-colors"
-                                                                            onClick={() => {
-                                                                                setEditando({ id: cliente.id, campo: 'folio_siac' });
-                                                                                setValorEditado(cliente.folio_siac || '');
-                                                                            }}
-                                                                            title="Click para editar SIAC"
-                                                                        >
-                                                                            <Hash size={10} /> SIAC: {cliente.folio_siac || '---'}
-                                                                            <Edit2 size={8} className="ml-1 opacity-0 group-hover/field:opacity-50" />
-                                                                        </span>
+                                                                        <div className="flex items-center gap-1 group/field">
+                                                                            <span
+                                                                                className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-gray-200 transition-colors"
+                                                                                onClick={(e) => copiarAlPortapapeles(e, cliente.folio_siac || '', 'SIAC')}
+                                                                                title="Click para copiar SIAC"
+                                                                            >
+                                                                                <Hash size={10} /> SIAC: {cliente.folio_siac || '---'}
+                                                                            </span>
+                                                                            <button
+                                                                                className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-telmex-blue transition-colors opacity-0 group-hover/field:opacity-100"
+                                                                                onClick={() => {
+                                                                                    setEditando({ id: cliente.id, campo: 'folio_siac' });
+                                                                                    setValorEditado(cliente.folio_siac || '');
+                                                                                }}
+                                                                                title="Editar SIAC"
+                                                                            >
+                                                                                <Edit2 size={10} />
+                                                                            </button>
+                                                                        </div>
                                                                     )}
                                                                 </div>
 
@@ -417,17 +425,25 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
                                                                             <SaveIcon size={12} className="text-green-500 cursor-pointer" onClick={() => handleUpdateCliente(cliente, 'orden_servicio', valorEditado)} />
                                                                         </div>
                                                                     ) : (
-                                                                        <span
-                                                                            className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-blue-100 transition-colors"
-                                                                            onClick={() => {
-                                                                                setEditando({ id: cliente.id, campo: 'orden_servicio' });
-                                                                                setValorEditado(cliente.orden_servicio || '');
-                                                                            }}
-                                                                            title="Click para editar Orden"
-                                                                        >
-                                                                            <Key size={10} /> ORDEN: {cliente.orden_servicio || '---'}
-                                                                            <Edit2 size={8} className="ml-1 opacity-0 group-hover/field:opacity-50" />
-                                                                        </span>
+                                                                        <div className="flex items-center gap-1 group/field">
+                                                                            <span
+                                                                                className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-blue-100 transition-colors"
+                                                                                onClick={(e) => copiarAlPortapapeles(e, cliente.orden_servicio || '', 'Orden')}
+                                                                                title="Click para copiar Orden"
+                                                                            >
+                                                                                <Key size={10} /> ORDEN: {cliente.orden_servicio || '---'}
+                                                                            </span>
+                                                                            <button
+                                                                                className="p-1 hover:bg-blue-50 rounded text-blue-400 hover:text-telmex-blue transition-colors opacity-0 group-hover/field:opacity-100"
+                                                                                onClick={() => {
+                                                                                    setEditando({ id: cliente.id, campo: 'orden_servicio' });
+                                                                                    setValorEditado(cliente.orden_servicio || '');
+                                                                                }}
+                                                                                title="Editar Orden"
+                                                                            >
+                                                                                <Edit2 size={10} />
+                                                                            </button>
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             </div>
