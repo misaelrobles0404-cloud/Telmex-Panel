@@ -252,25 +252,70 @@ export default function ComisionesPage() {
                     <h1 className="text-3xl font-bold text-gray-900">Gestión de Comisiones</h1>
                     <p className="text-gray-600 mt-1">Cortes semanales los Miércoles.</p>
                 </div>
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center gap-6 animate-in fade-in slide-in-from-right-4 duration-500 border border-white/20">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md border border-white/30">
-                            <Copy size={22} className="text-white" />
+                {/* Nuevo Banner Estilo Mockup */}
+                <div className="bg-[#f0f4ff] p-6 rounded-[32px] border border-blue-100 flex flex-col items-center gap-4 w-full max-w-md mx-auto shadow-sm transition-all hover:shadow-md">
+                    <div className="flex items-center gap-3 self-start mb-2">
+                        <div className="bg-white p-2 rounded-xl shadow-sm border border-blue-50">
+                            <span className="text-blue-600">🔑</span>
                         </div>
-                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-8">
-                            <div>
-                                <p className="text-[10px] uppercase font-black tracking-widest opacity-70 mb-1">Acceso Único (10...)</p>
-                                <div className="flex items-center gap-2 group cursor-pointer" onClick={(e) => copiarAlPortapapeles(e as any, '10000900', 'Acceso Único')}>
-                                    <p className="text-2xl font-black font-mono tracking-tighter group-hover:text-blue-200 transition-colors">10000900</p>
-                                    <Copy size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <h2 className="text-2xl font-black text-[#001b44] tracking-tight leading-tight">
+                            Clave Universal de <br /> Captura
+                        </h2>
+                    </div>
+
+                    <div className="w-full bg-[#fffcf0] border border-[#ffecb3] rounded-2xl p-3 flex items-center gap-3 mb-2">
+                        <span className="text-[#b45309]">🔒</span>
+                        <span className="text-[#b45309] text-[10px] font-black uppercase tracking-widest">
+                            Clave vinculada al folio SIAC
+                        </span>
+                    </div>
+
+                    <div className="w-full bg-white rounded-2xl p-5 border border-blue-50 shadow-sm">
+                        <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                            <div className="text-left">
+                                <p className="text-[#001b44] font-black text-sm uppercase leading-none">NACIONAL</p>
+                                <p className="text-[#001b44] font-black text-xs opacity-80">(ACCESO ÚNICO)</p>
+                            </div>
+                            <div
+                                className="bg-[#eef2ff] px-3 py-1.5 rounded-full border border-blue-100 flex items-center gap-2 cursor-pointer hover:bg-blue-100 transition-colors group"
+                                onClick={(e) => copiarAlPortapapeles(e as any, '10000900', 'Acceso Único')}
+                            >
+                                <span className="text-[#3b82f6]">👤</span>
+                                <span className="font-mono font-black text-[#3b82f6] text-sm">10000900</span>
+                                <Copy size={12} className="text-[#3b82f6] opacity-40 group-hover:opacity-100" />
+                            </div>
+                        </div>
+
+                        <div className="bg-[#e3f2ff] rounded-xl p-4 flex flex-col gap-4">
+                            <div className="flex items-center gap-2">
+                                <div className="bg-[#0047b3] p-1.5 rounded-lg shadow-sm">
+                                    <span className="text-white text-xs text-center block">🔒</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {['GUSTAVO', 'ACEVEDO', 'ZAMARRON'].map((word) => (
+                                        <button
+                                            key={word}
+                                            onClick={(e) => copiarAlPortapapeles(e as any, word, 'Nombre')}
+                                            className="bg-white px-3 py-1 rounded-lg text-[11px] font-black text-[#001b44] shadow-sm border border-white hover:border-blue-300 transition-all active:scale-95 uppercase"
+                                        >
+                                            {word}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
-                            <div className="hidden md:block w-px h-8 bg-white/20" />
-                            <div>
-                                <p className="text-[10px] uppercase font-black tracking-widest opacity-70 mb-1">Clave Captura</p>
-                                <div className="flex items-center gap-2 group cursor-pointer" onClick={(e) => copiarAlPortapapeles(e as any, '337595', 'Clave Captura')}>
-                                    <p className="text-2xl font-black font-mono tracking-tighter group-hover:text-blue-200 transition-colors">337595</p>
-                                    <Copy size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                            <div className="flex flex-col items-center gap-3">
+                                <div className="bg-white rounded-xl py-3 px-6 shadow-sm border border-white w-full flex items-center justify-center gap-3 group cursor-pointer hover:border-blue-100">
+                                    <span className="opacity-60 text-lg">🌐</span>
+                                    <span className="text-[#001b44] font-black text-sm tracking-wide uppercase">Marcar Uso Portal</span>
+                                </div>
+
+                                <div
+                                    className="bg-[#fff9f0] border-2 border-[#ffecb3] rounded-2xl py-3 px-8 flex items-center justify-center gap-4 cursor-pointer hover:bg-[#fff4e0] transition-colors group w-full"
+                                    onClick={(e) => copiarAlPortapapeles(e as any, '337595', 'Clave Captura')}
+                                >
+                                    <span className="text-[#d97706] text-xl">🔓</span>
+                                    <span className="font-mono text-2xl font-black text-[#d97706] tracking-widest">337595</span>
                                 </div>
                             </div>
                         </div>
