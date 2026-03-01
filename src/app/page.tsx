@@ -63,30 +63,26 @@ export default function DashboardPage() {
 
         const nombreUsuario = perfilActual?.nombre_completo || user.email || 'Usuario';
 
-        // Comprobar si el portal está en uso por otra persona
-        if (cliente.en_uso_por && cliente.en_uso_por !== nombreUsuario) {
-            // Permitir que Misael o SuperAdmin liberen si está trabado
-            const esAdmin = user.email === 'misaelrobles0404@gmail.com' || user.email === 'carrillomarjory7@gmail.com';
-            if (!esAdmin) {
-                mostrarToast(`⚠️ En uso por ${cliente.en_uso_por}`);
-                setLoading(false);
-                return;
-            }
-        }
-
+        const yaEstaEnUso = !!cliente.en_uso_por;
         const esMismoUsuario = cliente.en_uso_por === nombreUsuario;
+        const esAdmin = user.email === 'misaelrobles0404@gmail.com' ||
+            user.email === 'carrillomarjory7@gmail.com' ||
+            user.email?.includes('infinitummisael');
+
+        // Liberación: Si está en uso, y soy el dueño O soy admin, lo LIBERAMOS.
+        const debeLiberar = yaEstaEnUso && (esMismoUsuario || esAdmin);
 
         const clienteActualizado: Cliente = {
             ...cliente,
-            en_uso_por: esMismoUsuario ? undefined : nombreUsuario,
-            en_uso_desde: esMismoUsuario ? undefined : hoy,
+            en_uso_por: debeLiberar ? undefined : nombreUsuario,
+            en_uso_desde: debeLiberar ? undefined : hoy,
             actualizado_en: hoy,
             actividades: [
                 {
                     id: generarId(),
                     clienteId: cliente.id,
                     tipo: 'cambio_estado',
-                    descripcion: esMismoUsuario ? `Portal liberado por ${nombreUsuario}` : `Portal en uso por ${nombreUsuario}`,
+                    descripcion: debeLiberar ? `Portal liberado por ${nombreUsuario}` : `Portal en uso por ${nombreUsuario}`,
                     fecha: hoy
                 },
                 ...cliente.actividades || []
@@ -95,7 +91,7 @@ export default function DashboardPage() {
 
         try {
             await guardarCliente(clienteActualizado);
-            mostrarToast(esMismoUsuario ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
+            mostrarToast(debeLiberar ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
             await cargarDatos(true);
             setClienteSeleccionado(clienteActualizado);
         } catch (error: any) {
@@ -384,15 +380,16 @@ export default function DashboardPage() {
                         <div className="bg-white rounded-xl p-2 border border-blue-50 shadow-sm flex flex-col justify-center">
                             {(() => {
                                 const nombreUsuario = perfilActual?.nombre_completo || user?.email || '';
-                                const enUsoPorMismo = clienteSeleccionado?.en_uso_por &&
-                                    (clienteSeleccionado.en_uso_por.toLowerCase().includes('ailton') ||
-                                        clienteSeleccionado.en_uso_por.toLowerCase().includes('misael') ||
-                                        clienteSeleccionado.en_uso_por === nombreUsuario);
+                                const esMismoUsuario = clienteSeleccionado?.en_uso_por === nombreUsuario;
+                                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' ||
+                                    user?.email === 'carrillomarjory7@gmail.com' ||
+                                    user?.email?.includes('infinitummisael');
+                                const puedeLiberar = esMismoUsuario || esAdmin;
 
                                 return (
                                     <button
                                         onClick={() => clienteSeleccionado && marcarUsoPortal(clienteSeleccionado)}
-                                        disabled={!clienteSeleccionado || (!!clienteSeleccionado.en_uso_por && !enUsoPorMismo)}
+                                        disabled={!clienteSeleccionado || (!!clienteSeleccionado.en_uso_por && !puedeLiberar)}
                                         className={`rounded-xl py-2 px-4 shadow-sm border w-full flex items-center justify-center gap-2 transition-all ${clienteSeleccionado?.en_uso_por
                                             ? 'bg-yellow-50 border-yellow-200 text-yellow-700 active:scale-95'
                                             : 'bg-white border-gray-100 text-[#001b44] hover:bg-gray-50 active:scale-95'

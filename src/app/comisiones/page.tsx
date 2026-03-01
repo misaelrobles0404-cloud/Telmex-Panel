@@ -287,30 +287,26 @@ export default function ComisionesPage() {
 
         const nombreUsuario = perfilActual?.nombre_completo || user.email || 'Usuario';
 
-        // Comprobar si el portal está en uso por otra persona
-        if (cliente.en_uso_por && cliente.en_uso_por !== nombreUsuario) {
-            // Permitir que Misael o SuperAdmin liberen si está trabado
-            const esAdmin = user.email === 'misaelrobles0404@gmail.com' || user.email === 'carrillomarjory7@gmail.com';
-            if (!esAdmin) {
-                mostrarToast(`⚠️ En uso por ${cliente.en_uso_por}`);
-                setLoading(false);
-                return;
-            }
-        }
-
+        const yaEstaEnUso = !!cliente.en_uso_por;
         const esMismoUsuario = cliente.en_uso_por === nombreUsuario;
+        const esAdmin = user.email === 'misaelrobles0404@gmail.com' ||
+            user.email === 'carrillomarjory7@gmail.com' ||
+            user.email?.includes('infinitummisael');
+
+        // Liberación: Si está en uso, y soy el dueño O soy admin, lo LIBERAMOS.
+        const debeLiberar = yaEstaEnUso && (esMismoUsuario || esAdmin);
 
         const clienteActualizado: Cliente = {
             ...cliente,
-            en_uso_por: esMismoUsuario ? undefined : nombreUsuario,
-            en_uso_desde: esMismoUsuario ? undefined : hoy,
+            en_uso_por: debeLiberar ? undefined : nombreUsuario,
+            en_uso_desde: debeLiberar ? undefined : hoy,
             actualizado_en: hoy,
             actividades: [
                 {
                     id: generarId(),
                     clienteId: cliente.id,
                     tipo: 'cambio_estado',
-                    descripcion: esMismoUsuario ? `Portal liberado por ${nombreUsuario}` : `Portal en uso por ${nombreUsuario}`,
+                    descripcion: debeLiberar ? `Portal liberado por ${nombreUsuario}` : `Portal en uso por ${nombreUsuario}`,
                     fecha: hoy
                 },
                 ...cliente.actividades || []
@@ -319,7 +315,7 @@ export default function ComisionesPage() {
 
         try {
             await guardarCliente(clienteActualizado);
-            mostrarToast(esMismoUsuario ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
+            mostrarToast(debeLiberar ? 'Portal liberado exitosamente' : `Portal marcado por ${nombreUsuario}`);
             await cargarClientes();
         } catch (error: any) {
             console.error('Error detallado al marcar uso:', error);
@@ -394,7 +390,9 @@ export default function ComisionesPage() {
                                 // Lógica robusta de comparación de identidad
                                 const nombreUsuarioActual = perfilActual?.nombre_completo || user?.email || '';
                                 const esMismoUsuario = clienteSeleccionado?.en_uso_por === nombreUsuarioActual;
-                                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' || user?.email === 'carrillomarjory7@gmail.com';
+                                const esAdmin = user?.email === 'misaelrobles0404@gmail.com' ||
+                                    user?.email === 'carrillomarjory7@gmail.com' ||
+                                    user?.email?.includes('infinitummisael');
                                 const puedeLiberar = esMismoUsuario || esAdmin;
 
                                 return (
