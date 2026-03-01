@@ -252,22 +252,29 @@ export default function ComisionesPage() {
                     <h1 className="text-3xl font-bold text-gray-900">Gestión de Comisiones</h1>
                     <p className="text-gray-600 mt-1">Cortes semanales los Miércoles.</p>
                 </div>
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-2xl shadow-lg flex items-center gap-4 animate-in fade-in slide-in-from-right-4 duration-500">
-                    <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-                        <Copy size={20} className="text-white" />
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center gap-6 animate-in fade-in slide-in-from-right-4 duration-500 border border-white/20">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md border border-white/30">
+                            <Copy size={22} className="text-white" />
+                        </div>
+                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-8">
+                            <div>
+                                <p className="text-[10px] uppercase font-black tracking-widest opacity-70 mb-1">Acceso Único (10...)</p>
+                                <div className="flex items-center gap-2 group cursor-pointer" onClick={(e) => copiarAlPortapapeles(e as any, '10000900', 'Acceso Único')}>
+                                    <p className="text-2xl font-black font-mono tracking-tighter group-hover:text-blue-200 transition-colors">10000900</p>
+                                    <Copy size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                            </div>
+                            <div className="hidden md:block w-px h-8 bg-white/20" />
+                            <div>
+                                <p className="text-[10px] uppercase font-black tracking-widest opacity-70 mb-1">Clave Captura</p>
+                                <div className="flex items-center gap-2 group cursor-pointer" onClick={(e) => copiarAlPortapapeles(e as any, '337595', 'Clave Captura')}>
+                                    <p className="text-2xl font-black font-mono tracking-tighter group-hover:text-blue-200 transition-colors">337595</p>
+                                    <Copy size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-[10px] uppercase font-black tracking-widest opacity-80">Clave Única de Captura</p>
-                        <p className="text-2xl font-black font-mono">337595</p>
-                    </div>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-white hover:bg-white/10 ml-2"
-                        onClick={(e) => copiarAlPortapapeles(e as any, '337595', 'Clave Única')}
-                    >
-                        Copiar
-                    </Button>
                 </div>
             </div>
 
@@ -357,8 +364,22 @@ export default function ComisionesPage() {
                                                         </div>
                                                     )}
                                                 </td>
-                                                <td className="py-2 px-4 align-top">
-                                                    <div className="font-medium text-gray-900">{cliente.nombre}</div>
+                                                <td className="py-3 px-4 align-top">
+                                                    <div
+                                                        className="flex flex-wrap gap-1.5"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        {cliente.nombre.split(' ').map((parte, i) => (
+                                                            <button
+                                                                key={i}
+                                                                onClick={(e) => copiarAlPortapapeles(e as any, parte.toUpperCase(), 'Nombre')}
+                                                                className="px-2 py-0.5 bg-gray-50 border border-gray-200 rounded text-xs font-bold text-gray-700 hover:bg-telmex-blue hover:text-white hover:border-telmex-blue transition-all active:scale-95 shadow-sm uppercase"
+                                                                title={`Copiar "${parte}"`}
+                                                            >
+                                                                {parte}
+                                                            </button>
+                                                        ))}
+                                                    </div>
                                                 </td>
                                                 <td className="py-2 px-4 text-green-600 font-medium align-top">{formatearMoneda(cliente.comision)}</td>
                                                 <td className="py-2 px-4 text-right align-top">
