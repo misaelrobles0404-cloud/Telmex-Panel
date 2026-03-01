@@ -141,7 +141,7 @@ export default function ComisionesPage() {
             vendidos.forEach(cliente => {
                 // Usar fecha_instalacion o actualizado_en como fallback
                 const fechaRef = cliente.fecha_instalacion || cliente.actualizado_en;
-                const corte = getFechaCorte(fechaRef);
+                const corte = getDiaCorte(fechaRef);
 
                 if (!agrupados[corte]) {
                     agrupados[corte] = { clientes: [], total: 0 };
@@ -167,19 +167,10 @@ export default function ComisionesPage() {
         }
     };
 
-    // Función para obtener el próximo miércoles (o hoy si es miércoles)
-    const getFechaCorte = (fechaStr: string) => {
+    // Agrupa por día exacto (usa la fecha de instalación o actualización)
+    const getDiaCorte = (fechaStr: string) => {
         const fecha = new Date(fechaStr);
-        const diaSemana = fecha.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
-
-        // Queremos que el corte sea el Miércoles (3)
-        // Días restantes para el próximo miércoles: (3 - diaSemana + 7) % 7
-        const diasParaMiercoles = (3 - diaSemana + 7) % 7;
-
-        const fechaCorte = new Date(fecha);
-        fechaCorte.setDate(fecha.getDate() + diasParaMiercoles);
-
-        return fechaCorte.toISOString().split('T')[0]; // YYYY-MM-DD
+        return fecha.toISOString().split('T')[0]; // YYYY-MM-DD
     };
 
     const confirmarInstalacion = async (cliente: Cliente) => {
@@ -343,7 +334,7 @@ export default function ComisionesPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Gestión de Comisiones</h1>
-                    <p className="text-gray-600 mt-1">Cortes semanales los Miércoles.</p>
+                    <p className="text-gray-600 mt-1">Instalaciones por día (Lun–Vie). El Super Admin confirma y libera el pago.</p>
                 </div>
                 {/* Banner Simplificado y Compacto */}
                 <div className="bg-[#f0f4ff] p-3 md:p-4 rounded-[24px] border border-blue-100 flex flex-col items-center gap-3 w-full max-w-4xl mx-auto shadow-sm transition-all hover:shadow-md">
@@ -679,7 +670,7 @@ export default function ComisionesPage() {
             <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <Calendar className="text-telmex-blue" />
-                    Historial de Cortes (Miércoles)
+                    Mis Instalaciones por Día
                 </h2>
 
                 {Object.entries(clientesPagados).length === 0 ? (
@@ -691,11 +682,11 @@ export default function ComisionesPage() {
                         <Card key={fechaCorte} className="overflow-hidden border-green-100">
                             <div className="bg-green-50 p-4 flex justify-between items-center border-b border-green-100">
                                 <div>
-                                    <p className="text-sm text-green-700 font-medium uppercase tracking-wide">Corte Semana</p>
-                                    <p className="text-lg font-bold text-green-900">{formatearFecha(fechaCorte)} (Miércoles)</p>
+                                    <p className="text-sm text-green-700 font-medium uppercase tracking-wide">Día de Instalación</p>
+                                    <p className="text-lg font-bold text-green-900">{formatearFecha(fechaCorte)}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm text-green-700 font-medium">Total a Pagar</p>
+                                    <p className="text-sm text-green-700 font-medium">Total del Día</p>
                                     <p className="text-2xl font-bold text-green-700">{formatearMoneda(datos.total)}</p>
                                 </div>
                             </div>
@@ -707,7 +698,9 @@ export default function ComisionesPage() {
                                                 <th className="py-2 px-4 font-normal">Instalado el</th>
                                                 <th className="py-2 px-4 font-normal">Cliente</th>
                                                 <th className="py-2 px-4 font-normal">Folio SIAC</th>
-                                                <th className="py-2 px-4 font-normal text-right">Monto</th>
+                                                <th className="py-2 px-4 font-normal">Comisión</th>
+                                                <th className="py-2 px-4 font-normal text-center">Confirmada</th>
+                                                <th className="py-2 px-4 font-normal text-center">Pago</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -722,8 +715,23 @@ export default function ComisionesPage() {
                                                     </td>
                                                     <td className="py-2 px-4 font-medium text-gray-900">{cliente.nombre}</td>
                                                     <td className="py-2 px-4 font-mono text-gray-600">{cliente.folio_siac}</td>
-                                                    <td className="py-2 px-4 text-right font-medium text-green-600">
+                                                    <td className="py-2 px-4 font-medium text-green-600">
                                                         {formatearMoneda(cliente.comision)}
+                                                    </td>
+                                                    <td className="py-2 px-4 text-center">
+                                                        {cliente.comision_confirmada
+                                                            ? <span className="text-[10px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✅ Confirmada</span>
+                                                            : <span className="text-[10px] font-black bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">⏳ Pendiente</span>
+                                                        }
+                                                    </td>
+                                                    <td className="py-2 px-4 text-center">
+                                                        {cliente.comision_pagada
+                                                            ? <div>
+                                                                <span className="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full block">💸 Pagada</span>
+                                                                {cliente.fecha_pago && <span className="text-[9px] text-gray-400">{new Date(cliente.fecha_pago).toLocaleDateString('es-MX')}</span>}
+                                                            </div>
+                                                            : <span className="text-[10px] font-black bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Sin pagar</span>
+                                                        }
                                                     </td>
                                                 </tr>
                                             ))}
