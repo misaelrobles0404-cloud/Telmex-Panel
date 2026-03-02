@@ -165,87 +165,110 @@ export default function ClientesPage() {
                         variant="outline"
                         size="sm"
                         onClick={handleLimpieza}
-                        className="flex-1 sm:flex-none text-red-600 border-red-200 hover:bg-red-50 text-xs md:text-sm"
+                        className="hidden sm:flex text-red-600 border-red-200 hover:bg-red-50 text-xs md:text-sm"
                         title="Eliminar clientes antiguos (> 1 mes)"
                     >
-                        <Trash2 size={16} className="mr-1 md:mr-2" />
+                        <Trash2 size={16} className="mr-2" />
                         Limpieza
                     </Button>
                     <Button
                         variant="primary"
                         size="sm"
                         onClick={() => router.push('/clientes/nuevo')}
-                        className="flex-1 sm:flex-none text-xs md:text-sm"
+                        className="hidden sm:flex text-xs md:text-sm"
                     >
-                        <Plus size={16} className="mr-1 md:mr-2" />
+                        <Plus size={16} className="mr-2" />
                         Nuevo Cliente
+                    </Button>
+
+                    {/* Botón Limpieza móvil (solo icono) */}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleLimpieza}
+                        className="sm:hidden text-red-600 border-red-200 p-2"
+                    >
+                        <Trash2 size={18} />
                     </Button>
                 </div>
             </div>
 
-            {/* Tarjetas de Estadísticas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <Card className="bg-blue-50 border-blue-200">
-                    <CardContent className="p-4 flex items-center justify-between">
+            {/* Tarjetas de Estadísticas - Scroll horizontal en móvil */}
+            <div className="flex overflow-x-auto pb-4 mb-6 gap-4 no-scrollbar md:grid md:grid-cols-3 md:overflow-visible text-gray-500">
+                <Card className="min-w-[140px] flex-1 bg-blue-50 border-blue-200">
+                    <CardContent className="p-3 md:p-4 flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-blue-600 font-medium">Registrados Hoy</p>
-                            <p className="text-2xl font-bold text-blue-900">{stats.hoy}</p>
+                            <p className="text-[10px] md:text-sm text-blue-600 font-medium">Hoy</p>
+                            <p className="text-xl md:text-2xl font-bold text-blue-900">{stats.hoy}</p>
                         </div>
-                        <div className="p-2 bg-blue-100 rounded-full text-blue-600">
+                        <div className="hidden sm:block p-2 bg-blue-100 rounded-full text-blue-600">
                             <span className="text-xl">📅</span>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-green-50 border-green-200">
-                    <CardContent className="p-4 flex items-center justify-between">
+                <Card className="min-w-[140px] flex-1 bg-green-50 border-green-200">
+                    <CardContent className="p-3 md:p-4 flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-green-600 font-medium">Esta Semana</p>
-                            <p className="text-2xl font-bold text-green-900">{stats.semana}</p>
+                            <p className="text-[10px] md:text-sm text-green-600 font-medium">Semana</p>
+                            <p className="text-xl md:text-2xl font-bold text-green-900">{stats.semana}</p>
                         </div>
-                        <div className="p-2 bg-green-100 rounded-full text-green-600">
+                        <div className="hidden sm:block p-2 bg-green-100 rounded-full text-green-600">
                             <span className="text-xl">📆</span>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-purple-50 border-purple-200">
-                    <CardContent className="p-4 flex items-center justify-between">
+                <Card className="min-w-[140px] flex-1 bg-purple-50 border-purple-200">
+                    <CardContent className="p-3 md:p-4 flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-purple-600 font-medium">Este Mes</p>
-                            <p className="text-2xl font-bold text-purple-900">{stats.mes}</p>
+                            <p className="text-[10px] md:text-sm text-purple-600 font-medium">Mes</p>
+                            <p className="text-xl md:text-2xl font-bold text-purple-900">{stats.mes}</p>
                         </div>
-                        <div className="p-2 bg-purple-100 rounded-full text-purple-600">
+                        <div className="hidden sm:block p-2 bg-purple-100 rounded-full text-purple-600">
                             <span className="text-xl">📊</span>
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Filtros */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {/* Barra de Búsqueda */}
+            <div className="mb-4">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                     <input
                         type="text"
-                        placeholder="Buscar por nombre, teléfono o correo..."
+                        placeholder="Buscar por nombre o teléfono..."
                         value={busqueda}
                         onChange={(e) => setBusqueda(e.target.value)}
                         className="input pl-10"
                     />
                 </div>
+            </div>
 
-                <select
-                    value={filtroEstado}
-                    onChange={(e) => setFiltroEstado(e.target.value)}
-                    className="input"
-                >
-                    <option value="todos">Todos los prospectos activos</option>
-                    <option value="prospecto">PROSPECTO</option>
-                    <option value="pendiente_captura">PENDIENTE CAPTURA</option>
-                    <option value="capturado">CAPTURADO</option>
-                    <option value="posteado">POSTEADO</option>
-                </select>
+            {/* Filtros por Chips (Scroll horizontal en móvil) */}
+            <div className="flex overflow-x-auto gap-2 mb-6 pb-2 no-scrollbar">
+                {[
+                    { id: 'todos', label: 'Todos' },
+                    { id: 'prospecto', label: 'Prospectos' },
+                    { id: 'pendiente_captura', label: 'Pendientes' },
+                    { id: 'capturado', label: 'Capturados' },
+                    { id: 'posteado', label: 'Posteados' }
+                ].map((f) => (
+                    <button
+                        key={f.id}
+                        onClick={() => setFiltroEstado(f.id)}
+                        className={`
+                            px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border
+                            ${filtroEstado === f.id
+                                ? 'bg-telmex-blue text-white border-telmex-blue shadow-md'
+                                : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                            }
+                        `}
+                    >
+                        {f.label}
+                    </button>
+                ))}
             </div>
 
             {/* Lista de Clientes */}
@@ -284,33 +307,53 @@ export default function ClientesPage() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 text-xs md:text-sm">
-                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
-                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Teléfono (TT)</p>
-                                            <p className="font-medium text-gray-900 break-all">{cliente.no_tt}</p>
+                                    <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-2 md:gap-4 text-xs md:text-sm">
+                                        {/* Teléfono y Nombre destacados en móvil */}
+                                        <div className="bg-blue-50/50 p-2.5 rounded-xl border border-blue-100 sm:bg-transparent sm:p-0 sm:border-0 flex justify-between items-center sm:block">
+                                            <div>
+                                                <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-tight mb-0.5">Teléfono (TT)</p>
+                                                <p className="font-bold text-gray-900 text-sm md:text-base">{cliente.no_tt}</p>
+                                            </div>
+                                            <a
+                                                href={`tel:${cliente.no_tt}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="sm:hidden p-2 bg-telmex-blue text-white rounded-full shadow-lg"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                                            </a>
                                         </div>
-                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
-                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Dirección</p>
-                                            <p className="font-medium text-gray-900 truncate">
+
+                                        <div className="p-2 sm:p-0">
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight mb-0.5">Dirección</p>
+                                            <p className="font-medium text-gray-900 truncate text-xs">
                                                 {cliente.calle} {cliente.numero_exterior ? `No. ${cliente.numero_exterior}` : ''}
-                                                {cliente.mz ? ` Mz ${cliente.mz}` : ''} {cliente.lt ? ` Lt ${cliente.lt}` : ''}
-                                                <span className="block text-[10px] text-gray-500">{cliente.colonia}</span>
+                                                <span className="block text-[10px] text-gray-400">{cliente.colonia}</span>
                                             </p>
                                         </div>
-                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
-                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Referencias</p>
+
+                                        <div className="hidden sm:block p-2 sm:p-0">
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight mb-0.5">Referencias</p>
                                             <p className="font-medium text-gray-900">R1: {cliente.no_ref}</p>
-                                            {cliente.no_ref_2 && (
-                                                <p className="text-[10px] text-gray-500">R2: {cliente.no_ref_2}</p>
-                                            )}
                                         </div>
-                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
-                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Paquete</p>
-                                            <p className="font-medium text-gray-900 truncate">{cliente.paquete}</p>
+
+                                        <div className="p-2 sm:p-0">
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight mb-0.5">Paquete</p>
+                                            <p className="font-medium text-gray-900 truncate text-xs">{cliente.paquete}</p>
                                         </div>
-                                        <div className="bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
-                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Comisión</p>
-                                            <p className="font-black text-telmex-blue text-base">{formatearMoneda(cliente.comision)}</p>
+
+                                        <div className="p-2 sm:p-0 border-t border-gray-50 mt-1 pt-2 sm:border-0 sm:mt-0 sm:pt-0 flex justify-between items-center sm:block text-gray-500">
+                                            <div className="sm:hidden">
+                                                <p className="text-gray-500 text-[9px] uppercase font-bold">Comisión</p>
+                                                <p className="font-black text-telmex-blue text-lg leading-none">{formatearMoneda(cliente.comision)}</p>
+                                            </div>
+                                            <div className="hidden sm:block">
+                                                <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Comisión</p>
+                                                <p className="font-black text-telmex-blue text-base">{formatearMoneda(cliente.comision)}</p>
+                                            </div>
+                                            <div className="sm:hidden flex items-center text-telmex-blue font-bold text-xs">
+                                                Ver detalle
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><path d="m9 18 6-6-6-6" /></svg>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -332,6 +375,14 @@ export default function ClientesPage() {
                     </Card>
                 )}
             </div>
+
+            {/* Botón Flotante (FAB) para móviles */}
+            <button
+                onClick={() => router.push('/clientes/nuevo')}
+                className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-telmex-blue text-white rounded-full shadow-2xl flex items-center justify-center z-40 active:scale-95 transition-transform"
+            >
+                <Plus size={32} />
+            </button>
 
             {/* Modal Personalizado */}
             {showModal && (

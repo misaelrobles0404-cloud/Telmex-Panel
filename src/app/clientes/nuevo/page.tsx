@@ -9,7 +9,7 @@ import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types
 import { guardarCliente } from '@/lib/storage';
 import { clasificarServicio, calcularComision, generarId } from '@/lib/utils';
 import { PAQUETES_RESIDENCIALES, PAQUETES_PYME, obtenerPaquetesPorTipo } from '@/data/paquetes';
-import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, Building2, Home as HomeIcon, UserPlus, AlertTriangle, Copy } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { obtenerConfiguracion, obtenerRequisitosVenta } from '@/lib/admin';
 
@@ -61,6 +61,10 @@ export default function NuevoClientePage() {
 
         // Notas
         notas: '',
+
+        // SIAC / Orden de Servicio
+        folioSiac: '',
+        ordenServicio: '',
     });
 
     const [loading, setLoading] = useState(false);
@@ -179,6 +183,8 @@ export default function NuevoClientePage() {
             fecha_contacto: new Date().toISOString(),
             fecha_ultima_actividad: new Date().toISOString(),
             comision: 0,
+            folio_siac: formData.folioSiac,
+            orden_servicio: formData.ordenServicio,
             notas: formData.notas,
             creado_en: new Date().toISOString(),
             actualizado_en: new Date().toISOString(),
@@ -349,21 +355,21 @@ export default function NuevoClientePage() {
                 {/* Contenido Principal - Formulario */}
                 <div className="col-span-1">
                     {/* Advertencia de Requisitos para Comisión */}
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r shadow-sm">
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-6 rounded-r shadow-sm">
                         <div className="flex items-start">
                             <div className="flex-shrink-0">
-                                <AlertTriangle className="h-6 w-6 text-yellow-600" aria-hidden="true" />
+                                <AlertTriangle className="h-5 w-5 text-yellow-600" aria-hidden="true" />
                             </div>
                             <div className="ml-3">
-                                <h3 className="text-lg font-bold text-yellow-800">
-                                    REQUISITOS OBLIGATORIOS PARA COMISIONAR
+                                <h3 className="text-sm md:text-lg font-bold text-yellow-800">
+                                    REQUISITOS COMISIÓN
                                 </h3>
-                                <div className="mt-2 text-sm text-yellow-700">
-                                    <p className="font-semibold mb-2">Asegúrate de tener las siguientes capturas:</p>
-                                    <ul className="list-decimal list-inside space-y-1 font-medium">
-                                        {requisitosVenta.map((req, idx) => (
-                                            <li key={idx}>{req}</li>
+                                <div className="mt-1 text-xs text-yellow-700">
+                                    <ul className="list-disc list-inside space-y-0.5 font-medium grid grid-cols-1 sm:grid-cols-2">
+                                        {requisitosVenta.slice(0, 4).map((req, idx) => (
+                                            <li key={idx} className="truncate">{req}</li>
                                         ))}
+                                        <li className="sm:col-span-2 text-[10px] mt-1 italic text-yellow-600">Ver lista completa en documentos...</li>
                                     </ul>
                                 </div>
                             </div>
@@ -603,7 +609,7 @@ export default function NuevoClientePage() {
                                 <CardTitle>Documentación</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <Input
                                         label="INE"
                                         value={formData.ine}
@@ -621,6 +627,47 @@ export default function NuevoClientePage() {
                                         required
                                     />
 
+                                    <div className="relative">
+                                        <Input
+                                            label="Folio SIAC"
+                                            value={formData.folioSiac}
+                                            onChange={(e) => setFormData({ ...formData, folioSiac: e.target.value })}
+                                        />
+                                        {formData.folioSiac && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(formData.folioSiac);
+                                                    alert('Folio SIAC copiado');
+                                                }}
+                                                className="absolute right-2 top-8 p-1 text-telmex-blue hover:bg-blue-50 rounded"
+                                                title="Copiar Folio SIAC"
+                                            >
+                                                <Copy size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div className="relative">
+                                        <Input
+                                            label="Orden de Servicio"
+                                            value={formData.ordenServicio}
+                                            onChange={(e) => setFormData({ ...formData, ordenServicio: e.target.value })}
+                                        />
+                                        {formData.ordenServicio && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(formData.ordenServicio);
+                                                    alert('Orden de Servicio copiada');
+                                                }}
+                                                className="absolute right-2 top-8 p-1 text-telmex-blue hover:bg-blue-50 rounded"
+                                                title="Copiar Orden de Servicio"
+                                            >
+                                                <Copy size={16} />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -800,45 +847,71 @@ export default function NuevoClientePage() {
                         {/* Notas y Campaña */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Origen y Notas</CardTitle>
+                                <CardTitle>Notas adicionales</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+                            <CardContent>
                                 <Textarea
-                                    label="Notas adicionales"
+                                    label="Observaciones"
                                     value={formData.notas}
                                     onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                                    placeholder="Información adicional sobre el cliente..."
                                 />
                             </CardContent>
                         </Card>
 
-                        {/* Botones */}
-                        <div className="flex gap-1.5 sm:gap-4 justify-end items-center mt-6">
+                        {/* Espacio para que el sticky footer no tape contenido */}
+                        <div className="h-20 md:hidden" />
+
+                        {/* Botones de Acción Desktop */}
+                        <div className="hidden md:flex gap-4 justify-end items-center mt-10">
                             <Button
                                 type="button"
                                 variant="ghost"
                                 onClick={() => router.back()}
-                                className="text-gray-500 hover:text-gray-700 text-[11px] sm:text-sm px-2 sm:px-4"
+                                className="text-gray-500 hover:text-gray-700"
                             >
                                 Cancelar
                             </Button>
-
                             <Button
                                 type="button"
+                                variant="outline"
                                 onClick={() => handleGuardarProspecto()}
-                                className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-[10px] sm:text-sm px-2 sm:px-4 py-2"
+                                className="text-telmex-blue border-telmex-blue"
+                                disabled={loading}
                             >
-                                <UserPlus size={14} className="sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-                                GUARDAR PROSPECTO
+                                <UserPlus size={18} className="mr-2" />
+                                GUARDAR COMO PROSPECTO
                             </Button>
-
                             <Button
                                 type="submit"
                                 variant="primary"
-                                className="text-[10px] sm:text-sm px-2 sm:px-4 py-2"
+                                className="px-8 py-3"
+                                disabled={loading}
                             >
-                                <Save size={14} className="sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-                                GUARDAR CLIENTE
+                                <Save size={20} className="mr-2" />
+                                {loading ? 'REGISTRANDO...' : 'REGISTRAR CLIENTE'}
+                            </Button>
+                        </div>
+
+                        {/* Sticky Footer Mobile */}
+                        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex gap-2 z-40 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => handleGuardarProspecto()}
+                                className="flex-1 text-[10px] h-12 uppercase font-black tracking-tighter"
+                                disabled={loading}
+                            >
+                                <UserPlus size={16} className="mb-1 block mx-auto" />
+                                PROSPECTO
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                className="flex-[2] h-12 text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-200"
+                                disabled={loading}
+                            >
+                                <Save size={18} className="mr-2 inline-block" />
+                                {loading ? 'REGISTRANDO...' : 'REGISTRAR'}
                             </Button>
                         </div>
                     </form>

@@ -102,7 +102,7 @@ export function BossDashboardView({ clientes, perfiles }: BossDashboardViewProps
         try {
             const clienteActualizado: Cliente = {
                 ...cliente,
-                estado_pipeline: 'sin_cobertura',
+                estado_pipeline: 'cancelado',
                 actualizado_en: new Date().toISOString(),
                 actividades: [
                     {

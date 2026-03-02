@@ -6,10 +6,10 @@ import { Input, Select, Textarea } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types';
-import { guardarCliente, obtenerCliente } from '@/lib/storage';
+import { guardarCliente, obtenerCliente, obtenerEstadoPortal, liberarPortalGlobal } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 import { calcularComision } from '@/lib/utils';
-import { ArrowLeft, Save, Building2, Home as HomeIcon } from 'lucide-react';
+import { ArrowLeft, Save, Building2, Home as HomeIcon, Copy } from 'lucide-react';
 import { obtenerConfiguracion } from '@/lib/admin';
 
 export default function EditarClientePage({ params }: { params: { id: string } }) {
@@ -66,8 +66,9 @@ export default function EditarClientePage({ params }: { params: { id: string } }
         // Notas
         notas: '',
 
-        // SIAC
+        // SIAC / Orden de Servicio
         folioSiac: '',
+        ordenServicio: '',
     });
 
     const [clienteId, setClienteId] = useState('');
@@ -133,6 +134,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     notas: cliente.notas,
 
                     folioSiac: cliente.folio_siac || '',
+                    ordenServicio: cliente.orden_servicio || '',
                 });
             }
 
@@ -245,12 +247,34 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             creado_en: fechaCreacion,
             actualizado_en: new Date().toISOString(),
             folio_siac: formData.folioSiac,
+            orden_servicio: formData.ordenServicio,
         };
 
         console.log('Enviando actualización de cliente:', clienteActualizado);
 
         try {
             await guardarCliente(clienteActualizado);
+
+            // Lógica de liberación de clave del portal
+            if (formData.folioSiac && formData.folioSiac.trim() !== '') {
+                try {
+                    const estado = await obtenerEstadoPortal();
+                    const nombreUsuario = user?.user_metadata?.nombre_completo || user?.email || 'Usuario';
+
+                    // Si el portal está en uso por el usuario actual
+                    if (estado.en_uso_por === nombreUsuario) {
+                        const quiereLiberar = window.confirm('✅ Folio SIAC guardado.\n\n¿Ya terminaste el proceso en el portal?\n¿Deseas LIBERAR la clave ahora para que otros puedan usarla?');
+
+                        if (quiereLiberar) {
+                            await liberarPortalGlobal();
+                            alert('🔓 Clave liberada correctamente.');
+                        }
+                    }
+                } catch (portalError) {
+                    console.error('Error en lógica de portal:', portalError);
+                }
+            }
+
             alert('Cliente actualizado correctamente');
             router.push(`/clientes/${params.id}`);
         } catch (error: any) {
@@ -382,7 +406,48 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 placeholder="Solo números"
                             />
                             <Input label="CURP" value={formData.curp} onChange={(e) => setFormData({ ...formData, curp: e.target.value })} required />
-                            <Input label="Folio SIAC" value={formData.folioSiac} onChange={(e) => setFormData({ ...formData, folioSiac: e.target.value })} />
+
+                            <div className="relative">
+                                <Input
+                                    label="Folio SIAC"
+                                    value={formData.folioSiac}
+                                    onChange={(e) => setFormData({ ...formData, folioSiac: e.target.value })}
+                                />
+                                {formData.folioSiac && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(formData.folioSiac);
+                                            alert('Folio SIAC copiado');
+                                        }}
+                                        className="absolute right-2 top-8 p-1 text-telmex-blue hover:bg-blue-50 rounded"
+                                        title="Copiar Folio SIAC"
+                                    >
+                                        <Copy size={16} />
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="relative">
+                                <Input
+                                    label="Orden de Servicio"
+                                    value={formData.ordenServicio}
+                                    onChange={(e) => setFormData({ ...formData, ordenServicio: e.target.value })}
+                                />
+                                {formData.ordenServicio && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(formData.ordenServicio);
+                                            alert('Orden de Servicio copiada');
+                                        }}
+                                        className="absolute right-2 top-8 p-1 text-telmex-blue hover:bg-blue-50 rounded"
+                                        title="Copiar Orden de Servicio"
+                                    >
+                                        <Copy size={16} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
