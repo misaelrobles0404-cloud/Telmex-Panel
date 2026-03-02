@@ -235,6 +235,8 @@ export default function NuevoClientePage() {
             cartaBaja: false,
             estadoCuentaMegacable: false,
             notas: '',
+            folioSiac: '',
+            ordenServicio: '',
         });
         localStorage.removeItem('nuevo_cliente_borrador');
     };
