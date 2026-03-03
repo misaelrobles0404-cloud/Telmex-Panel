@@ -7,6 +7,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { FacebookPixelWrapper } from '@/components/FacebookPixelWrapper';
 import { PerfilOnboarding } from '@/components/PerfilOnboarding';
 import { AppInstallPrompt } from '@/components/AppInstallPrompt';
+import { NotifyProvider } from '@/components/NotifyProvider';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -19,28 +20,30 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     }, [pathname]);
 
     return (
-        <div className="flex h-screen overflow-hidden bg-gray-50">
-            {!isLoginPage && (
-                <Sidebar
-                    isOpen={isSidebarOpen}
-                    onClose={() => setIsSidebarOpen(false)}
-                />
-            )}
-
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <NotifyProvider>
+            <div className="flex h-screen overflow-hidden bg-gray-50">
                 {!isLoginPage && (
-                    <MobileHeader onMenuClick={() => setIsSidebarOpen(true)} />
+                    <Sidebar
+                        isOpen={isSidebarOpen}
+                        onClose={() => setIsSidebarOpen(false)}
+                    />
                 )}
 
-                <main className={`flex-1 overflow-y-auto w-full ${!isLoginPage ? '' : ''}`}>
-                    <div className="max-w-7xl mx-auto">
-                        {children}
-                    </div>
-                </main>
+                <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                    {!isLoginPage && (
+                        <MobileHeader onMenuClick={() => setIsSidebarOpen(true)} />
+                    )}
+
+                    <main className={`flex-1 overflow-y-auto w-full ${!isLoginPage ? '' : ''}`}>
+                        <div className="max-w-7xl mx-auto">
+                            {children}
+                        </div>
+                    </main>
+                </div>
+                <FacebookPixelWrapper />
+                <PerfilOnboarding />
+                <AppInstallPrompt />
             </div>
-            <FacebookPixelWrapper />
-            <PerfilOnboarding />
-            <AppInstallPrompt />
-        </div>
+        </NotifyProvider>
     );
 }
