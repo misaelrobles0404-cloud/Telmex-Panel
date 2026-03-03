@@ -11,7 +11,6 @@ import { obtenerClientes } from '@/lib/storage';
 import { formatearMoneda, formatearFecha } from '@/lib/utils';
 import { Plus, Search, Filter, Trash2, AlertTriangle, Link } from 'lucide-react';
 import { eliminarClientesMasivos } from '@/lib/storage';
-import { crearSolicitudDocumentos } from '@/lib/solicitudes';
 import { Modal } from '@/components/ui/Modal';
 
 export default function ClientesPage() {
@@ -25,10 +24,6 @@ export default function ClientesPage() {
     });
     const [filtroEstado, setFiltroEstado] = useState<string>('todos');
     const [loading, setLoading] = useState(true);
-    const [modalGenerarLink, setModalGenerarLink] = useState(false);
-    const [tipoServicioLink, setTipoServicioLink] = useState<'linea_nueva' | 'portabilidad'>('linea_nueva');
-    const [generandoLink, setGenerandoLink] = useState(false);
-    const [linkGenerado, setLinkGenerado] = useState('');
 
     const [showModal, setShowModal] = useState(false);
     const [modalConfig, setModalConfig] = useState<{
@@ -177,16 +172,7 @@ export default function ClientesPage() {
                         <Trash2 size={16} className="md:mr-2" />
                         <span className="hidden md:inline">Limpieza</span>
                     </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => { setLinkGenerado(''); setModalGenerarLink(true); }}
-                        className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 text-xs md:text-sm"
-                    >
-                        <Link size={16} className="md:mr-2" />
-                        <span className="hidden md:inline">Generar Link</span>
-                        <span className="md:hidden">Link</span>
-                    </Button>
+
                     <Button
                         variant="primary"
                         size="sm"
@@ -445,128 +431,6 @@ export default function ClientesPage() {
                 </div>
             )}
 
-            {/* Modal Generar Link sin cliente previo */}
-            <Modal
-                isOpen={modalGenerarLink}
-                onClose={() => setModalGenerarLink(false)}
-                title="🔗 Generar Link para Cliente"
-                size="md"
-            >
-                <div className="p-4 space-y-5">
-                    {!linkGenerado ? (
-                        <>
-                            <p className="text-sm text-gray-600">
-                                Genera un link seguro para que tu cliente suba sus documentos. Cuando lo envíe, se creará automáticamente como nuevo prospecto en tu panel.
-                            </p>
-                            <div>
-                                <p className="text-sm font-bold text-gray-700 mb-2">Tipo de servicio</p>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button
-                                        onClick={() => setTipoServicioLink('linea_nueva')}
-                                        className={`p-4 rounded-xl border-2 text-left transition-all ${tipoServicioLink === 'linea_nueva' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
-                                    >
-                                        <p className="font-bold text-sm text-gray-800">📱 Línea Nueva</p>
-                                        <p className="text-xs text-gray-500 mt-1">INE por ambos lados</p>
-                                    </button>
-                                    <button
-                                        onClick={() => setTipoServicioLink('portabilidad')}
-                                        className={`p-4 rounded-xl border-2 text-left transition-all ${tipoServicioLink === 'portabilidad' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'}`}
-                                    >
-                                        <p className="font-bold text-sm text-gray-800">🔄 Portabilidad</p>
-                                        <p className="text-xs text-gray-500 mt-1">INE + Estado de cuenta</p>
-                                    </button>
-                                </div>
-                            </div>
-                            <button
-                                disabled={generandoLink}
-                                onClick={async () => {
-                                    setGenerandoLink(true);
-                                    try {
-                                        const { data: { user } } = await supabase.auth.getUser();
-                                        if (!user) throw new Error('Sesión expirada. Recarga la página.');
-
-                                        // 1. Crear prospecto esqueleto AHORA (promotor autenticado → sin problemas de RLS)
-                                        const { data: nuevoCliente, error: insertErr } = await supabase
-                                            .from('clientes')
-                                            .insert({
-                                                user_id: user.id,
-                                                nombre: 'PROSPECTO PENDIENTE',
-                                                tipo_servicio: tipoServicioLink,
-                                                tipo_cliente: 'residencial',
-                                                estado_pipeline: 'prospecto',
-                                                no_tt: '',
-                                                no_ref: '',
-                                                correo: '',
-                                                calle: '',
-                                                colonia: '',
-                                                cp: '',
-                                                cd: '',
-                                                estado: '',
-                                                entre_calle_1: '',
-                                                entre_calle_2: '',
-                                                ine: '',
-                                                curp: '',
-                                                usuario: user.email || '',
-                                                usuario_portal_asignado: '',
-                                                paquete: 'POR DEFINIR',
-                                                clave_paquete: '',
-                                                velocidad: 0,
-                                                precio_mensual: 0,
-                                                tiene_internet: false,
-                                                tiene_telefono_fijo: false,
-                                                comision: 0,
-                                                fecha_contacto: new Date().toISOString(),
-                                                fecha_ultima_actividad: new Date().toISOString(),
-                                                creado_en: new Date().toISOString(),
-                                                actualizado_en: new Date().toISOString(),
-                                            })
-                                            .select('id')
-                                            .single();
-
-                                        if (insertErr) throw insertErr;
-
-                                        // 2. Generar link con el ID del prospecto ya creado
-                                        const url = await crearSolicitudDocumentos(
-                                            nuevoCliente.id,  // ← cliente_id real
-                                            tipoServicioLink,
-                                            user.email || ''
-                                        );
-                                        setLinkGenerado(url);
-                                        navigator.clipboard.writeText(url);
-                                    } catch (e: any) {
-                                        alert(`Error: ${e.message}`);
-                                    } finally {
-                                        setGenerandoLink(false);
-                                    }
-                                }}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-60"
-                            >
-                                {generandoLink ? '⏳ Generando...' : '🔗 Generar y Copiar Link'}
-                            </button>
-                        </>
-                    ) : (
-                        <div className="space-y-4">
-                            <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                                <p className="text-green-700 font-bold text-sm mb-1">✅ Link copiado al portapapeles</p>
-                                <p className="text-xs text-gray-500 break-all">{linkGenerado}</p>
-                            </div>
-                            <p className="text-sm text-gray-600 text-center">Manda este link a tu cliente por WhatsApp. Cuando llene el formulario y suba sus documentos, aparecerá automáticamente en tu lista de clientes.</p>
-                            <button
-                                onClick={() => navigator.clipboard.writeText(linkGenerado)}
-                                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-all active:scale-95"
-                            >
-                                📋 Copiar link de nuevo
-                            </button>
-                            <button
-                                onClick={() => { setLinkGenerado(''); }}
-                                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all"
-                            >
-                                Generar otro link
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </Modal>
         </div>
     );
 }
