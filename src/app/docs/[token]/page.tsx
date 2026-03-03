@@ -210,20 +210,8 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                 estado_cuenta_url: estadoCuentaUrl,
             });
 
-            // Crear o actualizar prospecto vía RPC (con permisos correctos para anon)
-            try {
-                const { data: rpcResult, error: rpcError } = await supabase.rpc('crear_prospecto_desde_portal', {
-                    p_nombre: nombre.trim().toUpperCase(),
-                    p_no_tt: noTitular.trim(),
-                    p_no_ref: noReferencia.trim(),
-                    p_correo: correo.trim().toLowerCase(),
-                    p_tipo_servicio: solicitud.tipo_servicio,
-                    p_promotor_email: solicitud.promotor_email,
-                    p_cliente_id: solicitud.cliente_id || null,
-                });
-                if (rpcError) console.error('RPC error:', rpcError.message);
-                else if (rpcResult?.ok === false) console.error('RPC sin éxito:', rpcResult.error);
-            } catch (e) { console.warn('Error creando prospecto:', e); }
+            // El trigger en la BD crea el prospecto automáticamente
+            // cuando el estado cambia a 'completado' en completarSolicitud()
 
             setProgreso(100);
             setEnviado(true);
