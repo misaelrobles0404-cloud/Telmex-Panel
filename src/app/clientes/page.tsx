@@ -491,10 +491,39 @@ export default function ClientesPage() {
                                     setGenerandoLink(true);
                                     try {
                                         const { data: { user } } = await supabase.auth.getUser();
+                                        if (!user) throw new Error('Sesión expirada. Recarga la página.');
+
+                                        // 1. Crear prospecto esqueleto AHORA (promotor autenticado → sin problemas de RLS)
+                                        const { data: nuevoCliente, error: insertErr } = await supabase
+                                            .from('clientes')
+                                            .insert({
+                                                nombre: 'PROSPECTO PENDIENTE',
+                                                tipo_servicio: tipoServicioLink,
+                                                estado_pipeline: 'prospecto',
+                                                user_id: user.id,
+                                                creado_en: new Date().toISOString(),
+                                                actualizado_en: new Date().toISOString(),
+                                                actividades: [],
+                                                documentos: [],
+                                                no_tt: '',
+                                                no_ref: '',
+                                                correo: '',
+                                                paquete: 'POR DEFINIR',
+                                                precio_mensual: 0,
+                                                velocidad: 0,
+                                                comision: 0,
+                                                calle: 'PENDIENTE',
+                                            })
+                                            .select('id')
+                                            .single();
+
+                                        if (insertErr) throw insertErr;
+
+                                        // 2. Generar link con el ID del prospecto ya creado
                                         const url = await crearSolicitudDocumentos(
-                                            null,  // sin cliente previo
+                                            nuevoCliente.id,  // ← cliente_id real
                                             tipoServicioLink,
-                                            user?.email || ''
+                                            user.email || ''
                                         );
                                         setLinkGenerado(url);
                                         navigator.clipboard.writeText(url);
