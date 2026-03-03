@@ -28,7 +28,8 @@ export function PerfilOnboarding() {
 
                 if (error) {
                     console.error("Error al verificar perfil:", error);
-                    // Si hay error de permiso o tabla, no bloqueamos pero lo registramos
+                    // Si hay error de permiso, lo más seguro es pedir el nombre
+                    setShowModal(true);
                     return;
                 }
 
