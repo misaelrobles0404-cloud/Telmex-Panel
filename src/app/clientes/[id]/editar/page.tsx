@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types';
 import { guardarCliente, obtenerCliente, obtenerEstadoPortal, liberarPortalGlobal } from '@/lib/storage';
-import { crearSolicitudDocumentos, obtenerSolicitudPorCliente, SolicitudDocumentos } from '@/lib/solicitudes';
+import { crearSolicitudDocumentos, obtenerSolicitudPorCliente, SolicitudDocumentos, subirCapturaPromotor, guardarCapturasProceso, obtenerCapturasProceso, CapturasProceso } from '@/lib/solicitudes';
 import { supabase } from '@/lib/supabase';
 import { calcularComision } from '@/lib/utils';
 import { ArrowLeft, Save, Building2, Home as HomeIcon, Copy, Link2, CheckCircle2, Clock } from 'lucide-react';
@@ -84,6 +84,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
     const [generandoLink, setGenerandoLink] = useState(false);
     const [linkCopiado, setLinkCopiado] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [capturasProceso, setCapturasProceso] = useState<CapturasProceso | null>(null);
+    const [subiendoCaptura, setSubiendoCaptura] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchCliente = async () => {
@@ -163,6 +165,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             try {
                 const sol = await obtenerSolicitudPorCliente(params.id);
                 setSolicitudDocs(sol);
+                const caps = await obtenerCapturasProceso(params.id);
+                setCapturasProceso(caps);
             } catch { /* no bloqueante */ }
         };
         fetchCliente();
@@ -519,6 +523,96 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 )}
                             </div>
                         )}
+                    </CardContent>
+                </Card>
+
+                {/* Capturas del Proceso (Promotor) */}
+                <Card className="border-l-4 border-l-purple-500">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            📸 Capturas del Proceso
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-xs text-gray-500 mb-4">
+                            Sube las capturas que tomas durante el proceso en el portal. Se guardan automáticamente al seleccionar cada imagen.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {[
+                                { key: 'captura_paquete_url', label: '📦 Paquete en Portal', hint: 'Captura del paquete seleccionado' },
+                                { key: 'captura_mapa_url', label: '🗺️ Mapa en Portal', hint: 'Captura del mapa/cobertura' },
+                                { key: 'captura_siac_url', label: '🆔 Folio SIAC', hint: 'Captura del folio SIAC generado' },
+                                { key: 'captura_si_chat_url', label: '✅ Sí Acepto en Chat', hint: 'Captura de la aceptación del cliente' },
+                            ].map(({ key, label, hint }) => {
+                                const url = capturasProceso?.[key as keyof CapturasProceso] as string | undefined;
+                                const estaSub = subiendoCaptura === key;
+                                return (
+                                    <div key={key} className="space-y-1">
+                                        <label className="text-xs font-bold text-gray-700">{label}</label>
+                                        <p className="text-[10px] text-gray-400">{hint}</p>
+                                        <div
+                                            className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-colors ${url ? 'border-purple-200 bg-purple-50/30' : 'border-gray-200 bg-gray-50 hover:border-purple-300 hover:bg-purple-50/20'
+                                                }`}
+                                            style={{ minHeight: 80 }}
+                                            onClick={() => {
+                                                const input = document.createElement('input');
+                                                input.type = 'file';
+                                                input.accept = 'image/*';
+                                                input.onchange = async (ev) => {
+                                                    const file = (ev.target as HTMLInputElement).files?.[0];
+                                                    if (!file || !currentUser) return;
+                                                    setSubiendoCaptura(key);
+                                                    try {
+                                                        const uploadedUrl = await subirCapturaPromotor(clienteId, file, key);
+                                                        const nuevasCapt: CapturasProceso = {
+                                                            ...(capturasProceso || { cliente_id: clienteId, promotor_email: currentUser.email || '' }),
+                                                            cliente_id: clienteId,
+                                                            promotor_email: currentUser.email || '',
+                                                            [key]: uploadedUrl,
+                                                        };
+                                                        await guardarCapturasProceso(nuevasCapt);
+                                                        setCapturasProceso(nuevasCapt);
+                                                    } catch (e: any) {
+                                                        alert(`Error al subir: ${e.message}`);
+                                                    } finally {
+                                                        setSubiendoCaptura(null);
+                                                    }
+                                                };
+                                                input.click();
+                                            }}
+                                        >
+                                            {estaSub ? (
+                                                <div className="flex items-center justify-center gap-2 h-20 text-purple-600 text-xs font-bold">
+                                                    <div className="w-4 h-4 border-2 border-purple-300 border-t-purple-600 rounded-full animate-spin" />
+                                                    Subiendo...
+                                                </div>
+                                            ) : url ? (
+                                                <div className="relative">
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                    <img src={url} alt={label} className="w-full max-h-32 object-cover" />
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
+                                                        <span className="text-white text-xs font-bold bg-black/60 px-2 py-1 rounded">Tocar para cambiar</span>
+                                                    </div>
+                                                    <div className="absolute top-1 right-1">
+                                                        <CheckCircle2 size={16} className="text-green-400 drop-shadow" />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center gap-1 h-20 text-gray-400">
+                                                    <span className="text-2xl">📷</span>
+                                                    <span className="text-[10px] font-medium">Tocar para subir</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {url && (
+                                            <a href={url} target="_blank" rel="noreferrer" className="text-[10px] text-purple-600 hover:underline">
+                                                Ver imagen completa ↗
+                                            </a>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </CardContent>
                 </Card>
 

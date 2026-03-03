@@ -140,3 +140,72 @@ export async function completarSolicitud(
 
     if (error) throw error;
 }
+
+// ============================================
+// CAPTURAS DEL PROCESO (Promotor)
+// ============================================
+
+export interface CapturasProceso {
+    id?: string;
+    cliente_id: string;
+    promotor_email: string;
+    captura_paquete_url?: string;
+    captura_mapa_url?: string;
+    captura_siac_url?: string;
+    captura_si_chat_url?: string;
+    creado_en?: string;
+    actualizado_en?: string;
+}
+
+/**
+ * Sube una captura del proceso (del promotor) al bucket y devuelve URL firmada.
+ */
+export async function subirCapturaPromotor(
+    clienteId: string,
+    archivo: File,
+    nombre: string
+): Promise<string> {
+    const extension = archivo.name.split('.').pop() || 'jpg';
+    const path = `promotor/${clienteId}/${nombre}.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('documentos-clientes')
+        .upload(path, archivo, { upsert: true });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = await supabase.storage
+        .from('documentos-clientes')
+        .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 días
+
+    return data?.signedUrl || '';
+}
+
+/**
+ * Guarda o actualiza las capturas del proceso de un cliente.
+ */
+export async function guardarCapturasProceso(
+    capturas: CapturasProceso
+): Promise<void> {
+    const { error } = await supabase
+        .from('capturas_proceso_cliente')
+        .upsert(capturas, { onConflict: 'cliente_id' });
+
+    if (error) throw error;
+}
+
+/**
+ * Obtiene las capturas del proceso de un cliente.
+ */
+export async function obtenerCapturasProceso(
+    clienteId: string
+): Promise<CapturasProceso | null> {
+    const { data, error } = await supabase
+        .from('capturas_proceso_cliente')
+        .select('*')
+        .eq('cliente_id', clienteId)
+        .maybeSingle();
+
+    if (error) throw error;
+    return data;
+}
