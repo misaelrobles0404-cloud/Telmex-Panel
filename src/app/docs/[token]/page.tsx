@@ -210,43 +210,20 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                 estado_cuenta_url: estadoCuentaUrl,
             });
 
-            // Autocompletar o crear prospecto
+            // Autocompletar o crear prospecto vía RPC (bypasea RLS)
             try {
-                if (solicitud.cliente_id) {
-                    // Link generado desde un cliente existente → actualizar sus datos
-                    await supabase.from('clientes').update({
-                        nombre: nombre.trim().toUpperCase(),
-                        no_tt: noTitular.trim(),
-                        no_ref: noReferencia.trim(),
-                        correo: correo.trim().toLowerCase(),
-                        actualizado_en: new Date().toISOString(),
-                    }).eq('id', solicitud.cliente_id);
-                } else {
-                    // Link generado sin cliente previo → crear nuevo prospecto
-                    const { data: userProfile } = await supabase
-                        .from('perfiles')
-                        .select('id')
-                        .eq('email', solicitud.promotor_email)
-                        .maybeSingle();
+                const { error: rpcError } = await supabase.rpc('crear_prospecto_desde_portal', {
+                    p_nombre: nombre.trim().toUpperCase(),
+                    p_no_tt: noTitular.trim(),
+                    p_no_ref: noReferencia.trim(),
+                    p_correo: correo.trim().toLowerCase(),
+                    p_tipo_servicio: solicitud.tipo_servicio,
+                    p_promotor_email: solicitud.promotor_email,
+                    p_cliente_id: solicitud.cliente_id || null
+                });
 
-                    await supabase.from('clientes').insert({
-                        nombre: nombre.trim().toUpperCase(),
-                        no_tt: noTitular.trim(),
-                        no_ref: noReferencia.trim(),
-                        correo: correo.trim().toLowerCase(),
-                        tipo_servicio: solicitud.tipo_servicio,
-                        estado_pipeline: 'prospecto',
-                        user_id: userProfile?.id || solicitud.promotor_email,
-                        creado_en: new Date().toISOString(),
-                        actualizado_en: new Date().toISOString(),
-                        actividades: [],
-                        documentos: [],
-                        paquete: 'POR DEFINIR',
-                        precio_mensual: 0,
-                        velocidad: 0,
-                        comision: 0,
-                        calle: 'PENDIENTE',
-                    });
+                if (rpcError) {
+                    console.error('Error en RPC crear_prospecto:', rpcError);
                 }
             } catch (e) { console.warn('Auto-prospecto error:', e); }
 
