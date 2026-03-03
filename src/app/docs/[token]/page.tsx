@@ -102,6 +102,17 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
     const [noReferencia, setNoReferencia] = useState('');
     const [correo, setCorreo] = useState('');
 
+    // Domicilio de instalación
+    const [calle, setCalle] = useState('');
+    const [colonia, setColonia] = useState('');
+    const [cp, setCp] = useState('');
+    const [cd, setCd] = useState('');
+    const [estadoDomicilio, setEstadoDomicilio] = useState('');
+    const [entreCalle1, setEntreCalle1] = useState('');
+    const [entreCalle2, setEntreCalle2] = useState('');
+    const [mz, setMz] = useState('');
+    const [lt, setLt] = useState('');
+
     const [ineFrente, setIneFrente] = useState<File | null>(null);
     const [ineFrentePreview, setIneFrentePreview] = useState<string | null>(null);
     const [ineReverso, setIneReverso] = useState<File | null>(null);
@@ -153,7 +164,11 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
 
         // Validaciones
         if (!nombre.trim() || !noTitular.trim() || !noReferencia.trim() || !correo.trim()) {
-            alert('Por favor completa todos los campos obligatorios.');
+            alert('Por favor completa todos los campos obligatorios de Datos Personales.');
+            return;
+        }
+        if (!calle.trim() || !colonia.trim() || !cp.trim() || !cd.trim() || !estadoDomicilio.trim()) {
+            alert('Por favor completa todos los campos obligatorios del Domicilio de Instalación.');
             return;
         }
         if (!ineFrente || !ineReverso) {
@@ -205,6 +220,15 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                 no_titular: noTitular.trim(),
                 no_referencia: noReferencia.trim(),
                 correo: correo.trim().toLowerCase(),
+                calle: calle.trim().toUpperCase(),
+                colonia: colonia.trim().toUpperCase(),
+                cp: cp.trim(),
+                cd: cd.trim().toUpperCase(),
+                estado_domicilio: estadoDomicilio.trim().toUpperCase(),
+                entre_calle_1: entreCalle1.trim().toUpperCase() || undefined,
+                entre_calle_2: entreCalle2.trim().toUpperCase() || undefined,
+                mz: mz.trim().toUpperCase() || undefined,
+                lt: lt.trim().toUpperCase() || undefined,
                 ine_frente_url: ineFrenteUrl,
                 ine_reverso_url: ineReversoUrl,
                 estado_cuenta_url: estadoCuentaUrl,
@@ -376,6 +400,129 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                             {correo.length > 3 && !correo.includes('@') && (
                                 <p className="text-xs text-red-500 mt-1">El correo debe contener @</p>
                             )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Domicilio de Instalación */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="bg-gray-50 px-5 py-4 border-b border-gray-100">
+                        <h2 className="font-black text-gray-800 text-sm uppercase tracking-wider">Domicilio de Instalación</h2>
+                        <p className="text-xs text-gray-500 mt-1">¿Dónde se instalará el servicio?</p>
+                    </div>
+                    <div className="p-5 space-y-4">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                                Calle y Número <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={calle}
+                                onChange={e => setCalle(e.target.value.toUpperCase())}
+                                placeholder="Ej. Av. Reforma 222 Int 3"
+                                className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">MZ (Opcional)</label>
+                                <input
+                                    type="text"
+                                    value={mz}
+                                    onChange={e => setMz(e.target.value.toUpperCase())}
+                                    placeholder="Manzana"
+                                    className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">LT (Opcional)</label>
+                                <input
+                                    type="text"
+                                    value={lt}
+                                    onChange={e => setLt(e.target.value.toUpperCase())}
+                                    placeholder="Lote"
+                                    className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                                Colonia <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={colonia}
+                                onChange={e => setColonia(e.target.value.toUpperCase())}
+                                placeholder="Colonia o Fraccionamiento"
+                                className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                                    Código Postal <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    maxLength={5}
+                                    value={cp}
+                                    onChange={e => setCp(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                                    placeholder="12345"
+                                    className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                                    Ciudad / Municipio <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={cd}
+                                    onChange={e => setCd(e.target.value.toUpperCase())}
+                                    placeholder="Ciudad"
+                                    className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                                Estado <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={estadoDomicilio}
+                                onChange={e => setEstadoDomicilio(e.target.value.toUpperCase())}
+                                placeholder="Estado de la República"
+                                className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Entre Calle 1 (Opcional)</label>
+                                <input
+                                    type="text"
+                                    value={entreCalle1}
+                                    onChange={e => setEntreCalle1(e.target.value.toUpperCase())}
+                                    placeholder="Cruza con..."
+                                    className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Entre Calle 2 (Opcional)</label>
+                                <input
+                                    type="text"
+                                    value={entreCalle2}
+                                    onChange={e => setEntreCalle2(e.target.value.toUpperCase())}
+                                    placeholder="Y cruza con..."
+                                    className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
