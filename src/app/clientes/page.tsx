@@ -166,44 +166,36 @@ export default function ClientesPage() {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={handleLimpieza}
-                        className="hidden sm:flex text-red-600 border-red-200 hover:bg-red-50 text-xs md:text-sm"
+                        className="text-red-600 border-red-200 hover:bg-red-50 text-xs md:text-sm"
                         title="Eliminar clientes antiguos (> 1 mes)"
                     >
-                        <Trash2 size={16} className="mr-2" />
-                        Limpieza
+                        <Trash2 size={16} className="md:mr-2" />
+                        <span className="hidden md:inline">Limpieza</span>
                     </Button>
                     <Button
                         variant="secondary"
                         size="sm"
                         onClick={() => { setLinkGenerado(''); setModalGenerarLink(true); }}
-                        className="hidden sm:flex text-green-700 border-green-200 bg-green-50 hover:bg-green-100 text-xs md:text-sm"
+                        className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 text-xs md:text-sm"
                     >
-                        <Link size={16} className="mr-2" />
-                        Generar Link
+                        <Link size={16} className="md:mr-2" />
+                        <span className="hidden md:inline">Generar Link</span>
+                        <span className="md:hidden">Link</span>
                     </Button>
                     <Button
                         variant="primary"
                         size="sm"
                         onClick={() => router.push('/clientes/nuevo')}
-                        className="hidden sm:flex text-xs md:text-sm"
+                        className="text-xs md:text-sm"
                     >
-                        <Plus size={16} className="mr-2" />
-                        Nuevo Cliente
-                    </Button>
-
-                    {/* Botón Limpieza móvil (solo icono) */}
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleLimpieza}
-                        className="sm:hidden text-red-600 border-red-200 p-2"
-                    >
-                        <Trash2 size={18} />
+                        <Plus size={16} className="md:mr-2" />
+                        <span className="hidden md:inline">Nuevo Cliente</span>
+                        <span className="md:hidden">Nuevo</span>
                     </Button>
                 </div>
             </div>
