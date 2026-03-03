@@ -6,10 +6,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Cliente, Actividad, Documento, EstadoPipeline } from '@/types';
 import { obtenerClientes, obtenerCliente, guardarCliente, eliminarCliente } from '@/lib/storage';
-import { obtenerSolicitudPorCliente, obtenerCapturasProceso, SolicitudDocumentos, CapturasProceso } from '@/lib/solicitudes';
+import { obtenerSolicitudPorCliente, obtenerCapturasProceso, guardarCapturasProceso, subirCapturaPromotor, SolicitudDocumentos, CapturasProceso } from '@/lib/solicitudes';
 import { supabase } from '@/lib/supabase';
 import { formatearMoneda, formatearFecha, formatearFechaHora, generarId } from '@/lib/utils';
-import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle, Copy, Save } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle, Copy, Save, Camera, Upload, Check } from 'lucide-react';
 import { Textarea } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { DocumentManager } from '@/components/DocumentManager';
@@ -30,6 +30,7 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
     const [solicitudDocs, setSolicitudDocs] = useState<SolicitudDocumentos | null>(null);
     const [capturasProceso, setCapturasProceso] = useState<CapturasProceso | null>(null);
+    const [subiendoCaptura, setSubiendoCaptura] = useState<string | null>(null);
 
     const mostrarToast = (message: string) => {
         setToast({ message, isVisible: true });
@@ -840,6 +841,80 @@ Acepta el servicio?`;
                                 >
                                     <FileText size={16} /> Gestionar Documentos
                                 </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* ── Capturas del Proceso (Promotor) ── */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Camera size={18} className="text-telmex-blue" />
+                                Capturas del Proceso
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 gap-3">
+                                {([
+                                    { key: 'captura_paquete_url', label: '📦 Paquete' },
+                                    { key: 'captura_mapa_url', label: '🗺️ Mapa' },
+                                    { key: 'captura_siac_url', label: '📋 SIAC' },
+                                    { key: 'captura_siac_chat_url', label: '💬 Chat SIAC' },
+                                    { key: 'captura_cobertura_url', label: '📡 Cobertura' },
+                                    { key: 'captura_si_chat_url', label: '✅ SI Aceptado' },
+                                ] as { key: keyof CapturasProceso; label: string }[]).map(({ key, label }) => {
+                                    const url = capturasProceso?.[key] as string | undefined;
+                                    const subiendo = subiendoCaptura === key;
+                                    return (
+                                        <label
+                                            key={key}
+                                            className={`relative flex flex-col items-center justify-center gap-1 p-3 rounded-xl border-2 cursor-pointer transition-all ${url
+                                                    ? 'border-green-400 bg-green-50'
+                                                    : 'border-dashed border-gray-300 bg-gray-50 hover:border-telmex-blue hover:bg-blue-50'
+                                                }`}
+                                            title={url ? 'Cambiar imagen' : 'Subir imagen'}
+                                        >
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                disabled={subiendo}
+                                                onChange={async (e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (!file || !cliente) return;
+                                                    setSubiendoCaptura(key);
+                                                    try {
+                                                        const url = await subirCapturaPromotor(cliente.id, file, key.replace('_url', ''));
+                                                        const nuevasCapturas: CapturasProceso = {
+                                                            ...capturasProceso,
+                                                            cliente_id: cliente.id,
+                                                            promotor_email: cliente.usuario || '',
+                                                            [key]: url,
+                                                        };
+                                                        await guardarCapturasProceso(nuevasCapturas);
+                                                        setCapturasProceso(nuevasCapturas);
+                                                        mostrarToast('✅ Captura guardada');
+                                                    } catch (err: any) {
+                                                        alert('Error al subir: ' + err.message);
+                                                    } finally {
+                                                        setSubiendoCaptura(null);
+                                                    }
+                                                }}
+                                            />
+                                            {subiendo ? (
+                                                <div className="w-5 h-5 border-2 border-telmex-blue border-t-transparent rounded-full animate-spin" />
+                                            ) : url ? (
+                                                <Check size={20} className="text-green-500" />
+                                            ) : (
+                                                <Upload size={18} className="text-gray-400" />
+                                            )}
+                                            <span className={`text-xs font-medium text-center leading-tight ${url ? 'text-green-700' : 'text-gray-500'
+                                                }`}>
+                                                {label}
+                                            </span>
+                                        </label>
+                                    );
+                                })}
                             </div>
                         </CardContent>
                     </Card>
