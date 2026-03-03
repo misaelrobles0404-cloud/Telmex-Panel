@@ -212,7 +212,7 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
 
             // Autocompletar o crear prospecto vía RPC (bypasea RLS)
             try {
-                const { error: rpcError } = await supabase.rpc('crear_prospecto_desde_portal', {
+                const { data: rpcData, error: rpcError } = await supabase.rpc('crear_prospecto_desde_portal', {
                     p_nombre: nombre.trim().toUpperCase(),
                     p_no_tt: noTitular.trim(),
                     p_no_ref: noReferencia.trim(),
@@ -224,6 +224,8 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
 
                 if (rpcError) {
                     console.error('Error en RPC crear_prospecto:', rpcError);
+                } else if (rpcData && rpcData.ok === false) {
+                    console.error('RPC prospecto falló:', rpcData.error);
                 }
             } catch (e) { console.warn('Auto-prospecto error:', e); }
 
