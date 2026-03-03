@@ -36,7 +36,7 @@ function generarToken(): string {
  * Crea una nueva solicitud de documentos y devuelve la URL pública para el cliente.
  */
 export async function crearSolicitudDocumentos(
-    clienteId: string,
+    clienteId: string | null,
     tipoServicio: 'linea_nueva' | 'portabilidad',
     promotorEmail: string
 ): Promise<string> {
@@ -46,7 +46,7 @@ export async function crearSolicitudDocumentos(
         .from('solicitudes_documentos')
         .insert({
             token,
-            cliente_id: clienteId,
+            cliente_id: clienteId,  // puede ser null para links sin cliente previo
             promotor_email: promotorEmail,
             tipo_servicio: tipoServicio,
             estado: 'pendiente',
@@ -54,7 +54,6 @@ export async function crearSolicitudDocumentos(
 
     if (error) throw error;
 
-    // Devuelve URL absoluta para compartir al cliente
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://telmex-panel.vercel.app';
     return `${baseUrl}/docs/${token}`;
 }

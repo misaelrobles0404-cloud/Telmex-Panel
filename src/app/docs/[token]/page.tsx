@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { obtenerSolicitudPorToken, subirDocumentoCliente, completarSolicitud, SolicitudDocumentos } from '@/lib/solicitudes';
+import { supabase } from '@/lib/supabase';
 import { CheckCircle, Upload, Camera, AlertCircle, Lock, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
@@ -151,7 +152,7 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
         if (!solicitud) return;
 
         // Validaciones
-        if (!nombre.trim() || !noTitular.trim() || !correo.trim()) {
+        if (!nombre.trim() || !noTitular.trim() || !noReferencia.trim() || !correo.trim()) {
             alert('Por favor completa todos los campos obligatorios.');
             return;
         }
@@ -161,6 +162,25 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
         }
         if (solicitud.tipo_servicio === 'portabilidad' && !estadoCuenta) {
             alert('Para portabilidad necesitas subir tu estado de cuenta.');
+            return;
+        }
+        // Validar nombre
+        if (nombre.trim().split(' ').length < 2) {
+            alert('Por favor escribe tu nombre completo (nombre y apellidos).');
+            return;
+        }
+        // Validar teléfonos de exactamente 10 dígitos
+        if (noTitular.length !== 10) {
+            alert('El número titular debe tener exactamente 10 dígitos.');
+            return;
+        }
+        if (noReferencia.length !== 10) {
+            alert('El número de referencia debe tener exactamente 10 dígitos.');
+            return;
+        }
+        // Validar correo
+        if (!correo.includes('@') || !correo.includes('.')) {
+            alert('El correo electrónico no es válido. Debe incluir @ y un dominio.');
             return;
         }
 
@@ -189,6 +209,46 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                 ine_reverso_url: ineReversoUrl,
                 estado_cuenta_url: estadoCuentaUrl,
             });
+
+            // Autocompletar o crear prospecto
+            try {
+                if (solicitud.cliente_id) {
+                    // Link generado desde un cliente existente → actualizar sus datos
+                    await supabase.from('clientes').update({
+                        nombre: nombre.trim().toUpperCase(),
+                        no_tt: noTitular.trim(),
+                        no_ref: noReferencia.trim(),
+                        correo: correo.trim().toLowerCase(),
+                        actualizado_en: new Date().toISOString(),
+                    }).eq('id', solicitud.cliente_id);
+                } else {
+                    // Link generado sin cliente previo → crear nuevo prospecto
+                    const { data: userProfile } = await supabase
+                        .from('perfiles')
+                        .select('id')
+                        .eq('email', solicitud.promotor_email)
+                        .maybeSingle();
+
+                    await supabase.from('clientes').insert({
+                        nombre: nombre.trim().toUpperCase(),
+                        no_tt: noTitular.trim(),
+                        no_ref: noReferencia.trim(),
+                        correo: correo.trim().toLowerCase(),
+                        tipo_servicio: solicitud.tipo_servicio,
+                        estado_pipeline: 'prospecto',
+                        user_id: userProfile?.id || solicitud.promotor_email,
+                        creado_en: new Date().toISOString(),
+                        actualizado_en: new Date().toISOString(),
+                        actividades: [],
+                        documentos: [],
+                        paquete: 'POR DEFINIR',
+                        precio_mensual: 0,
+                        velocidad: 0,
+                        comision: 0,
+                        calle: 'PENDIENTE',
+                    });
+                }
+            } catch (e) { console.warn('Auto-prospecto error:', e); }
 
             setProgreso(100);
             setEnviado(true);
@@ -291,9 +351,9 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                             <input
                                 type="text"
                                 value={nombre}
-                                onChange={e => setNombre(e.target.value)}
-                                placeholder="Ej. Juan García Martínez"
-                                className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white"
+                                onChange={e => setNombre(e.target.value.toUpperCase())}
+                                placeholder="EJ. JUAN GARCÍA MARTÍNEZ"
+                                className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
                             />
                         </div>
 
@@ -308,26 +368,34 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                             )}
                             <input
                                 type="tel"
+                                inputMode="numeric"
                                 value={noTitular}
-                                onChange={e => setNoTitular(e.target.value.replace(/\D/g, ''))}
-                                placeholder={esPortabilidad ? "Número actual a portar" : "Número de celular o fijo"}
+                                onChange={e => setNoTitular(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                placeholder={esPortabilidad ? "Número celular a portar (10 dígitos)" : "Número celular (10 dígitos)"}
                                 maxLength={10}
-                                className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white"
+                                className={`w-full border-2 ${noTitular.length > 0 && noTitular.length < 10 ? 'border-red-300 focus:border-red-400' : 'border-gray-100 focus:border-[#0057A8]'} rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white`}
                             />
+                            {noTitular.length > 0 && noTitular.length < 10 && (
+                                <p className="text-xs text-red-500 mt-1">{10 - noTitular.length} dígito(s) faltante(s)</p>
+                            )}
                         </div>
 
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-1.5">
-                                Número de referencia <span className="text-gray-400 font-normal">(adicional)</span>
+                                Número de referencia <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="tel"
+                                inputMode="numeric"
                                 value={noReferencia}
-                                onChange={e => setNoReferencia(e.target.value.replace(/\D/g, ''))}
-                                placeholder="Celular de un familiar o amigo"
+                                onChange={e => setNoReferencia(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                placeholder="Celular de un familiar o amigo (10 dígitos)"
                                 maxLength={10}
-                                className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white"
+                                className={`w-full border-2 ${noReferencia.length > 0 && noReferencia.length < 10 ? 'border-red-300 focus:border-red-400' : 'border-gray-100 focus:border-[#0057A8]'} rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white`}
                             />
+                            {noReferencia.length > 0 && noReferencia.length < 10 && (
+                                <p className="text-xs text-red-500 mt-1">{10 - noReferencia.length} dígito(s) faltante(s)</p>
+                            )}
                         </div>
 
                         <div>
@@ -336,11 +404,15 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                             </label>
                             <input
                                 type="email"
+                                inputMode="email"
                                 value={correo}
-                                onChange={e => setCorreo(e.target.value)}
+                                onChange={e => setCorreo(e.target.value.toLowerCase())}
                                 placeholder="correo@ejemplo.com"
-                                className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white"
+                                className={`w-full border-2 ${correo.length > 0 && !correo.includes('@') ? 'border-red-300 focus:border-red-400' : 'border-gray-100 focus:border-[#0057A8]'} rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white`}
                             />
+                            {correo.length > 3 && !correo.includes('@') && (
+                                <p className="text-xs text-red-500 mt-1">El correo debe contener @</p>
+                            )}
                         </div>
                     </div>
                 </div>
