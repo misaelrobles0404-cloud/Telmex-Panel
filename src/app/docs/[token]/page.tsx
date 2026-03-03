@@ -210,24 +210,20 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                 estado_cuenta_url: estadoCuentaUrl,
             });
 
-            // Autocompletar o crear prospecto vía RPC (bypasea RLS)
+            // Crear o actualizar prospecto vía RPC (con permisos correctos para anon)
             try {
-                const { data: rpcData, error: rpcError } = await supabase.rpc('crear_prospecto_desde_portal', {
+                const { data: rpcResult, error: rpcError } = await supabase.rpc('crear_prospecto_desde_portal', {
                     p_nombre: nombre.trim().toUpperCase(),
                     p_no_tt: noTitular.trim(),
                     p_no_ref: noReferencia.trim(),
                     p_correo: correo.trim().toLowerCase(),
                     p_tipo_servicio: solicitud.tipo_servicio,
                     p_promotor_email: solicitud.promotor_email,
-                    p_cliente_id: solicitud.cliente_id || null
+                    p_cliente_id: solicitud.cliente_id || null,
                 });
-
-                if (rpcError) {
-                    console.error('Error en RPC crear_prospecto:', rpcError);
-                } else if (rpcData && rpcData.ok === false) {
-                    console.error('RPC prospecto falló:', rpcData.error);
-                }
-            } catch (e) { console.warn('Auto-prospecto error:', e); }
+                if (rpcError) console.error('RPC error:', rpcError.message);
+                else if (rpcResult?.ok === false) console.error('RPC sin éxito:', rpcResult.error);
+            } catch (e) { console.warn('Error creando prospecto:', e); }
 
             setProgreso(100);
             setEnviado(true);
