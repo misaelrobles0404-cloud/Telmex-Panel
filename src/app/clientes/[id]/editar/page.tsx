@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Cliente, TipoServicio, TipoCliente, REQUISITOS_SERVICIO } from '@/types';
 import { guardarCliente, obtenerCliente, obtenerEstadoPortal, liberarPortalGlobal } from '@/lib/storage';
+import { crearSolicitudDocumentos, obtenerSolicitudPorCliente, SolicitudDocumentos } from '@/lib/solicitudes';
 import { supabase } from '@/lib/supabase';
 import { calcularComision } from '@/lib/utils';
-import { ArrowLeft, Save, Building2, Home as HomeIcon, Copy } from 'lucide-react';
+import { ArrowLeft, Save, Building2, Home as HomeIcon, Copy, Link2, CheckCircle2, Clock } from 'lucide-react';
 import { obtenerConfiguracion } from '@/lib/admin';
 
 export default function EditarClientePage({ params }: { params: { id: string } }) {
@@ -79,6 +80,10 @@ export default function EditarClientePage({ params }: { params: { id: string } }
     const [archivoDocumentos, setArchivoDocumentos] = useState<any[]>([]);
     const [paquetesDynamicos, setPaquetesDynamicos] = useState<any[]>([]);
     const [loadingPaquetes, setLoadingPaquetes] = useState(true);
+    const [solicitudDocs, setSolicitudDocs] = useState<SolicitudDocumentos | null>(null);
+    const [generandoLink, setGenerandoLink] = useState(false);
+    const [linkCopiado, setLinkCopiado] = useState(false);
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     useEffect(() => {
         const fetchCliente = async () => {
@@ -89,6 +94,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
 
             if (cliente) {
                 setClienteId(cliente.id);
+                setCurrentUser(user);
                 // Si el cliente no tiene user_id (antiguo), asignamos el usuario actual
                 setUserId(cliente.user_id || user?.id);
                 setFechaCreacion(cliente.creado_en);
@@ -152,6 +158,12 @@ export default function EditarClientePage({ params }: { params: { id: string } }
             }
             setLoadingPaquetes(false);
             setLoading(false);
+
+            // Cargar solicitud de documentos existente
+            try {
+                const sol = await obtenerSolicitudPorCliente(params.id);
+                setSolicitudDocs(sol);
+            } catch { /* no bloqueante */ }
         };
         fetchCliente();
     }, [params.id]);
@@ -388,6 +400,125 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                             <Input label="Entre Calle 1" value={formData.entreCalle1} onChange={(e) => setFormData({ ...formData, entreCalle1: e.target.value })} />
                             <Input label="Entre Calle 2" value={formData.entreCalle2} onChange={(e) => setFormData({ ...formData, entreCalle2: e.target.value })} />
                         </div>
+                    </CardContent>
+                </Card>
+
+                {/* Solicitud de Documentos */}
+                <Card className="border-l-4 border-l-blue-500">
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="flex items-center gap-2">
+                                <Link2 size={18} className="text-blue-600" />
+                                Solicitar Documentos al Cliente
+                            </CardTitle>
+                            {solicitudDocs?.estado === 'completado' && (
+                                <span className="flex items-center gap-1.5 text-xs font-black text-green-600 bg-green-50 border border-green-200 px-3 py-1 rounded-full">
+                                    <CheckCircle2 size={12} /> Recibidos ✅
+                                </span>
+                            )}
+                            {solicitudDocs?.estado === 'pendiente' && (
+                                <span className="flex items-center gap-1.5 text-xs font-black text-yellow-600 bg-yellow-50 border border-yellow-200 px-3 py-1 rounded-full">
+                                    <Clock size={12} /> Pendiente
+                                </span>
+                            )}
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {solicitudDocs?.estado === 'completado' ? (
+                            <div className="space-y-4">
+                                <p className="text-sm text-green-700 bg-green-50 rounded-xl p-3 font-medium">
+                                    ✅ El cliente ha enviado sus documentos correctamente.
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    {solicitudDocs.ine_frente_url && (
+                                        <a href={solicitudDocs.ine_frente_url} target="_blank" rel="noreferrer"
+                                            className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={solicitudDocs.ine_frente_url} alt="INE Frente" className="w-full h-20 object-cover rounded-lg" />
+                                            <span className="text-xs font-bold text-gray-600 group-hover:text-blue-700">INE Frente</span>
+                                        </a>
+                                    )}
+                                    {solicitudDocs.ine_reverso_url && (
+                                        <a href={solicitudDocs.ine_reverso_url} target="_blank" rel="noreferrer"
+                                            className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={solicitudDocs.ine_reverso_url} alt="INE Reverso" className="w-full h-20 object-cover rounded-lg" />
+                                            <span className="text-xs font-bold text-gray-600 group-hover:text-blue-700">INE Reverso</span>
+                                        </a>
+                                    )}
+                                    {solicitudDocs.estado_cuenta_url && (
+                                        <a href={solicitudDocs.estado_cuenta_url} target="_blank" rel="noreferrer"
+                                            className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group">
+                                            <div className="w-full h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-xs font-bold">Estado de Cuenta</div>
+                                            <span className="text-xs font-bold text-gray-600 group-hover:text-blue-700">Estado de Cuenta</span>
+                                        </a>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        const urls = [
+                                            solicitudDocs.ine_frente_url,
+                                            solicitudDocs.ine_reverso_url,
+                                            solicitudDocs.estado_cuenta_url,
+                                        ].filter(Boolean).join('\n');
+                                        if (navigator.share) {
+                                            await navigator.share({ title: `Docs ${solicitudDocs.nombre_cliente}`, text: urls });
+                                        } else {
+                                            navigator.clipboard.writeText(urls);
+                                            alert('Links de documentos copiados al portapapeles');
+                                        }
+                                    }}
+                                    className="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95"
+                                >
+                                    📤 Compartir Documentos a WhatsApp
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                <p className="text-sm text-gray-600">
+                                    Genera un link seguro para que el cliente suba su INE y datos. El link expira en 48 horas.
+                                </p>
+                                <button
+                                    type="button"
+                                    disabled={generandoLink}
+                                    onClick={async () => {
+                                        if (!currentUser) return;
+                                        setGenerandoLink(true);
+                                        try {
+                                            const link = await crearSolicitudDocumentos(
+                                                clienteId,
+                                                tipoServicio,
+                                                currentUser.email || ''
+                                            );
+                                            await navigator.clipboard.writeText(link);
+                                            setLinkCopiado(true);
+                                            const sol = await obtenerSolicitudPorCliente(clienteId);
+                                            setSolicitudDocs(sol);
+                                            setTimeout(() => setLinkCopiado(false), 3000);
+                                        } catch (e: any) {
+                                            alert(`Error: ${e.message}`);
+                                        } finally {
+                                            setGenerandoLink(false);
+                                        }
+                                    }}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-60"
+                                >
+                                    {generandoLink ? (
+                                        <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generando...</>
+                                    ) : linkCopiado ? (
+                                        <><CheckCircle2 size={18} /> ¡Link copiado! Pégalo en WhatsApp</>
+                                    ) : (
+                                        <><Link2 size={18} /> Generar y Copiar Link de Documentos</>
+                                    )}
+                                </button>
+                                {solicitudDocs?.estado === 'pendiente' && (
+                                    <p className="text-xs text-yellow-600 bg-yellow-50 rounded-lg p-2.5 font-medium text-center">
+                                        ⏳ Link enviado. Esperando que el cliente suba sus documentos...
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
