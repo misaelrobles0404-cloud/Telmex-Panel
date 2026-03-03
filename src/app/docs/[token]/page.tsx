@@ -285,9 +285,21 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                     <p className="text-gray-500 text-sm leading-relaxed">
                         Hemos recibido tu información correctamente. Tu asesor Telmex será notificado y se pondrá en contacto contigo para continuar con tu contratación.
                     </p>
-                    <div className="mt-6 p-4 bg-blue-50 rounded-2xl">
-                        <p className="text-xs text-blue-700 font-medium">
-                            🛡️ Tus datos están protegidos bajo las políticas de privacidad de Telmex.
+
+                    {/* Instrucción de captura */}
+                    <div className="mt-6 p-5 border-2 border-[#0057A8] bg-blue-50/50 rounded-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-[#0057A8]" />
+                        <p className="text-sm font-bold text-[#0057A8] mb-1">
+                            📸 Siguiente paso importante:
+                        </p>
+                        <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                            Tómale una captura a esta pantalla y envíasela por WhatsApp a tu asesor para confirmar que completaste tu registro.
+                        </p>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                        <p className="text-xs text-gray-500 font-medium flex justify-center items-center gap-2">
+                            <Lock size={14} /> Tus datos están protegidos bajo las políticas de privacidad.
                         </p>
                     </div>
                 </div>
