@@ -68,9 +68,10 @@ export async function middleware(request: NextRequest) {
         const { data: { user } } = await supabase.auth.getUser()
 
         const isLoginPage = request.nextUrl.pathname.startsWith('/login')
+        const isPublicRoute = request.nextUrl.pathname.startsWith('/docs') // Portal público para clientes
 
-        // Si no hay usuario y no está en /login, redirigir a /login
-        if (!user && !isLoginPage) {
+        // Si no hay usuario y no está en una ruta pública, redirigir a /login
+        if (!user && !isLoginPage && !isPublicRoute) {
             const redirectUrl = request.nextUrl.clone()
             redirectUrl.pathname = '/login'
             return NextResponse.redirect(redirectUrl)
@@ -87,7 +88,7 @@ export async function middleware(request: NextRequest) {
     } catch (e) {
         // En caso de error crítico en el middleware, redirigir a login por seguridad
         // a menos que ya estemos en login.
-        if (!request.nextUrl.pathname.startsWith('/login')) {
+        if (!request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/docs')) {
             const redirectUrl = request.nextUrl.clone()
             redirectUrl.pathname = '/login'
             return NextResponse.redirect(redirectUrl)

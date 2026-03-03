@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Cliente, Actividad, Documento, EstadoPipeline } from '@/types';
 import { obtenerClientes, obtenerCliente, guardarCliente, eliminarCliente } from '@/lib/storage';
+import { obtenerSolicitudPorCliente, obtenerCapturasProceso, SolicitudDocumentos, CapturasProceso } from '@/lib/solicitudes';
 import { supabase } from '@/lib/supabase';
 import { formatearMoneda, formatearFecha, formatearFechaHora, generarId } from '@/lib/utils';
 import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar, FileText, CheckCircle, Copy, Save } from 'lucide-react';
@@ -27,6 +28,8 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
     const [ordenServicioInput, setOrdenServicioInput] = useState('');
     const [perfilUsuario, setPerfilUsuario] = useState<{ nombre_completo: string } | null>(null);
     const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
+    const [solicitudDocs, setSolicitudDocs] = useState<SolicitudDocumentos | null>(null);
+    const [capturasProceso, setCapturasProceso] = useState<CapturasProceso | null>(null);
 
     const mostrarToast = (message: string) => {
         setToast({ message, isVisible: true });
@@ -48,6 +51,15 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
                     setCliente(data);
                     setFolioSiacInput(data.folio_siac || '');
                     setOrdenServicioInput(data.orden_servicio || '');
+                    // Cargar solicitud y capturas del proceso
+                    try {
+                        const [sol, caps] = await Promise.all([
+                            obtenerSolicitudPorCliente(params.id),
+                            obtenerCapturasProceso(params.id),
+                        ]);
+                        setSolicitudDocs(sol);
+                        setCapturasProceso(caps);
+                    } catch { /* no bloqueante */ }
                 }
 
                 // Cargar perfil del usuario actual para los formatos
@@ -1084,6 +1096,64 @@ Te escribo para dar seguimiento a tu trámite de internet TELMEX. 🚀
                                 <Copy size={16} className="mr-2" /> Copiar Mensaje
                             </Button>
                         </div>
+
+                        {/* Compartir documentos a WhatsApp */}
+                        {solicitudDocs?.estado === 'completado' && (
+                            <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                                <h3 className="font-semibold text-green-900 mb-2">📤 Paso 3: Compartir documentos del cliente</h3>
+                                <p className="text-sm text-green-700 mb-3">
+                                    {cliente.tipo_servicio === 'portabilidad'
+                                        ? 'INE Frente, INE Reverso y Estado de Cuenta'
+                                        : 'INE Frente e INE Reverso'}
+                                    {capturasProceso && ' + capturas del proceso'}
+                                </p>
+                                <button
+                                    type="button"
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95"
+                                    onClick={async () => {
+                                        const docsCliente = [
+                                            solicitudDocs.ine_frente_url,
+                                            solicitudDocs.ine_reverso_url,
+                                            solicitudDocs.estado_cuenta_url,
+                                        ].filter(Boolean) as string[];
+
+                                        const capturas = capturasProceso ? [
+                                            capturasProceso.captura_paquete_url,
+                                            capturasProceso.captura_mapa_url,
+                                            capturasProceso.captura_siac_url,
+                                            capturasProceso.captura_siac_chat_url,
+                                            capturasProceso.captura_cobertura_url,
+                                            capturasProceso.captura_si_chat_url,
+                                        ].filter(Boolean) as string[] : [];
+
+                                        const todasLasUrls = [...docsCliente, ...capturas];
+                                        const nombresDocs = ['INE_Frente', 'INE_Reverso', 'Estado_Cuenta',
+                                            'Paquete', 'Mapa', 'SIAC', 'SIAC_Chat', 'Cobertura', 'Si_Acepto'];
+
+                                        if (navigator.canShare) {
+                                            try {
+                                                const archivos: File[] = [];
+                                                for (let i = 0; i < todasLasUrls.length; i++) {
+                                                    const res = await fetch(todasLasUrls[i]);
+                                                    const blob = await res.blob();
+                                                    const ext = blob.type.includes('pdf') ? 'pdf' : 'jpg';
+                                                    archivos.push(new File([blob], `${cliente.nombre.split(' ')[0]}_${nombresDocs[i] || i}.${ext}`, { type: blob.type }));
+                                                }
+                                                if (navigator.canShare({ files: archivos })) {
+                                                    await navigator.share({ title: `Docs ${cliente.nombre}`, files: archivos });
+                                                    return;
+                                                }
+                                            } catch (e) { console.warn('File share error:', e); }
+                                        }
+                                        // Fallback: copiar links
+                                        navigator.clipboard.writeText(todasLasUrls.join('\n'));
+                                        alert('✅ Links copiados al portapapeles. Pégalos en tu grupo de WhatsApp.');
+                                    }}
+                                >
+                                    📲 Compartir Todo a WhatsApp
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </Modal>
