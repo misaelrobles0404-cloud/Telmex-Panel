@@ -542,6 +542,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 { key: 'captura_paquete_url', label: '📦 Paquete en Portal', hint: 'Captura del paquete seleccionado' },
                                 { key: 'captura_mapa_url', label: '🗺️ Mapa en Portal', hint: 'Captura del mapa/cobertura' },
                                 { key: 'captura_siac_url', label: '🆔 Folio SIAC', hint: 'Captura del folio SIAC generado' },
+                                { key: 'captura_siac_chat_url', label: '💬 SIAC Chat', hint: 'Captura del chat en SIAC' },
+                                { key: 'captura_cobertura_url', label: '📡 Cobertura/Facilidades', hint: 'Captura de validación de cobertura' },
                                 { key: 'captura_si_chat_url', label: '✅ Sí Acepto en Chat', hint: 'Captura de la aceptación del cliente' },
                             ].map(({ key, label, hint }) => {
                                 const url = capturasProceso?.[key as keyof CapturasProceso] as string | undefined;

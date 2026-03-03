@@ -153,6 +153,8 @@ export interface CapturasProceso {
     captura_mapa_url?: string;
     captura_siac_url?: string;
     captura_si_chat_url?: string;
+    captura_siac_chat_url?: string;
+    captura_cobertura_url?: string;
     creado_en?: string;
     actualizado_en?: string;
 }
