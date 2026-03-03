@@ -457,7 +457,7 @@ Acepta el servicio?`;
                             className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 flex-1 md:flex-none"
                             title="Dar seguimiento a prospecto"
                         >
-                            <span className="mr-1">📨</span> Dar Seguimiento
+                            <span className="mr-1">📲</span> Compartir Docs
                         </Button>
                     )}
 
@@ -1060,56 +1060,32 @@ Acepta el servicio?`;
                 )}
             </Modal>
 
-            {/* Modal de Seguimiento */}
+            {/* Modal de Compartir Documentos */}
             <Modal
                 isOpen={modalSeguimientoOpen}
                 onClose={() => setModalSeguimientoOpen(false)}
-                title="📨 Dar Seguimiento"
+                title="📲 Compartir Documentos"
                 size="md"
             >
                 {cliente && (
-                    <div className="space-y-6 p-4">
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                            <h3 className="font-semibold text-blue-900 mb-2">Paso 1: Busca el contacto en WhatsApp</h3>
-                            <p className="text-sm text-blue-700 mb-3">Copia el número del cliente para buscarlo en tu lista de chats.</p>
+                    <div className="p-4">
+                        {solicitudDocs?.estado === 'completado' ? (
+                            <div className="space-y-4">
+                                <div className="bg-green-50 p-4 rounded-xl border border-green-100">
+                                    <p className="text-sm font-semibold text-green-900 mb-1">
+                                        Documentos listos para compartir
+                                    </p>
+                                    <p className="text-xs text-green-700">
+                                        {cliente.tipo_servicio === 'portabilidad'
+                                            ? '📄 INE Frente · INE Reverso · Estado de Cuenta'
+                                            : '📄 INE Frente · INE Reverso'}
+                                        {capturasProceso && ' · Capturas del proceso'}
+                                    </p>
+                                </div>
 
-                            <div className="flex items-center gap-2 bg-white p-2 rounded border border-blue-200">
-                                <Phone size={18} className="text-blue-500" />
-                                <span className="font-mono text-lg font-medium flex-1">{cliente.no_tt}</span>
-                                <Button size="sm" onClick={copiarTelefono}>
-                                    <Copy size={14} className="mr-1" /> Copiar Teléfono
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
-                            <h3 className="font-semibold text-indigo-900 mb-2">Paso 2: Copia el mensaje de seguimiento</h3>
-                            <p className="text-sm text-indigo-700 mb-3">Este mensaje incluye los datos registrados (Paquete, Precio, Dirección) para recordar al cliente.</p>
-
-                            <div className="bg-white p-3 rounded border border-indigo-200 text-sm text-gray-600 italic mb-3 whitespace-pre-wrap">
-                                {`¡Hola${cliente.nombre.includes('Prospecto') ? '' : ` ${cliente.nombre.split(' ')[0]}`}! 👋
-Te escribo para dar seguimiento a tu trámite de internet TELMEX. 🚀
-...`}
-                            </div>
-
-                            <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onClick={copiarMensajeSeguimiento}>
-                                <Copy size={16} className="mr-2" /> Copiar Mensaje
-                            </Button>
-                        </div>
-
-                        {/* Compartir documentos a WhatsApp */}
-                        {solicitudDocs?.estado === 'completado' && (
-                            <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                                <h3 className="font-semibold text-green-900 mb-2">📤 Paso 3: Compartir documentos del cliente</h3>
-                                <p className="text-sm text-green-700 mb-3">
-                                    {cliente.tipo_servicio === 'portabilidad'
-                                        ? 'INE Frente, INE Reverso y Estado de Cuenta'
-                                        : 'INE Frente e INE Reverso'}
-                                    {capturasProceso && ' + capturas del proceso'}
-                                </p>
                                 <button
                                     type="button"
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95"
+                                    className="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-xl flex items-center justify-center gap-3 text-lg transition-all active:scale-95 shadow-lg"
                                     onClick={async () => {
                                         const docsCliente = [
                                             solicitudDocs.ine_frente_url,
@@ -1145,13 +1121,18 @@ Te escribo para dar seguimiento a tu trámite de internet TELMEX. 🚀
                                                 }
                                             } catch (e) { console.warn('File share error:', e); }
                                         }
-                                        // Fallback: copiar links
                                         navigator.clipboard.writeText(todasLasUrls.join('\n'));
-                                        alert('✅ Links copiados al portapapeles. Pégalos en tu grupo de WhatsApp.');
+                                        alert('✅ Links copiados. Pégalos en tu grupo de WhatsApp.');
                                     }}
                                 >
-                                    📲 Compartir Todo a WhatsApp
+                                    📲 Enviar Todo a WhatsApp
                                 </button>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-gray-500">
+                                <p className="text-4xl mb-3">⏳</p>
+                                <p className="font-semibold text-gray-700 mb-1">Documentos pendientes</p>
+                                <p className="text-sm">El cliente aún no ha subido sus documentos. Genera y comparte el link desde la sección de edición del cliente.</p>
                             </div>
                         )}
                     </div>
