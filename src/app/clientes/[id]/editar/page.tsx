@@ -465,12 +465,41 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                             solicitudDocs.ine_frente_url,
                                             solicitudDocs.ine_reverso_url,
                                             solicitudDocs.estado_cuenta_url,
-                                        ].filter(Boolean).join('\n');
+                                        ].filter(Boolean) as string[];
+
+                                        // Intentar compartir como archivos reales (funciona en móvil)
+                                        if (navigator.canShare) {
+                                            try {
+                                                const nombre = solicitudDocs.nombre_cliente || 'cliente';
+                                                const nombres = ['INE_Frente', 'INE_Reverso', 'Estado_de_Cuenta'];
+                                                const archivos: File[] = [];
+
+                                                for (let i = 0; i < urls.length; i++) {
+                                                    const res = await fetch(urls[i]);
+                                                    const blob = await res.blob();
+                                                    const ext = blob.type.includes('pdf') ? 'pdf' : 'jpg';
+                                                    archivos.push(new File([blob], `${nombre}_${nombres[i]}.${ext}`, { type: blob.type }));
+                                                }
+
+                                                if (navigator.canShare({ files: archivos })) {
+                                                    await navigator.share({
+                                                        title: `Documentos - ${nombre}`,
+                                                        files: archivos,
+                                                    });
+                                                    return;
+                                                }
+                                            } catch (e) {
+                                                console.warn('File share falló, usando texto:', e);
+                                            }
+                                        }
+
+                                        // Fallback: copiar links al portapapeles
+                                        const texto = urls.join('\n');
                                         if (navigator.share) {
-                                            await navigator.share({ title: `Docs ${solicitudDocs.nombre_cliente}`, text: urls });
+                                            await navigator.share({ title: `Docs ${solicitudDocs.nombre_cliente}`, text: texto });
                                         } else {
-                                            navigator.clipboard.writeText(urls);
-                                            alert('Links de documentos copiados al portapapeles');
+                                            navigator.clipboard.writeText(texto);
+                                            alert('✅ Links copiados. Pégalos en tu grupo de WhatsApp.');
                                         }
                                     }}
                                     className="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95"
