@@ -12,6 +12,9 @@ import { NotifyProvider } from '@/components/NotifyProvider';
 export function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isLoginPage = pathname === '/login';
+    const isDocsPage = pathname?.startsWith('/docs');
+    const hideNavigation = isLoginPage || isDocsPage;
+
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     // Cerrar el sidebar automáticamente cuando cambia la ruta (solo para móviles)
@@ -22,7 +25,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     return (
         <NotifyProvider>
             <div className="flex h-screen overflow-hidden bg-gray-50">
-                {!isLoginPage && (
+                {!hideNavigation && (
                     <Sidebar
                         isOpen={isSidebarOpen}
                         onClose={() => setIsSidebarOpen(false)}
@@ -30,7 +33,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                 )}
 
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                    {!isLoginPage && (
+                    {!hideNavigation && (
                         <MobileHeader onMenuClick={() => setIsSidebarOpen(true)} />
                     )}
 
