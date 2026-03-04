@@ -255,11 +255,27 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                 estado_cuenta_url: estadoCuentaUrl,
             });
 
-            // Si fue CURP, también guardar en la tabla de clientes para que el asesor lo vea
-            if (solicitud.tipo_identificacion === 'curp' && solicitud.cliente_id && curp.trim()) {
+            // Sincronizar datos directamente a la tabla de clientes como respaldo al trigger
+            if (solicitud.cliente_id) {
                 await supabase
                     .from('clientes')
-                    .update({ curp: curp.trim().toUpperCase() })
+                    .update({
+                        nombre: nombre.trim().toUpperCase(),
+                        no_tt: noTitular.trim(),
+                        no_ref: noReferencia.trim(),
+                        correo: correo.trim().toLowerCase(),
+                        calle: calle.trim().toUpperCase(),
+                        colonia: colonia.trim().toUpperCase(),
+                        cp: cp.trim(),
+                        cd: cd.trim().toUpperCase(),
+                        estado: estadoDomicilio.trim().toUpperCase(),
+                        entre_calle_1: entreCalle1.trim().toUpperCase() || '',
+                        entre_calle_2: entreCalle2.trim().toUpperCase() || '',
+                        mz: mz.trim().toUpperCase() || '',
+                        lt: lt.trim().toUpperCase() || '',
+                        curp: curp.trim() ? curp.trim().toUpperCase() : undefined,
+                        actualizado_en: new Date().toISOString()
+                    })
                     .eq('id', solicitud.cliente_id);
             }
 
