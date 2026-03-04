@@ -255,8 +255,13 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                 estado_cuenta_url: estadoCuentaUrl,
             });
 
-            // El trigger en la BD crea el prospecto automáticamente
-            // cuando el estado cambia a 'completado' en completarSolicitud()
+            // Si fue CURP, también guardar en la tabla de clientes para que el asesor lo vea
+            if (solicitud.tipo_identificacion === 'curp' && solicitud.cliente_id && curp.trim()) {
+                await supabase
+                    .from('clientes')
+                    .update({ curp: curp.trim().toUpperCase() })
+                    .eq('id', solicitud.cliente_id);
+            }
 
             setProgreso(100);
             setEnviado(true);

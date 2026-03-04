@@ -434,6 +434,24 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 <p className="text-sm text-green-700 bg-green-50 rounded-xl p-3 font-medium">
                                     ✅ El cliente ha enviado sus documentos correctamente.
                                 </p>
+
+                                {/* CURP capturado */}
+                                {solicitudDocs.tipo_identificacion === 'curp' && solicitudDocs.curp && (
+                                    <div className="bg-teal-50 border-2 border-teal-300 rounded-xl p-4 flex items-center justify-between">
+                                        <div>
+                                            <p className="text-xs font-bold text-teal-700 uppercase tracking-wider mb-0.5">CURP del Cliente</p>
+                                            <p className="text-lg font-black text-teal-900 tracking-wider">{solicitudDocs.curp}</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => { navigator.clipboard.writeText(solicitudDocs.curp!); }}
+                                            className="text-xs font-bold text-teal-700 bg-teal-100 hover:bg-teal-200 px-3 py-1.5 rounded-lg transition-colors"
+                                        >
+                                            📋 Copiar
+                                        </button>
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                     {solicitudDocs.ine_frente_url && (
                                         <a href={solicitudDocs.ine_frente_url} target="_blank" rel="noreferrer"

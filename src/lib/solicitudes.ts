@@ -151,13 +151,20 @@ export async function completarSolicitud(
         estado_cuenta_url?: string;
     }
 ): Promise<void> {
+    // Strip undefined values so Supabase doesn't complain about columns missing from its schema cache
+    const payload: Record<string, unknown> = {
+        estado: 'completado',
+        completado_en: new Date().toISOString(),
+    };
+    for (const [k, v] of Object.entries(datos)) {
+        if (v !== undefined && v !== null && v !== '') {
+            payload[k] = v;
+        }
+    }
+
     const { error } = await supabase
         .from('solicitudes_documentos')
-        .update({
-            ...datos,
-            estado: 'completado',
-            completado_en: new Date().toISOString(),
-        })
+        .update(payload)
         .eq('token', token);
 
     if (error) throw error;
