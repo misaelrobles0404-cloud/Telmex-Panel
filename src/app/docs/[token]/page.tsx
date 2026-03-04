@@ -101,6 +101,7 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
     const [noTitular, setNoTitular] = useState('');
     const [noReferencia, setNoReferencia] = useState('');
     const [correo, setCorreo] = useState('');
+    const [curp, setCurp] = useState('');
 
     // Domicilio de instalación
     const [calle, setCalle] = useState('');
@@ -171,9 +172,20 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
             alert('Por favor completa todos los campos obligatorios del Domicilio de Instalación.');
             return;
         }
-        if (!ineFrente || !ineReverso) {
-            alert('Debes subir ambos lados de tu INE.');
-            return;
+        if (solicitud.tipo_identificacion === 'curp') {
+            if (!curp.trim()) {
+                alert('Por favor ingresa tu CURP.');
+                return;
+            }
+            if (curp.trim().length !== 18 || !/^[A-Z0-9]{18}$/i.test(curp.trim())) {
+                alert('El CURP ingresado no es válido. Debe tener exactamente 18 caracteres alfanuméricos.');
+                return;
+            }
+        } else {
+            if (!ineFrente || !ineReverso) {
+                alert('Debes subir ambos lados de tu INE.');
+                return;
+            }
         }
         if (solicitud.tipo_servicio === 'portabilidad' && !estadoCuenta) {
             alert('Para portabilidad necesitas subir tu estado de cuenta.');
@@ -203,10 +215,18 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
         setProgreso(10);
 
         try {
-            setProgreso(30);
-            const ineFrenteUrl = await subirDocumentoCliente(params.token, ineFrente, 'ine_frente');
-            setProgreso(55);
-            const ineReversoUrl = await subirDocumentoCliente(params.token, ineReverso, 'ine_reverso');
+            let ineFrenteUrl: string | undefined;
+            let ineReversoUrl: string | undefined;
+
+            if (solicitud.tipo_identificacion === 'ine' && ineFrente && ineReverso) {
+                setProgreso(30);
+                ineFrenteUrl = await subirDocumentoCliente(params.token, ineFrente, 'ine_frente');
+                setProgreso(55);
+                ineReversoUrl = await subirDocumentoCliente(params.token, ineReverso, 'ine_reverso');
+            } else {
+                setProgreso(55);
+            }
+
             setProgreso(75);
 
             let estadoCuentaUrl: string | undefined;
@@ -217,6 +237,7 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
 
             await completarSolicitud(params.token, {
                 nombre_cliente: nombre.trim().toUpperCase(),
+                curp: solicitud.tipo_identificacion === 'curp' ? curp.trim().toUpperCase() : undefined,
                 no_titular: noTitular.trim(),
                 no_referencia: noReferencia.trim(),
                 correo: correo.trim().toLowerCase(),
@@ -545,20 +566,46 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                         <h2 className="font-black text-gray-800 text-sm uppercase tracking-wider">Documentos Requeridos</h2>
                     </div>
                     <div className="p-5 space-y-5">
-                        <FileUploadZone
-                            label="INE — Frente"
-                            hint="Foto clara del frente de tu credencial de elector"
-                            onChange={(f) => handleFileChange(f, setIneFrente, setIneFrentePreview)}
-                            preview={ineFrentePreview}
-                            required
-                        />
-                        <FileUploadZone
-                            label="INE — Reverso"
-                            hint="Foto del reverso de tu credencial de elector"
-                            onChange={(f) => handleFileChange(f, setIneReverso, setIneReversoPreview)}
-                            preview={ineReversoPreview}
-                            required
-                        />
+                        {solicitud?.tipo_identificacion === 'curp' ? (
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                                    CURP <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={curp}
+                                    onChange={e => setCurp(e.target.value.toUpperCase().slice(0, 18))}
+                                    placeholder="Ej. GOMJ850312HDFMRS09"
+                                    className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                                    maxLength={18}
+                                />
+                                <div className="mt-2 text-xs flex items-center justify-between">
+                                    <span className={`font-semibold ${curp.length === 18 ? 'text-green-600' : 'text-gray-500'}`}>
+                                        {curp.length}/18 caracteres
+                                    </span>
+                                    <a href="https://www.gob.mx/curp/" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline">
+                                        Consultar mi CURP aquí
+                                    </a>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <FileUploadZone
+                                    label="INE — Frente"
+                                    hint="Foto clara del frente de tu credencial de elector"
+                                    onChange={(f) => handleFileChange(f, setIneFrente, setIneFrentePreview)}
+                                    preview={ineFrentePreview}
+                                    required
+                                />
+                                <FileUploadZone
+                                    label="INE — Reverso"
+                                    hint="Foto del reverso de tu credencial de elector"
+                                    onChange={(f) => handleFileChange(f, setIneReverso, setIneReversoPreview)}
+                                    preview={ineReversoPreview}
+                                    required
+                                />
+                            </>
+                        )}
                         {esPortabilidad && (
                             <FileUploadZone
                                 label="Estado de cuenta"

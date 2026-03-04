@@ -10,9 +10,11 @@ export interface SolicitudDocumentos {
     cliente_id: string;
     promotor_email: string;
     tipo_servicio: 'linea_nueva' | 'portabilidad';
+    tipo_identificacion?: 'ine' | 'curp';
     estado: 'pendiente' | 'completado' | 'expirado';
     expira_en: string;
     nombre_cliente?: string;
+    curp?: string;
     no_titular?: string;
     no_referencia?: string;
     correo?: string;
@@ -47,7 +49,8 @@ function generarToken(): string {
 export async function crearSolicitudDocumentos(
     clienteId: string | null,
     tipoServicio: 'linea_nueva' | 'portabilidad',
-    promotorEmail: string
+    promotorEmail: string,
+    tipoIdentificacion: 'ine' | 'curp' = 'ine'
 ): Promise<string> {
     const token = generarToken();
 
@@ -58,6 +61,7 @@ export async function crearSolicitudDocumentos(
             cliente_id: clienteId,  // puede ser null para links sin cliente previo
             promotor_email: promotorEmail,
             tipo_servicio: tipoServicio,
+            tipo_identificacion: tipoIdentificacion,
             estado: 'pendiente',
         });
 
@@ -129,6 +133,7 @@ export async function completarSolicitud(
     token: string,
     datos: {
         nombre_cliente: string;
+        curp?: string;
         no_titular: string;
         no_referencia: string;
         correo: string;
@@ -141,8 +146,8 @@ export async function completarSolicitud(
         entre_calle_2?: string;
         mz?: string;
         lt?: string;
-        ine_frente_url: string;
-        ine_reverso_url: string;
+        ine_frente_url?: string;
+        ine_reverso_url?: string;
         estado_cuenta_url?: string;
     }
 ): Promise<void> {

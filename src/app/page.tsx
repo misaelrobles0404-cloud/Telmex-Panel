@@ -56,6 +56,7 @@ export default function DashboardPage() {
     // Modal Generar Link
     const [modalGenerarLink, setModalGenerarLink] = useState(false);
     const [tipoServicioLink, setTipoServicioLink] = useState<'linea_nueva' | 'portabilidad'>('linea_nueva');
+    const [tipoIdLink, setTipoIdLink] = useState<'ine' | 'curp'>('ine');
     const [generandoLink, setGenerandoLink] = useState(false);
     const [linkGenerado, setLinkGenerado] = useState('');
 
@@ -632,6 +633,25 @@ export default function DashboardPage() {
                                     </button>
                                 </div>
                             </div>
+                            <div>
+                                <p className="text-sm font-bold text-gray-700 mb-2">Método de Identificación</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={() => setTipoIdLink('ine')}
+                                        className={`p-4 rounded-xl border-2 text-left transition-all ${tipoIdLink === 'ine' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'}`}
+                                    >
+                                        <p className="font-bold text-sm text-gray-800">📷 INE (Foto)</p>
+                                        <p className="text-xs text-gray-500 mt-1">Sube fotos de la credencial</p>
+                                    </button>
+                                    <button
+                                        onClick={() => setTipoIdLink('curp')}
+                                        className={`p-4 rounded-xl border-2 text-left transition-all ${tipoIdLink === 'curp' ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-gray-300'}`}
+                                    >
+                                        <p className="font-bold text-sm text-gray-800">🔡 CURP (Texto)</p>
+                                        <p className="text-xs text-gray-500 mt-1">Solo captura sus 18 caracteres</p>
+                                    </button>
+                                </div>
+                            </div>
                             <button
                                 disabled={generandoLink}
                                 onClick={async () => {
@@ -680,11 +700,11 @@ export default function DashboardPage() {
 
                                         if (insertErr) throw insertErr;
 
-                                        // 2. Generar link con el ID del prospecto ya creado
                                         const url = await crearSolicitudDocumentos(
                                             nuevoCliente.id,  // ← cliente_id real
                                             tipoServicioLink,
-                                            user.email || ''
+                                            user.email || '',
+                                            tipoIdLink
                                         );
                                         setLinkGenerado(url);
                                         navigator.clipboard.writeText(url);

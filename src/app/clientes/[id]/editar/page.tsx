@@ -81,6 +81,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
     const [paquetesDynamicos, setPaquetesDynamicos] = useState<any[]>([]);
     const [loadingPaquetes, setLoadingPaquetes] = useState(true);
     const [solicitudDocs, setSolicitudDocs] = useState<SolicitudDocumentos | null>(null);
+    const [tipoIdLink, setTipoIdLink] = useState<'ine' | 'curp'>('ine');
     const [generandoLink, setGenerandoLink] = useState(false);
     const [linkCopiado, setLinkCopiado] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
@@ -508,10 +509,28 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 </button>
                             </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 <p className="text-sm text-gray-600">
-                                    Genera un link seguro para que el cliente suba su INE y datos. El link expira en 48 horas.
+                                    Genera un link seguro para que el cliente suba sus documentos o CURP. El link expira en 48 horas.
                                 </p>
+
+                                <div>
+                                    <p className="text-sm font-bold text-gray-700 mb-2">Método de Identificación</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setTipoIdLink('ine')}
+                                            className={`p-3 rounded-xl border-2 text-left transition-all ${tipoIdLink === 'ine' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'}`}
+                                        >
+                                            <p className="font-bold text-sm text-gray-800">📷 INE (Foto)</p>
+                                        </button>
+                                        <button
+                                            onClick={() => setTipoIdLink('curp')}
+                                            className={`p-3 rounded-xl border-2 text-left transition-all ${tipoIdLink === 'curp' ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-gray-300'}`}
+                                        >
+                                            <p className="font-bold text-sm text-gray-800">🔡 CURP (Texto)</p>
+                                        </button>
+                                    </div>
+                                </div>
                                 <button
                                     type="button"
                                     disabled={generandoLink}
@@ -522,7 +541,8 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                             const link = await crearSolicitudDocumentos(
                                                 clienteId,
                                                 tipoServicio,
-                                                currentUser.email || ''
+                                                currentUser.email || '',
+                                                tipoIdLink
                                             );
                                             await navigator.clipboard.writeText(link);
                                             setLinkCopiado(true);

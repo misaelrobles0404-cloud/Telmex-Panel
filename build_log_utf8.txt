@@ -1,0 +1,76 @@
+﻿
+> telmex-panel-pro@1.0.0 build
+> next build
+
+  Ôû▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+node.exe : Failed to compile.
+En línea: 1 Carácter: 1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (Failed   
+  to compile.:String) [],    
+ RemoteException
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+
+./src/app/docs/[token]/page.t
+sx
+Error: 
+  [31mx[0m Unexpected 
+token `div`. Expected jsx 
+identifier
+     ,-[[36;1;4mC:\Users\ADM
+IN\OneDrive\Desktop\TELMEX PA
+NEL\src\app\docs\[token]\page
+.tsx[0m:276:1]
+ [2m276[0m |     // ÔöÇÔöÇ 
+PANTALLA DE ├ëXITO ÔöÇÔöÇ
+ [2m277[0m |     if 
+(enviado) {
+ [2m278[0m |         
+return (
+ [2m279[0m |             
+<div className="min-h-screen 
+bg-gradient-to-br 
+from-[#0057A8] to-[#003d7a] 
+flex items-center 
+justify-center p-6">
+     : [31;1m             
+^^^[0m
+ [2m280[0m |               
+  <div className="bg-white 
+rounded-3xl shadow-2xl p-8 
+max-w-sm w-full text-center">
+ [2m281[0m |               
+      <div className="w-20 
+h-20 bg-green-100 
+rounded-full flex 
+items-center justify-center 
+mx-auto mb-4">
+ [2m281[0m |               
+          <CheckCircle 
+size={40} 
+className="text-green-500" />
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested 
+module:
+./src/app/docs/[token]/page.t
+sx
+
+
+> Build failed because of 
+webpack errors
