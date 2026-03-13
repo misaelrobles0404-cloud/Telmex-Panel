@@ -227,6 +227,14 @@ export default function ClienteDetallePage({ params }: { params: { id: string } 
         // Función para aplicar negritas tipo WhatsApp
         const b = (text: string) => `*${text}*`;
 
+        const paqueteLower = cliente.paquete ? cliente.paquete.toLowerCase() : '';
+        const esSoloInternet = cliente.incluye_telefono === false ||
+            paqueteLower.includes('solo internet') ||
+            paqueteLower.includes('internet residencial') ||
+            paqueteLower.includes('sin telefonía');
+        const descPaquete = esSoloInternet ? 'INTERNET' : 'INTERNET Y TELEFONÍA';
+        const descPaqueteSinAcento = esSoloInternet ? 'INTERNET' : 'INTERNET Y TELEFONIA';
+
         const line = "———————————————————";
         let formato = "";
 
@@ -254,7 +262,7 @@ ${b('C.P-')} ${cliente.cp}
 ${b('COL-')} ${cliente.colonia.toUpperCase()}
 ${b('C.D-')} ${cliente.cd.toUpperCase()}
 ${line}
-${b('PAQUETE-')} $${cliente.precio_mensual} ${cliente.velocidad} MEGAS ${cliente.incluye_telefono === true || (!cliente.paquete.toLowerCase().includes('solo internet') && !cliente.paquete.toLowerCase().includes('internet residencial') && !cliente.paquete.toLowerCase().includes('sin telefonía')) ? 'INTERNET Y TELEFONIA' : 'INTERNET'}.
+${b('PAQUETE-')} $${cliente.precio_mensual} ${cliente.velocidad} MEGAS ${descPaqueteSinAcento}.
 
 ${line}
 ${b('GASTOS DE INSTALACIÓN')} 
@@ -280,7 +288,7 @@ ${b('DOMICILIO')}
 🔹 ${b('CODIGO POSTAL:')} ${cliente.cp}
 
 ${b('PAQUETE A CONTRATAR')}
-🔹 ${b('PAQUETE:')} ($${cliente.precio_mensual} ${cliente.velocidad} MEGAS ${cliente.incluye_telefono === true || (!cliente.paquete.toLowerCase().includes('solo internet') && !cliente.paquete.toLowerCase().includes('internet residencial') && !cliente.paquete.toLowerCase().includes('sin telefonía')) ? 'INTERNET Y TELEFONÍA' : 'INTERNET'})
+🔹 ${b('PAQUETE:')} ($${cliente.precio_mensual} ${cliente.velocidad} MEGAS ${descPaquete})
 
 🔹️ ${b('GASTOS DE INSTALACIÓN:')} 400 INICIALES Y 1200 DIFERIDOS A CARGO A SU RECIBO TELMEX
 
