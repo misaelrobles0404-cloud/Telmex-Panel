@@ -190,7 +190,6 @@ export function validarRequisitos(cliente: Partial<Cliente>): string[] {
     if (!cliente.nombre?.trim()) errores.push('Nombre es requerido');
     if (!cliente.no_tt?.trim()) errores.push('Número de teléfono es requerido');
     if (!cliente.correo?.trim()) errores.push('Correo es requerido');
-    if (!cliente.curp?.trim()) errores.push('CURP es requerido');
 
     // Dirección
     if (!cliente.calle?.trim()) errores.push('Calle es requerida');

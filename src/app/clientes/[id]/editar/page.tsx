@@ -380,11 +380,11 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     <CardHeader><CardTitle>Información Básica</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input label="Nombre Completo" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required />
+                            <Input label="Nombre Completo" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value.toUpperCase() })} required />
                             <Input label="No. TT (Teléfono)" value={formData.noTT} onChange={(e) => setFormData({ ...formData, noTT: e.target.value })} required />
                             <Input label="No. Ref (Referencia)" value={formData.noRef} onChange={(e) => setFormData({ ...formData, noRef: e.target.value })} required />
                             <Input label="No. Ref 2 (Opcional)" value={formData.noRef2} onChange={(e) => setFormData({ ...formData, noRef2: e.target.value })} />
-                            <Input label="Correo" type="email" value={formData.correo} onChange={(e) => setFormData({ ...formData, correo: e.target.value })} required />
+                            <Input label="Correo" type="email" value={formData.correo} onChange={(e) => setFormData({ ...formData, correo: e.target.value.toLowerCase() })} required />
                         </div>
                     </CardContent>
                 </Card>
@@ -394,17 +394,17 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                     <CardHeader><CardTitle>Dirección</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input label="Calle" value={formData.calle} onChange={(e) => setFormData({ ...formData, calle: e.target.value })} required />
+                            <Input label="Calle" value={formData.calle} onChange={(e) => setFormData({ ...formData, calle: e.target.value.toUpperCase() })} required />
                             <Input label="Número Exterior" value={formData.numeroExterior} onChange={(e) => setFormData({ ...formData, numeroExterior: e.target.value })} placeholder="Opcional" />
                             <Input label="Número Interior" value={formData.numeroInterior} onChange={(e) => setFormData({ ...formData, numeroInterior: e.target.value })} placeholder="Opcional" />
                             <Input label="Manzana (Mz) (Opcional)" value={formData.mz} onChange={(e) => setFormData({ ...formData, mz: e.target.value })} placeholder="Ej: 15" />
                             <Input label="Lote (Lt) (Opcional)" value={formData.lt} onChange={(e) => setFormData({ ...formData, lt: e.target.value })} placeholder="Ej: 02" />
-                            <Input label="Colonia" value={formData.colonia} onChange={(e) => setFormData({ ...formData, colonia: e.target.value })} required />
+                            <Input label="Colonia" value={formData.colonia} onChange={(e) => setFormData({ ...formData, colonia: e.target.value.toUpperCase() })} required />
                             <Input label="CP" value={formData.cp} onChange={(e) => setFormData({ ...formData, cp: e.target.value })} required />
-                            <Input label="Ciudad" value={formData.cd} onChange={(e) => setFormData({ ...formData, cd: e.target.value })} required />
-                            <Input label="Estado" value={formData.estado} onChange={(e) => setFormData({ ...formData, estado: e.target.value })} required />
-                            <Input label="Entre Calle 1" value={formData.entreCalle1} onChange={(e) => setFormData({ ...formData, entreCalle1: e.target.value })} />
-                            <Input label="Entre Calle 2" value={formData.entreCalle2} onChange={(e) => setFormData({ ...formData, entreCalle2: e.target.value })} />
+                            <Input label="Ciudad" value={formData.cd} onChange={(e) => setFormData({ ...formData, cd: e.target.value.toUpperCase() })} required />
+                            <Input label="Estado" value={formData.estado} onChange={(e) => setFormData({ ...formData, estado: e.target.value.toUpperCase() })} required />
+                            <Input label="Entre Calle 1" value={formData.entreCalle1} onChange={(e) => setFormData({ ...formData, entreCalle1: e.target.value.toUpperCase() })} />
+                            <Input label="Entre Calle 2" value={formData.entreCalle2} onChange={(e) => setFormData({ ...formData, entreCalle2: e.target.value.toUpperCase() })} />
                         </div>
                     </CardContent>
                 </Card>
@@ -700,7 +700,7 @@ export default function EditarClientePage({ params }: { params: { id: string } }
                                 }}
                                 placeholder="Solo números"
                             />
-                            <Input label="CURP" value={formData.curp} onChange={(e) => setFormData({ ...formData, curp: e.target.value })} required />
+                            <Input label="CURP" value={formData.curp} onChange={(e) => setFormData({ ...formData, curp: e.target.value.toUpperCase() })} placeholder="Opcional" />
 
                             <div className="relative">
                                 <Input

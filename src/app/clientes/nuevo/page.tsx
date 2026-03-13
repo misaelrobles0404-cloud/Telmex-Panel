@@ -485,7 +485,7 @@ export default function NuevoClientePage() {
                                     <Input
                                         label="Nombre Completo"
                                         value={formData.nombre}
-                                        onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, nombre: e.target.value.toUpperCase() })}
                                         placeholder="Opcional para prospectos"
                                     />
 
@@ -513,7 +513,7 @@ export default function NuevoClientePage() {
                                         label="Correo"
                                         type="email"
                                         value={formData.correo}
-                                        onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, correo: e.target.value.toLowerCase() })}
                                         required
                                     />
                                 </div>
@@ -530,7 +530,7 @@ export default function NuevoClientePage() {
                                     <Input
                                         label="Calle"
                                         value={formData.calle}
-                                        onChange={(e) => setFormData({ ...formData, calle: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, calle: e.target.value.toUpperCase() })}
                                         required
                                     />
 
@@ -565,7 +565,7 @@ export default function NuevoClientePage() {
                                     <Input
                                         label="Colonia"
                                         value={formData.colonia}
-                                        onChange={(e) => setFormData({ ...formData, colonia: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, colonia: e.target.value.toUpperCase() })}
                                         required
                                     />
 
@@ -579,27 +579,27 @@ export default function NuevoClientePage() {
                                     <Input
                                         label="CD (Ciudad)"
                                         value={formData.cd}
-                                        onChange={(e) => setFormData({ ...formData, cd: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, cd: e.target.value.toUpperCase() })}
                                         required
                                     />
 
                                     <Input
                                         label="Estado"
                                         value={formData.estado}
-                                        onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, estado: e.target.value.toUpperCase() })}
                                         required
                                     />
 
                                     <Input
                                         label="Entre Calle 1"
                                         value={formData.entreCalle1}
-                                        onChange={(e) => setFormData({ ...formData, entreCalle1: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, entreCalle1: e.target.value.toUpperCase() })}
                                     />
 
                                     <Input
                                         label="Entre Calle 2"
                                         value={formData.entreCalle2}
-                                        onChange={(e) => setFormData({ ...formData, entreCalle2: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, entreCalle2: e.target.value.toUpperCase() })}
                                     />
                                 </div>
                             </CardContent>
@@ -625,8 +625,8 @@ export default function NuevoClientePage() {
                                     <Input
                                         label="CURP"
                                         value={formData.curp}
-                                        onChange={(e) => setFormData({ ...formData, curp: e.target.value })}
-                                        required
+                                        onChange={(e) => setFormData({ ...formData, curp: e.target.value.toUpperCase() })}
+                                        placeholder="Opcional"
                                     />
 
                                     <div className="relative">
