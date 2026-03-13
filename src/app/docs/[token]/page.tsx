@@ -111,6 +111,8 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
     const [estadoDomicilio, setEstadoDomicilio] = useState('');
     const [entreCalle1, setEntreCalle1] = useState('');
     const [entreCalle2, setEntreCalle2] = useState('');
+    const [numeroExterior, setNumeroExterior] = useState('');
+    const [numeroInterior, setNumeroInterior] = useState('');
     const [mz, setMz] = useState('');
     const [lt, setLt] = useState('');
 
@@ -248,6 +250,8 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                 estado_domicilio: estadoDomicilio.trim().toUpperCase(),
                 entre_calle_1: entreCalle1.trim().toUpperCase() || undefined,
                 entre_calle_2: entreCalle2.trim().toUpperCase() || undefined,
+                numero_exterior: numeroExterior.trim().toUpperCase() || undefined,
+                numero_interior: numeroInterior.trim().toUpperCase() || undefined,
                 mz: mz.trim().toUpperCase() || undefined,
                 lt: lt.trim().toUpperCase() || undefined,
                 ine_frente_url: ineFrenteUrl,
@@ -255,29 +259,7 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                 estado_cuenta_url: estadoCuentaUrl,
             });
 
-            // Sincronizar datos directamente a la tabla de clientes como respaldo al trigger
-            if (solicitud.cliente_id) {
-                await supabase
-                    .from('clientes')
-                    .update({
-                        nombre: nombre.trim().toUpperCase(),
-                        no_tt: noTitular.trim(),
-                        no_ref: noReferencia.trim(),
-                        correo: correo.trim().toLowerCase(),
-                        calle: calle.trim().toUpperCase(),
-                        colonia: colonia.trim().toUpperCase(),
-                        cp: cp.trim(),
-                        cd: cd.trim().toUpperCase(),
-                        estado: estadoDomicilio.trim().toUpperCase(),
-                        entre_calle_1: entreCalle1.trim().toUpperCase() || '',
-                        entre_calle_2: entreCalle2.trim().toUpperCase() || '',
-                        mz: mz.trim().toUpperCase() || '',
-                        lt: lt.trim().toUpperCase() || '',
-                        curp: curp.trim() ? curp.trim().toUpperCase() : undefined,
-                        actualizado_en: new Date().toISOString()
-                    })
-                    .eq('id', solicitud.cliente_id);
-            }
+            // El trigger en la base de datos (fn_prospecto_desde_portal) se encargará de actualizar la tabla clientes.
 
             setProgreso(100);
             setEnviado(true);
@@ -467,15 +449,38 @@ export default function PortalDocumentosPage({ params }: { params: { token: stri
                     <div className="p-5 space-y-4">
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-1.5">
-                                Calle y Número <span className="text-red-500">*</span>
+                                Calle <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
                                 value={calle}
                                 onChange={e => setCalle(e.target.value.toUpperCase())}
-                                placeholder="Ej. Av. Reforma 222 Int 3"
+                                placeholder="Ej. Av. Reforma"
                                 className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
                             />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Núm. Ext <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text"
+                                    value={numeroExterior}
+                                    onChange={e => setNumeroExterior(e.target.value.toUpperCase())}
+                                    placeholder="222"
+                                    className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Núm. Int (Opcional)</label>
+                                <input
+                                    type="text"
+                                    value={numeroInterior}
+                                    onChange={e => setNumeroInterior(e.target.value.toUpperCase())}
+                                    placeholder="3"
+                                    className="w-full border-2 border-gray-100 focus:border-[#0057A8] rounded-xl px-4 py-3 text-sm font-medium outline-none transition-colors bg-gray-50 focus:bg-white uppercase"
+                                />
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

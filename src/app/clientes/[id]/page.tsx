@@ -254,7 +254,7 @@ ${b('C.P-')} ${cliente.cp}
 ${b('COL-')} ${cliente.colonia.toUpperCase()}
 ${b('C.D-')} ${cliente.cd.toUpperCase()}
 ${line}
-${b('PAQUETE-')} $${cliente.precio_mensual} ${cliente.velocidad} MEGAS ${!cliente.incluye_telefono ? 'INTERNET' : 'INTERNET Y TELEFONIA'}.
+${b('PAQUETE-')} $${cliente.precio_mensual} ${cliente.velocidad} MEGAS ${cliente.incluye_telefono === true || (!cliente.paquete.toLowerCase().includes('solo internet') && !cliente.paquete.toLowerCase().includes('internet residencial') && !cliente.paquete.toLowerCase().includes('sin telefonía')) ? 'INTERNET Y TELEFONIA' : 'INTERNET'}.
 
 ${line}
 ${b('GASTOS DE INSTALACIÓN')} 
@@ -280,7 +280,7 @@ ${b('DOMICILIO')}
 🔹 ${b('CODIGO POSTAL:')} ${cliente.cp}
 
 ${b('PAQUETE A CONTRATAR')}
-🔹 ${b('PAQUETE:')} ($${cliente.precio_mensual} ${cliente.velocidad} MEGAS ${!cliente.incluye_telefono ? 'INTERNET' : 'INTERNET Y TELEFONÍA'})
+🔹 ${b('PAQUETE:')} ($${cliente.precio_mensual} ${cliente.velocidad} MEGAS ${cliente.incluye_telefono === true || (!cliente.paquete.toLowerCase().includes('solo internet') && !cliente.paquete.toLowerCase().includes('internet residencial') && !cliente.paquete.toLowerCase().includes('sin telefonía')) ? 'INTERNET Y TELEFONÍA' : 'INTERNET'})
 
 🔹️ ${b('GASTOS DE INSTALACIÓN:')} 400 INICIALES Y 1200 DIFERIDOS A CARGO A SU RECIBO TELMEX
 
@@ -362,7 +362,15 @@ Solo necesito que me confirmes para agendar.
         if (!cliente) return;
 
         const nombre = cliente.nombre.toUpperCase();
-        const descripcionServicio = !cliente.incluye_telefono ? 'internet' : 'internet y telefonía';
+
+        // Determinar descripción del servicio basada en el boolean o en el nombre del paquete como fallback
+        const paqueteLower = cliente.paquete ? cliente.paquete.toLowerCase() : '';
+        const esSoloInternet = cliente.incluye_telefono === false ||
+            paqueteLower.includes('solo internet') ||
+            paqueteLower.includes('internet residencial') ||
+            paqueteLower.includes('sin telefonía');
+
+        const descripcionServicio = esSoloInternet ? 'internet' : 'internet y telefonía';
         const precio = cliente.precio_mensual;
 
         const mensaje = `Buenas tardes
@@ -869,8 +877,8 @@ Acepta el servicio?`;
                                         <label
                                             key={key}
                                             className={`relative flex flex-col items-center justify-center gap-1 p-3 rounded-xl border-2 cursor-pointer transition-all ${url
-                                                    ? 'border-green-400 bg-green-50'
-                                                    : 'border-dashed border-gray-300 bg-gray-50 hover:border-telmex-blue hover:bg-blue-50'
+                                                ? 'border-green-400 bg-green-50'
+                                                : 'border-dashed border-gray-300 bg-gray-50 hover:border-telmex-blue hover:bg-blue-50'
                                                 }`}
                                             title={url ? 'Cambiar imagen' : 'Subir imagen'}
                                         >

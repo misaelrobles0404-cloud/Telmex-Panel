@@ -25,6 +25,8 @@ export interface SolicitudDocumentos {
     estado_domicilio?: string;
     entre_calle_1?: string;
     entre_calle_2?: string;
+    numero_exterior?: string;
+    numero_interior?: string;
     mz?: string;
     lt?: string;
     ine_frente_url?: string;
@@ -144,6 +146,8 @@ export async function completarSolicitud(
         estado_domicilio: string;
         entre_calle_1?: string;
         entre_calle_2?: string;
+        numero_exterior?: string;
+        numero_interior?: string;
         mz?: string;
         lt?: string;
         ine_frente_url?: string;
