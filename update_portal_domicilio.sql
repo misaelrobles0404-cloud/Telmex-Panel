@@ -3,6 +3,8 @@
 -- ==========================================================
 ALTER TABLE solicitudes_documentos
 ADD COLUMN IF NOT EXISTS calle TEXT,
+ADD COLUMN IF NOT EXISTS numero_exterior TEXT,
+ADD COLUMN IF NOT EXISTS numero_interior TEXT,
 ADD COLUMN IF NOT EXISTS colonia TEXT,
 ADD COLUMN IF NOT EXISTS cp TEXT,
 ADD COLUMN IF NOT EXISTS cd TEXT,
@@ -38,6 +40,8 @@ BEGIN
             no_ref         = COALESCE(NEW.no_referencia, no_ref),
             correo         = COALESCE(NEW.correo, correo),
             calle          = COALESCE(NEW.calle, calle),
+            numero_exterior= COALESCE(NEW.numero_exterior, numero_exterior),
+            numero_interior= COALESCE(NEW.numero_interior, numero_interior),
             colonia        = COALESCE(NEW.colonia, colonia),
             cp             = COALESCE(NEW.cp, cp),
             cd             = COALESCE(NEW.cd, cd),
@@ -69,7 +73,7 @@ BEGIN
             creado_en, actualizado_en,
             actividades, documentos,
             paquete, precio_mensual, velocidad, comision, 
-            calle, colonia, cp, cd, estado, 
+            calle, numero_exterior, numero_interior, colonia, cp, cd, estado, 
             entre_calle_1, entre_calle_2, mz, lt
         ) VALUES (
             COALESCE(NEW.nombre_cliente, 'CLIENTE PORTAL'),
@@ -83,6 +87,8 @@ BEGIN
             '[]'::jsonb, '[]'::jsonb,
             'POR DEFINIR', 0, 0, 0, 
             COALESCE(NEW.calle, 'PENDIENTE'),
+            COALESCE(NEW.numero_exterior, ''),
+            COALESCE(NEW.numero_interior, ''),
             COALESCE(NEW.colonia, ''),
             COALESCE(NEW.cp, ''),
             COALESCE(NEW.cd, ''),

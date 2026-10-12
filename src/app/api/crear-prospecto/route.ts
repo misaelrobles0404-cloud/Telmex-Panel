@@ -5,7 +5,11 @@ import { createClient } from '@supabase/supabase-js';
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { nombre, no_tt, no_ref, correo, tipo_servicio, promotor_email, cliente_id } = body;
+        const { 
+            nombre, no_tt, no_ref, correo, tipo_servicio, promotor_email, cliente_id,
+            calle, numero_exterior, numero_interior, colonia, cp, cd, estado,
+            entre_calle_1, entre_calle_2, mz, lt, curp
+        } = body;
 
         if (!nombre || !promotor_email) {
             return NextResponse.json({ error: 'Faltan datos requeridos' }, { status: 400 });
@@ -24,9 +28,21 @@ export async function POST(req: NextRequest) {
                 .from('clientes')
                 .update({
                     nombre: nombre.toUpperCase(),
-                    no_tt,
-                    no_ref,
-                    correo: correo.toLowerCase(),
+                    no_tt: no_tt || undefined,
+                    no_ref: no_ref || undefined,
+                    correo: correo ? correo.toLowerCase() : undefined,
+                    calle: calle ? calle.toUpperCase() : undefined,
+                    numero_exterior: numero_exterior ? numero_exterior.toUpperCase() : undefined,
+                    numero_interior: numero_interior ? numero_interior.toUpperCase() : undefined,
+                    colonia: colonia ? colonia.toUpperCase() : undefined,
+                    cp: cp || undefined,
+                    cd: cd ? cd.toUpperCase() : undefined,
+                    estado: estado ? estado.toUpperCase() : undefined,
+                    entre_calle_1: entre_calle_1 ? entre_calle_1.toUpperCase() : undefined,
+                    entre_calle_2: entre_calle_2 ? entre_calle_2.toUpperCase() : undefined,
+                    mz: mz ? mz.toUpperCase() : undefined,
+                    lt: lt ? lt.toUpperCase() : undefined,
+                    curp: curp ? curp.toUpperCase() : undefined,
                     actualizado_en: new Date().toISOString(),
                 })
                 .eq('id', cliente_id);
@@ -78,9 +94,9 @@ export async function POST(req: NextRequest) {
         // Insertar el nuevo prospecto
         const { error: insertError } = await supabase.from('clientes').insert({
             nombre: nombre.toUpperCase(),
-            no_tt,
-            no_ref,
-            correo: correo.toLowerCase(),
+            no_tt: no_tt || 'PENDIENTE',
+            no_ref: no_ref || 'PENDIENTE',
+            correo: correo ? correo.toLowerCase() : 'pendiente@correo.com',
             tipo_servicio,
             estado_pipeline: 'prospecto',
             user_id: userId,
@@ -92,7 +108,18 @@ export async function POST(req: NextRequest) {
             precio_mensual: 0,
             velocidad: 0,
             comision: 0,
-            calle: 'PENDIENTE',
+            calle: calle ? calle.toUpperCase() : 'PENDIENTE',
+            numero_exterior: numero_exterior ? numero_exterior.toUpperCase() : '',
+            numero_interior: numero_interior ? numero_interior.toUpperCase() : '',
+            colonia: colonia ? colonia.toUpperCase() : 'PENDIENTE',
+            cp: cp || '00000',
+            cd: cd ? cd.toUpperCase() : 'PENDIENTE',
+            estado: estado ? estado.toUpperCase() : 'PENDIENTE',
+            entre_calle_1: entre_calle_1 ? entre_calle_1.toUpperCase() : '',
+            entre_calle_2: entre_calle_2 ? entre_calle_2.toUpperCase() : '',
+            mz: mz ? mz.toUpperCase() : '',
+            lt: lt ? lt.toUpperCase() : '',
+            curp: curp ? curp.toUpperCase() : 'PENDIENTE',
         });
 
         if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 });
